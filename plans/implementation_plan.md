@@ -9,7 +9,7 @@ This plan establishes a modular, multiplatform boilerplate for **Web and Mobile 
 ```mermaid
 flowchart TD
     App["App Root (Provider & Theme Setup)"]
-    Nav["Screen Manager / Navigator"]
+    Nav["Screen Manager"]
     Store["Universal Game State (Zustand / Context)"]
     Storage["Cross-Platform Storage Adapter"]
 
@@ -17,10 +17,10 @@ flowchart TD
     App --> Store
     Store <--> Storage
 
-    Nav --> Intro["Intro / Splash Screen"]
+    Nav --> Intro["Intro Screen"]
     Nav --> MainMenu["Main Menu Screen"]
     Nav --> LevelSelect["Level Selector Screen"]
-    Nav --> HighScores["High Score Chart Screen"]
+    Nav --> HighScores["High Score Screen"]
     Nav --> Settings["Settings Screen"]
     Nav --> GameScreen["Gameplay Screen"]
 
@@ -57,27 +57,28 @@ Initialize the universal React Native / Expo environment configured for TypeScri
 
 #### [NEW] [package.json](file:///Users/isegura/Documents/CODE/bouncerback%202/package.json)
 - Setup Expo dependencies (`expo`, `react-native`, `react-native-web`, `react-dom`, `@expo/metro-runtime`).
-- UI & styling primitives (`react-native-safe-area-context`, `lucide-react-native` or icon set).
+- UI & layout primitives (`react-native-safe-area-context`, `lucide-react-native`, `expo-font`).
 - Universal state management (`zustand`) and storage (`@react-native-async-storage/async-storage`).
 
 #### [NEW] [app.json](file:///Users/isegura/Documents/CODE/bouncerback%202/app.json) & [tsconfig.json](file:///Users/isegura/Documents/CODE/bouncerback%202/tsconfig.json)
-- Configure cross-platform settings, orientation (landscape or portrait locks/defaults), web viewport settings, and path aliases (e.g. `@/components`, `@/screens`, `@/state`).
+- Configure cross-platform settings, locked landscape orientation, black background, web viewport settings, and path aliases (e.g. `@/components`, `@/screens`, `@/state`).
 
 ---
 
-### 2. Core Theme & Design System
+### 2. Core Theme & UI Components
 
-A shared retro/arcade aesthetic system ensuring high visual polish and consistent UI components across all platforms.
+Shared foundational tokens and reusable UI components across all platforms, configured to use `src/fonts/c64_angled.ttf` as the universal font for all text throughout the entire application.
 
 #### [NEW] `src/theme/colors.ts` & `src/theme/typography.ts`
-- Unified color palette (dark theme with vibrant neon/arcade accents, glassmorphic cards, glowing borders).
-- Font presets and typography scales adaptable across web resolutions and mobile screens.
+- Semantic color definitions (backgrounds, surfaces, text, accents).
+- Typography scale, font sizes, and styles using `c64_angled.ttf` (`C64Angled` font family) for all text rendering.
 
 #### [NEW] `src/components/common/`
-- `GameButton.tsx`: Pressable retro button with sound trigger, active bounce animations, and hover/focus states for web.
-- `GameCard.tsx`: Glassmorphic container for dialogs, scoreboards, and level tiles.
-- `ResponsiveContainer.tsx`: Handles safe area insets on mobile and aspect-ratio letterboxing / auto-scaling on web.
-- `ModalBackdrop.tsx`: Universal blur/dim overlay for popups and pause menus.
+- `GameText.tsx`: Universal typography component applying `c64_angled.ttf` font family across all text elements in the app.
+- `GameButton.tsx`: Pressable button component with click/press handlers, active states, disabled states, and `GameText` labels.
+- `GameCard.tsx`: Structural container component for dialogs, scoreboards, and level tiles.
+- `ResponsiveContainer.tsx`: Handles safe area insets on mobile and aspect-ratio sizing / letterboxing on web.
+- `ModalBackdrop.tsx`: Overlay container for popups and pause menus.
 
 ---
 
@@ -97,26 +98,26 @@ Universal state layer that handles game progression, settings, and high scores i
 
 ### 4. Screen Implementations
 
+Individual screens built as modular standalone views. Specific screen transitions and triggers will be specified one by one.
+
 #### [NEW] `src/screens/IntroScreen.tsx`
-- Animated game title / logo.
-- Blinking "Press Start / Tap Anywhere" prompt.
-- Auto-transition or tap listener leading to the Main Menu.
+- Game title display.
 
 #### [NEW] `src/screens/MainMenuScreen.tsx`
 - Navigation action list: **Play (Continue)**, **Level Select**, **High Scores**, **Settings**, **Credits**.
-- Sound and music quick-toggle icons.
-- Version badge and animated background effects.
+- Sound and music quick-toggle controls.
+- Version badge and screen layout.
 
 #### [NEW] `src/screens/LevelSelectScreen.tsx`
-- Scrollable grid of levels displaying level numbers, unlocked/locked status, and 3-star ratings.
+- Scrollable grid of levels displaying level numbers, unlocked/locked status, and star ratings.
 - "Back to Menu" button and "Play Selected" action.
 
 #### [NEW] `src/screens/HighScoreScreen.tsx`
-- Arcade leaderboard table ranking top scores, dates, and level tags.
+- Leaderboard table ranking top scores, dates, and level tags.
 - Option to clear scores or filter by level/difficulty.
 
 #### [NEW] `src/screens/SettingsScreen.tsx`
-- Audio sliders (SFX & BGM), controls scheme selector (touch/keyboard/gamepad indicators), and reset progress option.
+- Audio controls (SFX & BGM), controls scheme selector, and reset progress option.
 
 ---
 
@@ -126,7 +127,7 @@ Universal state layer that handles game progression, settings, and high scores i
 - **Engine Viewport Component**: Placeholder container ready to host the future game engine (Canvas / WebGL).
 - **HUD Overlay**:
   - Top Bar: Current Score, Multiplier, Health/Lives icons, Timer, Level title.
-  - Controls: Pause button (top right), optional on-screen touch controls if needed.
+  - Controls: Pause button, optional on-screen controls.
 - **Overlaid Modals**:
   - `PauseMenuModal.tsx`: Resume, Restart Level, Settings, Quit to Menu.
   - `GameOverModal.tsx`: Final score, high score indicator, Retry button, Menu button.
@@ -143,14 +144,14 @@ Universal state layer that handles game progression, settings, and high scores i
 
 ### Automated Checks
 - Run TypeScript type checks (`npx tsc --noEmit`) to ensure complete type safety across all screens and bridge interfaces.
-- Run linting / build tests (`npm run build` or `npx expo export --platform web`).
+- Run build/export tests (`npx expo export --platform web`).
 
 ### Manual Cross-Platform Verification
 1. **Web Testing**:
    - Launch local web dev server (`npx expo start --web`).
-   - Verify all screen transitions (Intro -> Main Menu -> Level Select -> Gameplay -> High Scores).
+   - Verify individual screen rendering and active states.
    - Test responsive window resizing (mobile viewport vs desktop widescreen).
-   - Test HUD pause/resume/game-over modal triggers in the gameplay screen.
+   - Test HUD modal triggers in the gameplay screen.
 2. **Mobile (Native) Testing**:
    - Verify layout with notch/island safe areas using Expo Go / simulator.
    - Verify touch feedback and layout responsiveness.
