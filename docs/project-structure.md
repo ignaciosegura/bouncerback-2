@@ -22,6 +22,8 @@ root/
     │   ├── SettingsMenu.jsx        # Settings menu screen
     │   ├── LevelSelectionMenu.jsx  # Level selection menu screen
     │   ├── Overlay.jsx             # Generic overlay component to be placed on top of current screen content
+    │   └── TextBox.jsx             # Floating text box component. Used mostly for the tutorial level.
+    │   └── TutorialSteps.jsx       # Tutorial steps component. A series of timed TextBox at specific times.
     ├── game/                       # Pure game logic & PixiJS implementation
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
     │   └── entities/               # Game objects
