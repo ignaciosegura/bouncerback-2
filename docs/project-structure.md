@@ -5,11 +5,11 @@ root/
 ├── android/                        # Capacitor Android native project
 ├── ios/                            # Capacitor iOS native project
 ├── capacitor.config.json           # Capacitor configuration
-├── package.json
-├── public/                         # Static assets
-│   └── assets/
-│       ├── audio/                  # Sound effects & music files for Howler.js
-│       └── vectors/                # SVG Vector assets
+├── package.json                  
+└── assets/                         # Static assets
+    ├── audio/                      # Sound effects & music files for Howler.js
+    ├── vectors/                    # SVG Vector assets
+    └── fonts/                      # Font files for the game (TTF and OTF formats).
 └── src/
     ├── audio/
     │   └── soundManager.js         # Centralized Howler.js sound controller
