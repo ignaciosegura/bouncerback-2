@@ -80,6 +80,24 @@
                 }
             },
             "additionalProperties": false
+        },
+        "paddles": {
+            "type": "object",
+            "required": [
+                "angle",
+                "duration"
+            ],
+            "properties": {
+                "angle": {
+                    "type": "number",
+                    "description": "Angle of the paddle measured in grads."
+                },
+                "duration": {
+                    "type": "number",
+                    "description": "Duration of the paddle action measured in seconds."
+                }
+            },
+            "additionalProperties": false
         }
     },
     "additionalProperties": false
