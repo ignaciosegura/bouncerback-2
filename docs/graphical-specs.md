@@ -31,3 +31,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * Black background: #000000
 * White: #FFFFFF
 * White background: #DDDDDD
+
+# Mockups
+
+Reference images can be found in the `docs/images` folder. The filenames specify the screen they represent.
