@@ -2,31 +2,47 @@
 
 ```text
 root/
-├── android/                   # Capacitor Android native project
-├── ios/                       # Capacitor iOS native project
-├── capacitor.config.json      # Capacitor configuration
+├── android/                        # Capacitor Android native project
+├── ios/                            # Capacitor iOS native project
+├── capacitor.config.json           # Capacitor configuration
 ├── package.json
-├── public/                    # Static assets
+├── public/                         # Static assets
 │   └── assets/
-│       ├── audio/             # Sound effects & music files for Howler.js
-│       └── vectors/           # Optional external SVG/vector assets
+│       ├── audio/                  # Sound effects & music files for Howler.js
+│       └── vectors/                # SVG Vector assets
 └── src/
     ├── audio/
-    │   └── soundManager.js    # Centralized Howler.js sound controller
-    ├── components/            # React UI components (HUD, Menus, Modals)
-    │   ├── HUD.jsx
-    │   ├── MainMenu.jsx
-    │   └── GameOverModal.jsx
-    ├── game/                  # Pure game logic & PixiJS implementation
-    │   ├── GameEngine.js      # Main PixiJS application orchestrator
-    │   ├── scenes/            # Individual game states (MainScene, etc.)
-    │   │   └── MainScene.js
-    │   └── entities/          # Game objects (Player, Enemies, Projectiles)
-    │       └── Player.js
-    ├── screens/               # React screen wrappers
-    │   ├── GameScreen.jsx     # Houses the PixiCanvas component & HUD overlay
-    │   └── MenuScreen.jsx
-    ├── App.jsx                # React top-level router / screen switcher
-    ├── main.jsx               # React entry point
-    └── index.css              # Global styles & mobile safe-area setup
-└── project-files/             # non-code files for asset building (project files). Affinity, Ableton Live project files, etc.
+    │   └── soundManager.js         # Centralized Howler.js sound controller
+    ├── components/                 # React UI components (HUD, Menus, Modals)
+    │   ├── Button.jsx              # Reusable button component
+    │   ├── HUD.jsx                 # Heads-Up Display for in-game information
+    │   ├── MainMenu.jsx            # Main menu screen
+    │   ├── Menu.jsx                # Generic menu container component
+    │   ├── Screen.jsx              # Base screen wrapper component (handles transitions, safe areas, etc.)
+    │   ├── SettingsMenu.jsx        # Settings menu screen
+    │   ├── LevelSelectionMenu.jsx  # Level selection menu screen
+    │   ├── Overlay.jsx             # Generic overlay component to be placed on top of current screen content
+    ├── game/                       # Pure game logic & PixiJS implementation
+    │   ├── GameEngine.js           # Main PixiJS application orchestrator
+    │   └── entities/               # Game objects
+    │   │   ├── Nucleus.js          # The central element that stays in place.
+    │   │   ├── ContainmentRing.js  # The ring where the atoms are escaping from
+    │   │   ├── Paddle.js           # The paddles to be spawned by the player
+    │   │   └── Atom.js             # The balls moving around
+    ├── levels/                     # Levels
+    │   ├── level1.json             # Level 1 data
+    │   ├── level2.json             # Level 2 data
+    │   ├── level3.json             # Level 3 data
+    │   ├── level4.json             # Level 4 data
+    │   └── level5.json             # Level 5 data
+    ├── screens/                    # React screen wrappers
+    │   ├── GameScreen.jsx          # Houses the PixiCanvas component & HUD overlay
+    │   ├── MainMenuScreen.jsx      # Main menu screen wrapper
+    │   ├── SettingsMenuScreen.jsx  # Settings menu screen wrapper
+    │   ├── LevelSelectionMenuScreen.jsx  # Level selection menu screen wrapper
+    │   ├── GameOverOverlay.jsx     # Game over overlay screen wrapper
+    │   └── PauseOverlay.jsx        # Pause overlay screen wrapper
+    ├── App.jsx                     # React top-level router / screen switcher
+    ├── main.jsx                    # React entry point
+    └── index.css                   # Global styles & mobile safe-area setup
+└── project-files/                  # non-code files for asset building (project files). Affinity, Ableton Live project files, 
