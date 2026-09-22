@@ -1,0 +1,86 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LevelFile",
+    "type": "object",
+    "required": [
+        "name",
+        "duration",
+        "timeSignature",
+        "soundTrack",
+        "atoms"
+    ],
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "Name of the level."
+        },
+        "duration": {
+            "type": "number",
+            "description": "Length of the level measured in bars."
+        },
+        "timeSignature": {
+            "type": "object",
+            "required": [
+                "bpm",
+                "signature"
+            ],
+            "properties": {
+                "bpm": {
+                    "type": "number",
+                    "description": "Beats per minute."
+                },
+                "signature": {
+                    "type": "number",
+                    "description": "Beat count per bar (e.g., 4 for common time)."
+                }
+            },
+            "additionalProperties": false
+        },
+        "soundTrack": {
+            "type": "string",
+            "description": "Filename of the audio file."
+        },
+        "vfx": {
+            "type": "array",
+            "description": "Visual-effects timeline entries. If empty, the default vfx will be used.",
+            "items": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "time"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Effect identifier."
+                    },
+                    "time": {
+                        "type": "number",
+                        "description": "Bar offset at which the effect triggers."
+                    }
+                },
+                "additionalProperties": false
+            },
+            "default": []
+        },
+        "atoms": {
+            "type": "object",
+            "required": [
+                "speed",
+                "frequency"
+            ],
+            "properties": {
+                "speed": {
+                    "type": "number",
+                    "description": "Bars required for an atom to complete a round trip."
+                },
+                "frequency": {
+                    "type": "number",
+                    "description": "Bars interval between atom spawns (actual spawn moment within each interval is random)."
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}
