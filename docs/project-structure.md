@@ -37,7 +37,7 @@ root/
     ├── game/                       # Pure game logic & PixiJS implementation
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
     │   └── entities/               # Game objects
-    │   │   ├── Nucleus.js          # The central element that stays in place.
+    │   │   ├── AtomEmitter.js      # The central element that stays in place and spawns atoms.
     │   │   ├── ContainmentRing.js  # The ring where the atoms are escaping from
     │   │   ├── Paddle.js           # The paddles to be spawned by the player
     │   │   └── Atom.js             # The balls moving around
