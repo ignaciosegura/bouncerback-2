@@ -10,6 +10,16 @@ root/
     ├── audio/                      # Sound effects & music files for Howler.js
     ├── vectors/                    # SVG Vector assets
     └── fonts/                      # Font files for the game (TTF and OTF formats).
+└── docs/                           # Documentation for the implementation
+    ├── images/                     # Reference images for layout and style
+    ├── tech-stack.md               # Tech stack & architectural boundaries
+    ├── navigation.md               # Navigation flow
+    ├── graphical-specs.md          # Graphical specifications
+    ├── project-structure.md        # Project structure
+    ├── implementation-guidelines.md  # Implementation guidelines
+    ├── level-file-schema.md        # Level file schema
+    ├── react-pixi-example.jsx      # Example of a React Pixi component
+    └── react-pixi-usage-example.jsx  # Example of a React Pixi usage example
 └── src/
     ├── audio/
     │   └── soundManager.js         # Centralized Howler.js sound controller
