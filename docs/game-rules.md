@@ -16,7 +16,7 @@ If the player runs out of lives (it reaches zero), the game will end in a "Game 
 
 ## Level end condition
 
-When the timer runs out, the core will attract all atoms and "swallow" them. The level will end succesfuly and the player will be taken to the "You made it!" screen.
+When the timer runs out, the core will attract all atoms and "swallow" them. The level will end succesfuly and the player will be taken to the "YOU WIN!" screen.
 
 # Player input mechanics
 
