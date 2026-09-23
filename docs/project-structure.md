@@ -17,7 +17,7 @@ root/
     ├── graphical-specs.md          # Graphical specifications
     ├── project-structure.md        # Project structure
     ├── implementation-guidelines.md  # Implementation guidelines
-    ├── level-file-schema.md        # Level file schema
+    ├── level-file-schema.json      # Level file schema
     ├── react-pixi-example.jsx      # Example of a React Pixi component
     └── react-pixi-usage-example.jsx  # Example of a React Pixi usage example
 └── src/
