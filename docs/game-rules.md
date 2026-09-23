@@ -8,7 +8,15 @@ At the center of the containment ring there's the atom emitter, or core. It will
 
 The player can place paddles by clicking or tapping at the screen. These paddles will appear at the containment ring for a short period of time, and they will bounce the atoms back, reversing their course. The player can only set two paddles at a time. If it puts a third one, the first one will dissapear inmediately ("first in, first out").
 
-If an atom escapes the containment ring, the player will lose a life immediately, and the atom will vanish (fade out) while keeping the same speed and direction.
+If an atom escapes the containment ring, the player will lose one life immediately, and the atom will vanish (fade out) while keeping the same speed and direction.
+
+## Game over condition
+
+If the player runs out of lives (it reaches zero), the game will end in a "Game over" screen.
+
+## Level end condition
+
+When the timer runs out, the core will attract all atoms and "swallow" them. The level will end succesfuly and the player will be taken to the "You made it!" screen.
 
 # Player input mechanics
 
@@ -33,17 +41,17 @@ The player loses a live every time an atom escapes the containment ring.
 
 The timer specifies the time remaining to beat the level, in tenths of a second. For example, a 2 minutes long level will have an initial time value of 1200 (120 * 10). The timer will decrease 1 unit every 0.1 seconds.
 
-When the timer runs out, the core will attract all atoms and "swallow" them. The level will end succesfuly and the player will be taken to the next level, if available. Otherwise, the game will end in a "Game over - You win" screen.
+The level file will specify the length of the level in musical notation format: tempo (in BPM), time signature and number of bars. The timer will start counting down from the calculated time.
 
 # Score
 
 The player will get:
 
-* 10 points * atom charge value every time it bounces back an atom using a paddle. 
-* 100 points * atom charge value for every atom captured
+* 10 points * level * atom charge value every time it bounces back an atom using a paddle. 
+* 100 points * level * atom charge value for every atom captured
 * 1 point per 0.1 seconds passed.
-* 1000 points per atom contained at the end of the level, when the core "swallows" all remaining atoms.
+* 1000 points * level per atom contained at the end of the level, when the core "swallows" all remaining atoms.
  
 # High Score
 
-The high score will be visible for the whole game. If the user beats the high score, it will be updated immediately at the same time as the score.
+The high score will be visible for the whole game. If the user beats the high score, it will be updated immediately at the same time as the score. The high score is common to all levels.
