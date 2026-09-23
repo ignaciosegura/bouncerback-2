@@ -5,7 +5,7 @@
   - Settings Button
   - Start Game Button
 - **Level Selection Screen**
-  - Level 1 Button *(tutorial level)*
+  - Level 1 Button
   - Level 2 Button
   - Level 3 Button
   - Level 4 Button
