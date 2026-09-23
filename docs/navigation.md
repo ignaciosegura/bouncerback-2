@@ -1,0 +1,31 @@
+# Navigation Flow
+
+- **Intro Screen**
+- **Main Menu**
+  - Settings Button
+  - Start Game Button
+- **Level Selection Screen**
+  - Level 1 Button *(tutorial level)*
+  - Level 2 Button
+  - Level 3 Button
+  - Level 4 Button
+  - Level 5 Button
+  - Back Button
+- **Settings Screen**
+  - Sound FX Volume Slider
+  - Music Volume Slider
+  - Back Button
+- **Game Screen** *(During gameplay)*
+  - HUD (score, lives, time)
+  - Game Canvas
+  - Pause Button (top‑right)
+- **Pause Overlay**
+  - Resume Button
+  - Settings Button
+  - Main Menu Button
+- **Game Over Overlay**
+  - Score
+  - Best Score
+  - Play Again Button
+  - Main Menu Button
+
