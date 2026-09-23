@@ -49,8 +49,8 @@ The player will get:
 
 * 10 points * level * atom charge value every time it bounces back an atom using a paddle. 
 * 100 points * level * atom charge value for every atom captured
-* 1000 points * level * remaining lives for every atom contained at the end of the level, when the core "swallows" all remaining atoms.
-* Additional bonus for the duration of the level. 1 point for every 0.1 seconds.
+* 200 points * level * atom charge value * remaining lives for every atom contained at the end of the level, when the core "swallows" all remaining atoms.
+* Additional bonus after all remaining atoms have been swallowed (the player needs to pass the level): 1 point for every 0.1 seconds.
  
 # High Score
 
