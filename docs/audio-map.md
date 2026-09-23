@@ -26,7 +26,7 @@ Tracks are assigned to screens or levels. Each level's track is declared in its 
 | File | Screen / Level |
 | :--- | :--- |
 | `main_title.mp3` | Main Menu, Settings, Level Selection (all non-gameplay screens) |
-| `learn.mp3` | Level 1 (tutorial level) |
+| `learn.mp3` | Level 1 |
 | `neutronika.mp3` | Level 2 |
 | `femtocosmos.mp3` | Level 3 |
 | `chronosaedron.mp3` | Level 4 |
