@@ -15,7 +15,7 @@ This is a step-by-step implementation plan for creating the Bouncerback retro-in
 
 2. **Add game-specific libraries**
    - Install Howler.js for audio management
-   - Set up any necessary CSS frameworks or styling libraries
+   - Set up plain CSS and inline styles (no framework needed)
 
 3. **Verify installation**
    - Run a test to confirm all dependencies are installed correctly
