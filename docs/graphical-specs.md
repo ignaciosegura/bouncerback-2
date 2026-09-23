@@ -16,8 +16,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * Font weight normal/regular in all cases (no bold or italic).
 * All texts will be uppercase.
 * The font used will be "C64 Angled", a monospaced font: `assets/fonts/c64_angled.ttf`.
-* **Tutorial Text Boxes**: These are special boxes that are meant to teach the player how to play the game. They are timed to appear at specific moments during the game. They will have their text broken into 30 characters long lines. No word wrapping. This is intentional, to give the game a retro feel.
-* **All Other Text Boxes**: All other text boxes should put all the text in one line (no line-breaks).
+* All text boxes should put all the text in one line (no line-breaks).
 
 ## Visual effects
 
