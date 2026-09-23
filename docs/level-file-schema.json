@@ -7,7 +7,8 @@
         "duration",
         "timeSignature",
         "soundTrack",
-        "atoms"
+        "atoms",
+        "lives"
     ],
     "properties": {
         "name": {
@@ -90,7 +91,7 @@
             "properties": {
                 "angle": {
                     "type": "number",
-                    "description": "Angle of the paddle measured in grads."
+                    "description": "Arc length (width) of the paddle, measured in degrees."
                 },
                 "duration": {
                     "type": "number",
@@ -98,6 +99,10 @@
                 }
             },
             "additionalProperties": false
+        },
+        "lives": {
+            "type": "integer",
+            "description": "Number of lives the player starts the level with."
         }
     },
     "additionalProperties": false

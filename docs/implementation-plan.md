@@ -1,207 +1,75 @@
+# Bouncerback — Implementation Plan
 
-# Bouncerback Implementation Plan
+## Context
 
-## Overview
-This is a step-by-step implementation plan for creating the Bouncerback retro-inspired 2D arcade game built with React + PixiJS. Each step allows for manual verification before proceeding to the next.
+Bouncerback is fully documented (`AGENTS.md`, `docs/*`) but has zero implementation: no `package.json`, no bundler, no `src` code — only docs, mockups, and raw assets. The goal is to scaffold and implement the React + PixiJS + Capacitor game described in the docs.
 
-## Step-by-Step Implementation Plan
+Before planning, every doc, all seven mockups, and the level schema were read in full, surfacing a few real gaps/contradictions. The three that would materially change the implementation were resolved via clarifying questions with the user; the rest are minor and are handled as stated assumptions below (flag if any are wrong).
 
-### Step 1: Project Setup and Dependencies
-**Goal**: Install required dependencies and set up the basic project structure
+### Already applied (per user answers)
+1. **Stray `src/` asset dirs removed.** `src/fonts/`, `src/img/`, `src/sound/` duplicated (and partly diverged from — e.g. `bounce_dry/knackle/wet.mp3` instead of `bounce.mp3`, a leftover `tracks/tutorial.mp3`) the canonical `assets/` tree from `docs/project-structure.md`. Deleted via `git rm` — `assets/` is now the single source of truth for audio/fonts/vectors.
+2. **`docs/level-file-schema.json` fixed:** `paddles.angle` description changed from "grads" to "degrees" (was a documentation error).
+3. **`docs/level-file-schema.json` extended:** added a required `"lives"` (integer) field so each level can set its own starting life count — no per-level lives value existed before (only inferable from the GAMEPLAY.png mockup's 4 dots), and it needs to vary by level per the user's answer.
 
-1. **Install React and related dependencies**
-   - Create a new React app or configure existing one with TypeScript
-   - Add PixiJS dependencies (`pixi.js`, `@types/pixi.js`)
+### Stated assumptions (not blocking, proceed unless corrected)
+- **Bundler:** Vite (fast ESM dev server, pairs well with PixiJS v8's async `app.init()` and with Capacitor).
+- **Language:** plain JavaScript/JSX — matches `.eslintrc.json` (no TS parser) and `project-structure.md` (all `.jsx`/`.js` files). The old deleted `docs/implementation-plan.md` mentioned TypeScript/Expo; that plan is stale/superseded and is ignored.
+- **No routing library** — `App.jsx` is a simple state-based screen switcher, per `project-structure.md`'s description ("router / screen switcher").
+- **Persistence:** `localStorage` for settings (music/SFX volume) and high score. Works identically in browser and Capacitor WebView; no extra plugin needed for v1.
+- **Orientation lock:** CSS/layout-based landscape enforcement plus a "rotate your device" overlay when the viewport is portrait (covers desktop browsers, which have no reliable lock API), and the `@capacitor/screen-orientation` plugin for a hard lock on native iOS/Android. This plugin isn't listed in `docs/tech-stack.md`'s stack table but is necessary to satisfy AGENTS.md rule "forced landscape orientation" on native.
+- **PixiJS v8**, matching the async `app.init()` pattern in `docs/react-pixi-example.jsx`.
+- **VFX vocabulary:** `docs/level-file-schema.json`'s `vfx[].name` and `graphical-specs.md`'s "optional effects" are never given concrete identifiers. Two are introduced: `palette_invert` (black/white swap, used for the "one life left" state per graphical-specs) and `glow_pulse` (paddle glow). Level files can reference these by name in their `vfx` timeline; the 1-life-remaining trigger fires `palette_invert` directly from game state regardless of the level's own vfx list.
+- **Score "level" multiplier** in the formulas (`10 * level * charge`, etc.) = the level's numeric index, 1–5.
+- **Atom speed derivation:** `atoms.speed` ("bars for a round trip") combined with `timeSignature` gives `secondsPerBar = 60/bpm * signature`; atom pixel speed = `(2 * ringRadius) / (atoms.speed * secondsPerBar)`. Timer initial value (tenths of a second) = `round(duration * secondsPerBar * 10)`.
+- No automated test framework is specified anywhere in the docs; a couple of lightweight Vitest unit tests for pure logic (score formulas, level-loader math) can be added since PixiJS/DOM rendering isn't practically unit-testable — this is additive, not required, and can be skipped to keep scope minimal.
+- Mobile app icon: `src/img/icon.png` was deleted with the stray folder, and `assets/vectors/` only has the wordmark logo (not a square icon). Mobile packaging (Phase 8) will use a placeholder square icon derived from the logo mark until a real one is supplied.
 
-2. **Add game-specific libraries**
-   - Install Howler.js for audio management
-   - Set up plain CSS and inline styles (no framework needed)
+---
 
-3. **Verify installation**
-   - Run a test to confirm all dependencies are installed correctly
-   - Check that imports work properly in the code
+## Implementation Phases
 
-### Step 2: Create Core Game Structure
-**Goal**: Establish the main game components and layout structure
+### Phase 0 — Project scaffolding
+- `package.json`, Vite + `@vitejs/plugin-react`, deps: `react`, `react-dom`, `pixi.js@^8`, `howler`, `@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`, `@capacitor/android`, `@capacitor/screen-orientation`.
+- `index.html`, `src/main.jsx`, `capacitor.config.json` (placeholder appId/appName).
+- `src/index.css`: `@font-face` for `assets/fonts/c64_angled.ttf`, global reset, black background, `env(safe-area-inset-*)` padding, base `touch-action: none`.
 
-1. **Create main App component**
-   - Set up React component structure
-   - Implement proper screen orientation handling (landscape only)
-   - Add routing capabilities for menu/game flow
+### Phase 1 — App shell & navigation
+- `src/App.jsx`: screen-state switcher covering `navigation.md`'s flow (Intro → Main Menu → {Level Select, Settings} → Game → {Pause, Game Over, You Win} overlays).
+- `src/components/Screen.jsx`: wraps each screen, applies safe-area padding and the portrait "rotate device" overlay.
+- Generic UI: `Button.jsx`, `Menu.jsx`, `TextBox.jsx`, `Overlay.jsx` implementing `graphical-specs.md` exactly — thin border, transparent fill, 1em padding, uppercase, single line, C64 Angled font, light/dark (`#DDDDDD`/`#000000`) variants per screen.
 
-2. **Create PixiJS canvas container**
-   - Create a dedicated container for the PixiJS rendering
-   - Apply required styling (`touchAction: 'none'`) to prevent mobile gestures
-   - Set up proper sizing for different device types
+### Phase 2 — Audio manager
+- `src/audio/soundManager.js` (Howler wrapper): preloads all `assets/audio/*.mp3` + `assets/audio/tracks/*.mp3`; unlocks by playing `silence.mp3` on the Intro screen's first tap (which then advances to Main Menu); exposes `playSfx(name)`, `playTrack(name)` with crossfade, and "don't restart if same track" continuity (audio-map.md rules 1–3); music/SFX volume (0–10 scale per SETTINGS mockup) persisted to `localStorage` and read by every screen (available globally, not just in-game, per AGENTS.md rule 5).
 
-3. **Verify structure**
-   - Test that the main game screen renders correctly
-   - Confirm screen orientation restrictions are in place
+### Phase 3 — Level data & loader
+- Author `src/levels/level1.json`…`level5.json` against the corrected schema (level1 = easiest: lowest atom speed/frequency demand relative to duration, most lives; difficulty ramps to level5). Track assignment per `audio-map.md`'s suggested defaults (`learn.mp3`…`mekanomancer.mp3`).
+- `src/game/levelLoader.js`: parses/validates a level JSON and returns derived runtime values (`timerTenths`, `atomSpeedPxPerSec`, `spawnIntervalSeconds` with the "random moment within interval" jitter from game-rules.md, paddle arc-degrees/duration, starting lives).
 
-### Step 3: Implement Audio Manager
-**Goal**: Create audio management system with proper mobile browser handling
+### Phase 4 — PixiJS GameEngine & entities
+- `src/game/GameEngine.js`: owns the `PIXI.Application` and `app.ticker` loop; builds `ContainmentRing`, `AtomEmitter` (core), pooled `Atom`s and `Paddle`s; implements the two-stage pointer flow from game-rules.md (`pointerdown` draws an inactive paddle, `pointermove` rotates it with the cursor, `pointerup` commits it at the release angle, oldest paddle evicted FIFO on a 3rd placement); collision checks (atom↔paddle arc reflects + increments charge up to 10, atom↔ring escape fades the atom and costs a life, atom↔core tap destroys atoms with charge ≥ 3); emits only low-frequency callbacks (`onScoreChange`, `onLivesChange`, `onTimeChange`, `onGameOver`, `onLevelWin`) — no per-frame state ever crosses into React, per AGENTS.md rule 2. Calls `app.destroy(true, { children: true, texture: true })` on teardown (rule 3); canvas container has `touchAction: 'none'` (rule 4).
+- `src/game/entities/{AtomEmitter,ContainmentRing,Paddle,Atom}.js`: `PIXI.Graphics`-based vector shapes (white lines/fills on black, no textures, per `graphical-specs.md`) with per-entity `update(deltaMS)`.
 
-1. **Create audio manager module**
-   - Initialize Howler.js with appropriate settings
-   - Implement unlock mechanism on first user interaction
-   - Add methods for playing different sound effects (bounce, capture, destroy, etc.)
+### Phase 5 — Screens & HUD wiring
+- `src/screens/{MainMenuScreen,LevelSelectionMenuScreen,SettingsMenuScreen,GameScreen,GameOverOverlay,PauseOverlay}.jsx` + a `YouWinOverlay.jsx` (mirrors GameOver per the mockup, adds hi-score line), each matching its `docs/images/*.png` mockup.
+- `src/components/HUD.jsx`: SCORE / TIME / HI-SCORE + life-dots row, updated only from the GameEngine's low-frequency callbacks (matches GAMEPLAY.png layout).
+- Pause button stops `app.ticker`; Resume restarts it; Settings/Main Menu buttons inside Pause reuse the existing screens.
 
-2. **Add audio loading**
-   - Preload all necessary sounds
-   - Create audio context management
+### Phase 6 — Scoring & rules
+- Implement `game-rules.md`'s Score section verbatim (bounce, capture, end-of-level containment × remaining lives, time bonus), charge accumulation (+1 per bounce, cap 10, tap-to-destroy unlocked at charge ≥ 3), immediate high-score update+persist the moment it's beaten (visible on every screen per game-rules.md "High Score").
 
-3. **Verify functionality**
-   - Test that sounds play correctly on all platforms
-   - Confirm audio unlock works with mobile browsers
+### Phase 7 — Visual effects
+- Small vfx registry (`palette_invert`, `glow_pulse`) driven both by a level's `vfx` timeline (bar-offset → seconds, via the loader) and directly by game state (1 life left → `palette_invert`).
 
-### Step 4: Define Game State and Entities
-**Goal**: Create data models for game elements
+### Phase 8 — Mobile packaging
+- `npx cap add ios android` (generated output is off-limits to hand-edit per AGENTS.md — only touch it via the Capacitor CLI), wire `@capacitor/screen-orientation` to lock landscape on native, generate icons/splash from a placeholder square icon (flag that a real one should replace it).
 
-1. **Create atom entity model**
-   - Position, velocity, size, color properties
-   - Physics calculations (movement, collision detection)
+### Phase 9 — QA pass
+- Manual verification per `implementation-guidelines.md`'s per-step "Verify" checklists; optional Vitest unit tests for the pure math (scoring, level loader) as a nice-to-have.
 
-2. **Create paddle entity model**
-   - Position, rotation, size properties
-   - Spawn timing and destruction logic
+---
 
-3. **Define game state management**
-   - Score tracking
-   - Lives system
-   - Game timer
-   - Level progression
-
-4. **Verify entities**
-   - Test entity creation and basic movement
-   - Confirm collision detection works
-
-### Step 5: Implement Core Game Loop
-**Goal**: Set up the main PixiJS game loop and update logic
-
-1. **Initialize PixiJS application**
-   - Create stage, renderer with correct settings
-   - Set up ticker for frame updates
-
-2. **Implement game physics**
-   - Atom movement logic
-   - Paddle positioning based on user interaction
-   - Collision detection between atoms and paddles
-
-3. **Add rendering logic**
-   - Update visual elements in each frame
-   - Render atom entities
-   - Render paddle entities
-   - Implement cleanup for disappearing paddles
-
-4. **Verify game loop**
-   - Test that game updates at expected frame rate
-   - Confirm basic physics work as expected
-
-### Step 6: Implement User Interaction and Controls
-**Goal**: Create responsive input handling system
-
-1. **Add canvas touch/mouse handlers**
-   - Click/touch detection for paddle placement
-   - Mouse movement tracking for paddle positioning preview
-
-2. **Implement paddle spawning logic**
-   - Calculate optimal position around ring
-   - Add visual feedback when placing paddles
-
-3. **Add game controls**
-   - Start/stop game functionality
-   - Pause/resume mechanisms (if needed)
-
-4. **Verify controls**
-   - Test that user touch/click correctly spawns paddles
-   - Confirm paddle spawning responds as expected to input
-
-### Step 7: Implement Game Rules and Scoring System
-**Goal**: Add core gameplay logic and scoring mechanism
-
-1. **Create game rule enforcement**
-   - Atom escape detection
-   - Time-based win/lose conditions
-   - Score calculation based on captures
-
-2. **Implement scoring system**
-   - Points for each atom captured
-   - Bonus points for consecutive captures
-   - Penalty for allowing atoms to escape
-
-3. **Add game state transitions**
-   - Start, playing, paused, game over screens
-   - Level progression logic
-
-4. **Verify gameplay**
-   - Test all score calculation logic
-   - Confirm game over conditions work
-   - Validate time-based mechanics
-
-### Step 8: Create UI Elements and Menus
-**Goal**: Develop the user interface components for menu navigation
-
-1. **Create main menu screen**
-   - Start button
-   - Settings options (audio, controls)
-   - Title screen with retro styling
-
-2. **Implement HUD elements**
-   - Score display
-   - Lives indicator
-   - Timer display
-   - Game status messages
-
-3. **Create game over screen**
-   - Final score display
-   - Restart option
-   - Return to menu option
-
-4. **Verify UI**
-   - Test that all menus render correctly
-   - Confirm UI elements match retro styling (C64 font, black background)
-   - Validate proper transitions between screens
-
-### Step 9: Implement Level System
-**Goal**: Create system for handling multiple levels with increasing difficulty
-
-1. **Create level data structure**
-   - Define format in `docs/level-file-schema.json`
-   - Load level files (`level1.json` through `level5.json`)
-
-2. **Implement level progression logic**
-   - Automatic level advancement
-   - Difficulty increases (atom speed, spawn rate)
-
-3. **Add visual level indicators**
-   - Level number display
-   - Difficulty progression visualization
-
-4. **Verify levels**
-   - Test loading of multiple levels
-   - Confirm difficulty progression works as intended
-
-### Step 10: Final Integration and Testing
-**Goal**: Merge all components and perform comprehensive testing
-
-1. **Combine all game elements**
-   - Connect UI with game logic
-   - Ensure proper communication between PixiJS and React systems
-
-2. **Perform manual QA testing**
-   - Test on different screen sizes
-   - Verify mobile browser compatibility
-   - Validate audio handling
-   - Confirm all game mechanics work correctly
-
-3. **Add performance optimizations**
-   - Memory leak prevention (proper cleanup)
-   - Frame rate optimization
-   - Asset loading optimization
-
-4. **Final verification**
-   - End-to-end gameplay test
-   - Cross-platform compatibility check
-   - Full user experience validation
-
-Each step is designed to be verifiable independently, allowing you to manually test and confirm each component works as expected before moving on to the next step.
+## Verification
+- `npm run dev`: click through Intro → Main Menu → Level Select → Settings → Game; compare pixel layout against each `docs/images/*.png` mockup at a landscape viewport, and confirm the rotate-device overlay appears in a portrait emulated viewport.
+- Manual gameplay pass on `level1`: paddle placement (down/drag/release), atom bounce/charge/escape/destroy, timer countdown, life loss, win/loss overlays, and score math all match `game-rules.md`'s formulas.
+- Audio: confirm `silence.mp3` fires on first Intro tap before any other sound, track continuity/crossfade across screens, volume settings persist across a reload.
+- `npx cap sync` completes cleanly; app boots in an Android/iOS simulator with landscape locked and audio unlocking on first tap.
