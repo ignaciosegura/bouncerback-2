@@ -42,4 +42,4 @@ Tracks are assigned to screens or levels. Each level's track is declared in its 
 1. **Unlock on first interaction** — Play `silence.mp3` immediately when the player first interacts with any screen (e.g., tapping the main menu). This satisfies the mobile browser audio policy and ensures all subsequent sounds play without delay.
 2. **Music crossfade** — When transitioning between screens, fade out the current track before fading in the new one.
 3. **Music continuity** — If the destination screen uses the same track as the origin (e.g., navigating Settings → Main Menu), do **not** restart or crossfade the track; let it continue playing seamlessly.
-4. **SFX volume and music volume** — Controlled independently via the Settings screen sliders and persisted in `soundManager.js`.
+4. **SFX volume and music volume** — Controlled independently via the Settings screen buttons and persisted in `soundManager.js`.

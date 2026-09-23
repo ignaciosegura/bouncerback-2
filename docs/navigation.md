@@ -12,8 +12,8 @@
   - Level 5 Button
   - Back Button
 - **Settings Screen**
-  - Sound FX Volume Slider
-  - Music Volume Slider
+  - Sound FX Volume dual-button
+  - Music Volume dual-button
   - Back Button
 - **Game Screen** *(During gameplay)*
   - HUD (score, lives, time)
