@@ -27,15 +27,14 @@ export default function App () {
   const [musicVolume, setMusicVolume] = useState(soundManager.getMusicVolume)
   const [sfxVolume, setSfxVolume] = useState(soundManager.getSfxVolume)
 
-  // Menus play the menu track, gameplay the level's track; Game Over and You Win! are silent.
+  // Menus play the menu track; Game Over and You Win! are silent. The game screen fades the music
+  // out and the GameEngine starts the level's track when its start delay ends.
   // Nothing plays before the Intro tap unlocks audio.
   useEffect(() => {
     switch (screen) {
     case SCREENS.INTRO:
       return
     case SCREENS.GAME:
-      soundManager.playTrack(level.soundTrack)
-      return
     case SCREENS.GAME_OVER:
     case SCREENS.YOU_WIN:
       soundManager.stopTrack()
@@ -43,7 +42,7 @@ export default function App () {
     default:
       soundManager.playTrack(soundManager.MENU_TRACK)
     }
-  }, [screen, level])
+  }, [screen])
 
   const goToMainMenu = () => setScreen(SCREENS.MAIN_MENU)
 

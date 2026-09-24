@@ -27,15 +27,16 @@ Every doc, all seven mockups and the level schema were reviewed against each oth
 - **Bounce:** a paddle reverses an atom's direction exactly — it travels straight back through the core and out toward the opposite side of the ring (this is what makes the tap-at-the-core capture possible).
 - **Paddle lifetime** (`paddles.duration`) starts when the paddle is set (pointer released). While dragging, the paddle is inactive and doesn't expire.
 - **`paddles` is required** in the level schema. Suggested starting values: `angle` 30°, `duration` 3 s.
+- **Start delay:** entering a level shows the ring and core, then waits **3 seconds** before the timer, the atom emitter, the level track and player input start. The menu track fades out during the delay and the level track is preloaded, so music and timer start together.
 - **Swallow phase (timer reaches 0):** spawning stops, paddles disappear, input is disabled and every atom inside the ring is pulled into the core over **3 seconds**. Nothing can escape, so no lives can be lost; atoms already fading out after escaping are ignored. Then the You Win! screen is shown.
 - **Score** (`level` = the level's number, 1–5):
-  - Bounce: `10 × level × charge`.
+  - Bounce: `10 × level × charge`, using the charge the atom has as it hits (before the bounce adds one).
   - Capture (tap-destroy at the core): `100 × level × charge`.
   - Containment at level end: `200 × level × charge × remaining lives` for every atom swallowed.
   - Time bonus at level end: `initial timer value (tenths of a second) × level`. Example: a 2-minute level 3 gives `1200 × 3 = 3600`.
 - **Charge:** atoms start at 1, gain +1 per bounce, capped at 10; they can be tap-destroyed at the core once charge ≥ 3.
 - **High score:** common to all levels, updated and saved the moment it's beaten, visible on the HUD, Game Over and You Win! screens.
-- **Timing math:** `secondsPerBeat = 60 / bpm`. Atom pixel speed = `ringRadius / (atoms.travelTime × secondsPerBeat)`. Initial timer (tenths of a second) = `round(duration × signature × secondsPerBeat × 10)`. Spawn interval = `atoms.frequency × signature × secondsPerBeat`, with the actual spawn at a random moment inside each interval.
+- **Timing math:** `secondsPerBeat = 60 / bpm`. Atom pixel speed = `contactDistance / (atoms.travelTime × secondsPerBeat)`, where `contactDistance` is the distance from the core at which an atom touches a paddle (ring radius − half the paddle thickness − atom radius), so atoms reach the ring exactly `travelTime` beats after leaving the core. Initial timer (tenths of a second) = `round(duration × signature × secondsPerBeat × 10)`. Spawn interval = `atoms.frequency × signature × secondsPerBeat`, with the actual spawn at a random moment inside each interval.
 
 ### Layout & UI
 - **Playfield scaling:** ring radius ≈ 31% of viewport height (a ring about 62% of the screen height, as in the GAMEPLAY mockup), centered; the core, atoms and paddle thickness scale with it. Recalculated on window resize/rotation. Because atom speed is defined in beats, gameplay timing is the same on every screen size.
@@ -60,6 +61,7 @@ Implementation is split into two cycles. The **first development cycle** builds 
 - VFX (`palette_invert`, `glow_pulse`, and the "one life left" trigger). The `vfx` field stays in the level files as an empty array (`[]`) in cycle 1.
 - Level unlocking (all levels are playable from the start in cycle 1).
 - Results ambience track (Game Over and You Win! are silent in cycle 1: the music just fades out).
+- Visual cue for capturable atoms (charge ≥ 3). In cycle 1 all atoms look the same.
 - Mobile build (Capacitor `ios`/`android` packaging, native icons/splash, native orientation lock). Cycle 1 targets the web build only; Capacitor deps are installed in Phase 0 but `cap add`/`cap sync` and everything native happen in cycle 2.
 
 ---
@@ -77,7 +79,7 @@ Implementation is split into two cycles. The **first development cycle** builds 
 - Generic UI: `Button.jsx`, `Menu.jsx`, `TextBox.jsx`, `Overlay.jsx` implementing `graphical-specs.md` exactly — thin border in the text color, transparent fill, 0.5em padding, line height 1, uppercase, single line, C64 Angled font at the sizes listed in Decisions.
 
 ### Phase 2 — Audio manager
-- `src/audio/soundManager.js` (Howler wrapper): loads all SFX and tracks via Vite imports; unlocks by playing `silence.mp3` on the Intro screen's first tap (which then advances to Main Menu); exposes `playSfx(name)`, `playTrack(name)` with crossfade, `stopTrack()` (fade out to silence, used by Game Over and You Win!), and "don't restart if same track" continuity (`audio-map.md` rules 1–3); music/SFX volume (10 steps, 0–9) persisted to `localStorage` and available on every screen (AGENTS.md rule 5).
+- `src/audio/soundManager.js` (Howler wrapper): loads all SFX and tracks via Vite imports; unlocks by playing `silence.mp3` on the Intro screen's first tap (which then advances to Main Menu); exposes `playSfx(name)`, `playTrack(name)` with crossfade, `stopTrack()` (fade out to silence, used by the Game Screen's start delay, Game Over and You Win!), `preloadTrack(name)` (load without playing, so the level track starts on time after the start delay), and "don't restart if same track" continuity (`audio-map.md` rules 1–4); music/SFX volume (10 steps, 0–9) persisted to `localStorage` and available on every screen (AGENTS.md rule 5).
 - SFX mapping per `audio-map.md`: `launch` on spawn, `bounce` on paddle hit, `capture` on tap-destroy, `destroy` on escape, `vortex_creation` at the start of the swallow.
 
 ### Phase 3 — Level data & loader
@@ -88,6 +90,7 @@ Implementation is split into two cycles. The **first development cycle** builds 
 - `src/game/GameEngine.js`: owns the `PIXI.Application` and `app.ticker` loop; builds `ContainmentRing`, `AtomEmitter` (core), pooled `Atom`s and `Paddle`s; sizes the playfield from the viewport height and relayouts on resize.
 - Input, per `game-rules.md`: `pointerdown` draws an inactive paddle at the pointer's angle, `pointermove` rotates it, `pointerup` sets it and starts its lifetime; a third paddle removes the oldest (first in, first out). A tap on an atom with charge ≥ 3 while it crosses the core destroys it.
 - Collisions: atom ↔ active paddle arc reverses direction exactly and adds charge (max 10); atom ↔ ring with no paddle means escape: it fades out on the same path and costs a life.
+- Start of level: 3-second start delay (see Decisions), then the engine starts the timer, spawns, input and the level track together.
 - End of level: timer reaches 0 → 3-second swallow (no spawns, no paddles, no input, no escapes), then containment and time-bonus scores are added and `onLevelWin` fires. Lives reach 0 → `onGameOver`.
 - Emits only low-frequency callbacks (`onScoreChange`, `onLivesChange`, `onTimeChange`, `onGameOver`, `onLevelWin`) — no per-frame state crosses into React (AGENTS.md rule 2). Calls `app.destroy(true, { children: true, texture: true })` on teardown (rule 3); canvas container has `touchAction: 'none'` (rule 4).
 - `src/game/entities/{AtomEmitter,ContainmentRing,Paddle,Atom}.js`: `PIXI.Graphics` vector shapes (white lines and filled circles on black, no textures) with per-entity `update(deltaMS)`.
@@ -132,6 +135,9 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 ### Phase 14 — Results ambience track
 - Compose a dedicated ambience track for the Game Over and You Win! screens (silent in cycle 1) and add it to `assets/audio/tracks/` and `docs/audio-map.md`; those screens call `playTrack` with it instead of `stopTrack()`.
 
+### Phase 15 — Capturable atom cue
+- Make atoms with charge ≥ 3 (capturable at the core) visually distinct from the others, so the player knows which ones can be tapped. Style to be designed; it must stay within the 2D vector, white-on-black rules of `graphical-specs.md`.
+
 ---
 
 ## Verification
@@ -139,7 +145,7 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 ### First development cycle
 - `npm run dev`: click through Intro → Main Menu → Level Select → Settings → Game → Game Over / You Win! → Try Again / Main Menu; compare each screen against its `docs/mockups/*.png` mockup at a landscape browser viewport, including font sizes (24/32/64px).
 - Resize the browser window during gameplay: the ring stays centered and scales with the height; atom timing doesn't change.
-- Manual gameplay pass on `level1`: paddle placement (press/drag/release, lifetime starts on release, FIFO with a third paddle), straight-back bounce and charge, escape and life loss, tap-destroy at charge ≥ 3, timer countdown, 3-second safe swallow, and score math (including the `timerTenths × level` time bonus) all match `game-rules.md`.
+- Manual gameplay pass on `level1`: 3-second start delay (timer, atoms and music start together), paddle placement (press/drag/release, lifetime starts on release, FIFO with a third paddle), straight-back bounce and charge, escape and life loss, tap-destroy at charge ≥ 3, timer countdown, 3-second safe swallow, and score math (including the `timerTenths × level` time bonus) all match `game-rules.md`.
 - High score updates live on the HUD when beaten and survives a reload.
 - Audio: `silence.mp3` fires on the first Intro tap before any other sound; track continuity/crossfade across screens; the music fades out to silence on Game Over and You Win!; volume settings survive a reload.
 - Production build (`npm run build` + `npm run preview`): assets load with hashed filenames.
@@ -152,3 +158,4 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 - VFX fire at the correct level-timeline moments and the "one life left" `palette_invert` triggers correctly.
 - Level unlocking: only level 1 is available on a fresh install; winning unlocks the next one and survives a reload.
 - Game Over and You Win! play the ambience track; returning to the menu crossfades back to `main_title.mp3`.
+- Atoms with charge ≥ 3 are visually distinct, and the cue appears on the bounce that brings an atom to charge 3.

@@ -23,11 +23,11 @@ for (const [path, url] of Object.entries(sfxUrls)) {
   sfx[baseName(path).replace(/\.mp3$/, '')] = new Howl({ src: [url] })
 }
 
-// Tracks are large once decoded: each one is loaded when it starts and unloaded when it stops.
-// Keyed by file name ('learn.mp3'), as referenced by the level files' soundTrack field.
+// Tracks are large once decoded: each one is loaded when it starts (or is preloaded) and unloaded
+// when it stops. Keyed by file name ('learn.mp3'), as referenced by the level files' soundTrack field.
 const tracks = {}
 for (const [path, url] of Object.entries(trackUrls)) {
-  tracks[baseName(path)] = { url, howl: null }
+  tracks[baseName(path)] = { url, howl: null, started: false }
 }
 
 let musicVolume = readVolume(STORAGE_KEYS.music)
@@ -111,14 +111,30 @@ export function stopTrack () {
   currentTrack = null
   clearTimeout(fadeInTimer)
   fadeOutOtherTracks()
-  fadeInTimer = setTimeout(unloadOtherTracks, FADE_MS)
+  fadeInTimer = setTimeout(() => unloadOtherTracks(), FADE_MS)
 }
 
-// Fades out every loaded track except the current one; returns whether any was fading
+/**
+ * Loads a track without playing it, so a later playTrack starts it without a loading delay.
+ */
+export function preloadTrack (name) {
+  const track = tracks[name]
+  if (!track) {
+    console.warn(`soundManager: unknown track "${name}"`)
+    return
+  }
+  if (!track.howl) track.howl = createTrackHowl(track.url)
+}
+
+function createTrackHowl (url) {
+  return new Howl({ src: [url], loop: true, volume: 0 })
+}
+
+// Fades out every playing track except the current one; returns whether any was fading
 function fadeOutOtherTracks () {
   let fadingOut = false
   for (const [trackName, track] of Object.entries(tracks)) {
-    if (trackName !== currentTrack && track.howl) {
+    if (trackName !== currentTrack && track.started) {
       track.howl.fade(track.howl.volume(), 0, FADE_MS)
       fadingOut = true
     }
@@ -126,22 +142,25 @@ function fadeOutOtherTracks () {
   return fadingOut
 }
 
-function unloadOtherTracks () {
+// Unloads every track except the current one; preloaded tracks are kept unless `includePreloaded`
+function unloadOtherTracks (includePreloaded = false) {
   for (const [trackName, track] of Object.entries(tracks)) {
-    if (trackName !== currentTrack && track.howl) {
+    if (trackName !== currentTrack && track.howl && (track.started || includePreloaded)) {
       track.howl.unload()
       track.howl = null
+      track.started = false
     }
   }
 }
 
 function startCurrentTrack () {
-  unloadOtherTracks()
+  unloadOtherTracks(true)
 
   const track = tracks[currentTrack]
-  if (!track.howl) {
-    track.howl = new Howl({ src: [track.url], loop: true, volume: 0 })
+  if (!track.howl) track.howl = createTrackHowl(track.url)
+  if (!track.started) {
     track.howl.play()
+    track.started = true
   }
   // Also fades a track back in if it was requested again while fading out
   track.howl.fade(track.howl.volume(), gain(musicVolume), FADE_MS)

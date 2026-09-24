@@ -84,7 +84,7 @@ export function loadLevel (data, number) {
     secondsPerBeat,
     // Initial timer value, in tenths of a second
     timerTenths: Math.round(data.duration * secondsPerBar * 10),
-    // Atom speed in ring radii per second (multiply by the ring radius in px to get px/s)
+    // Atom speed in core-to-ring trips per second (multiply by that distance in px to get px/s)
     atomSpeed: 1 / (data.atoms.travelTime * secondsPerBeat),
     // One atom spawns at a random moment inside each interval (see spawnDelay)
     spawnInterval: data.atoms.frequency * secondsPerBar,

@@ -2,6 +2,10 @@ The objective of the game is to keep the atoms inside the containment ring for a
 
 # Game mechanics
 
+## Level start
+
+When the level starts, the containment ring and the core are shown, but the game waits **3 seconds** before it begins: the timer doesn't count, no atoms are emitted, the level's music hasn't started yet and player input is disabled. This gives the previous screen's music time to fade out and the player time to get ready. After the delay, the timer, the atom emitter and the level's music all start at the same moment.
+
 ## Core mechanics
 
 At the center of the containment ring there's the atom emitter, or core. It will start emitting atoms (with a initial charge value of 1) in random directions at semi-random intervals. All atoms travel at the same speed, specified in the level settings file.
@@ -37,7 +41,7 @@ The paddle's lifetime (the `paddles.duration` value in the level file) starts co
 
 ## Atom capture
 
-Every time an atom is blocked by a paddle, its direction will be reversed and it will gain a "charge". The reversal is exact: the atom travels straight back through the core and out toward the opposite side of the ring. When the atom has three chargers, the player can destroy it by tapping on it while crossing the core.
+Every time an atom is blocked by a paddle, its direction will be reversed and it will gain a "charge". The reversal is exact: the atom travels straight back through the core and out toward the opposite side of the ring. When the atom has three chargers, the player can destroy it by tapping on it while crossing the core. (A visual cue that tells capturable atoms apart is planned for the second development cycle; in the first cycle all atoms look the same.)
 
 Destroying atoms is optional, the player can keep bouncing them for extra points and charges, up to a limit of ten charges. At ten charges, the atom will not gain charges, but otherwise it will behave as a normal atom.
 

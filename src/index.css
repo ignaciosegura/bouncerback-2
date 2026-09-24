@@ -231,8 +231,15 @@ button {
   text-align: right;
 }
 
-/* Game (placeholder) */
+/* Game */
 
-.game-screen {
-  gap: calc(64 * var(--u));
+.game-screen__canvas {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.game-screen__canvas canvas {
+  display: block;
 }

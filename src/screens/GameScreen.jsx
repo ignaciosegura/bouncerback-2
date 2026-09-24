@@ -1,17 +1,25 @@
+import { useEffect, useEffectEvent, useRef } from 'react'
 import Screen from '../components/Screen.jsx'
-import Menu from '../components/Menu.jsx'
-import Button from '../components/Button.jsx'
-import TextBox from '../components/TextBox.jsx'
+import GameEngine from '../game/GameEngine.js'
 
-// Placeholder until the PixiJS GameEngine and HUD are wired in: lets navigation be tested end to end
 export default function GameScreen ({ level, onGameOver, onLevelWin }) {
+  const canvasContainerRef = useRef(null)
+  const handleGameOver = useEffectEvent((result) => onGameOver(result))
+  const handleLevelWin = useEffectEvent((result) => onLevelWin(result))
+
+  // PixiJS owns the canvas; React only hears about the end of the level
+  useEffect(() => {
+    const engine = new GameEngine(level, {
+      onGameOver: (result) => handleGameOver(result),
+      onLevelWin: (result) => handleLevelWin(result)
+    })
+    engine.mount(canvasContainerRef.current)
+    return () => engine.destroy()
+  }, [level])
+
   return (
     <Screen variant="dark" className="game-screen">
-      <TextBox size="hud">{level.name}</TextBox>
-      <Menu>
-        <Button onClick={() => onLevelWin({ score: 7280 })}>WIN</Button>
-        <Button onClick={() => onGameOver({ score: 240 })}>LOSE</Button>
-      </Menu>
+      <div ref={canvasContainerRef} className="game-screen__canvas" />
     </Screen>
   )
 }
