@@ -40,6 +40,7 @@ Every doc, all seven mockups and the level schema were reviewed against each oth
 ### Layout & UI
 - **Playfield scaling:** ring radius ≈ 31% of viewport height (a ring about 62% of the screen height, as in the GAMEPLAY mockup), centered; the core, atoms and paddle thickness scale with it. Recalculated on window resize/rotation. Because atom speed is defined in beats, gameplay timing is the same on every screen size.
 - **Font sizes** (per `graphical-specs.md`): 24px HUD, 32px menu buttons, 64px "GAME OVER" / "YOU WIN!" titles. Line height 1, weight normal, always uppercase, single line.
+- **UI scaling:** the mockups are 1:1 at 1920x1080. All UI sizes are written in mockup pixels (`--u` in `src/index.css`) and scale with the viewport (min of height/1080 and width/1920, floor 0.4px), so every screen keeps the mockup proportions on phones too. Button padding is 0.5em, as in the mockups.
 - **Mockups win on on-screen text:** where a doc and a mockup disagree, follow the mockup. Labels: "HI-SCORE" (not "High Score"/"Best Score"), "TRY AGAIN" (not "Play Again"), "<<< BACK".
 - **Level Select** buttons show each level file's `name` (LEARN, NEUTRONIKA, FEMTOCOSMOS, CHRONOSAEDR0N, MEKANOMANCER). All levels are unlocked in cycle 1; unlocking comes in cycle 2.
 - **Try Again** restarts the same level from scratch (score reset to 0, lives from the level file).
@@ -72,7 +73,7 @@ Implementation is split into two cycles. The **first development cycle** builds 
 ### Phase 1 — App shell & navigation
 - `src/App.jsx`: screen-state switcher covering `navigation.md`'s flow (Intro → Main Menu → {Level Select, Settings} → Game → {Game Over, You Win!}). Game Over and You Win! are full screens that replace the Game Screen. Try Again restarts the same level; Main Menu returns to the menu. All screen changes are immediate.
 - `src/components/Screen.jsx`: wraps each screen, applies safe-area padding and the light/dark (`#DDDDDD`/`#000000`) background variant.
-- Generic UI: `Button.jsx`, `Menu.jsx`, `TextBox.jsx`, `Overlay.jsx` implementing `graphical-specs.md` exactly — thin border in the text color, transparent fill, 1em padding, line height 1, uppercase, single line, C64 Angled font at the sizes listed in Decisions.
+- Generic UI: `Button.jsx`, `Menu.jsx`, `TextBox.jsx`, `Overlay.jsx` implementing `graphical-specs.md` exactly — thin border in the text color, transparent fill, 0.5em padding, line height 1, uppercase, single line, C64 Angled font at the sizes listed in Decisions.
 
 ### Phase 2 — Audio manager
 - `src/audio/soundManager.js` (Howler wrapper): loads all SFX and tracks via Vite imports; unlocks by playing `silence.mp3` on the Intro screen's first tap (which then advances to Main Menu); exposes `playSfx(name)`, `playTrack(name)` with crossfade, and "don't restart if same track" continuity (`audio-map.md` rules 1–3); music/SFX volume (0–10 scale per the SETTINGS mockup) persisted to `localStorage` and available on every screen (AGENTS.md rule 5).

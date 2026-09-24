@@ -11,6 +11,18 @@
   --color-white: #FFFFFF;
   --color-white-bg: #DDDDDD;
   --font-game: 'C64 Angled', monospace;
+
+  /*
+   * One mockup pixel. Mockups are drawn at 1920x1080, so every UI size is
+   * expressed as calc(N * var(--u)) and scales with the viewport, with a
+   * floor so text stays readable on small phones.
+   */
+  --u: max(0.4px, min(100dvh / 1080, 100vw / 1920));
+
+  --font-hud: calc(24 * var(--u));
+  --font-menu: calc(32 * var(--u));
+  --font-title: calc(64 * var(--u));
+  --border-width: max(1px, calc(3 * var(--u)));
 }
 
 *,
@@ -47,11 +59,7 @@ body {
 }
 
 #root {
-  padding:
-    env(safe-area-inset-top)
-    env(safe-area-inset-right)
-    env(safe-area-inset-bottom)
-    env(safe-area-inset-left);
+  position: relative;
 }
 
 button {
@@ -61,4 +69,170 @@ button {
   border: none;
   text-transform: inherit;
   cursor: pointer;
+}
+
+/* Screen */
+
+.screen {
+  --fg: var(--color-white);
+  --bg: var(--color-black);
+
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding:
+    env(safe-area-inset-top)
+    env(safe-area-inset-right)
+    env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.screen--light {
+  --fg: var(--color-black);
+  --bg: var(--color-white-bg);
+}
+
+/* Button */
+
+.button {
+  min-width: calc(283 * var(--u));
+  padding: 0.5em;
+  border: var(--border-width) solid currentColor;
+  font-size: var(--font-menu);
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.button:active,
+.button:focus-visible,
+.volume-control__step:active,
+.volume-control__step:focus-visible {
+  outline: none;
+  background: var(--fg);
+  color: var(--bg);
+}
+
+/* Menu */
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  font-size: var(--font-menu);
+}
+
+.menu__items,
+.menu__footer {
+  display: flex;
+  flex-direction: column;
+  gap: calc(64 * var(--u));
+}
+
+.menu--with-footer {
+  flex: 1;
+  padding-block: calc(143 * var(--u));
+}
+
+.menu--with-footer .menu__items {
+  margin-block: auto;
+}
+
+.menu__footer {
+  margin-top: calc(64 * var(--u));
+}
+
+/* TextBox */
+
+.text-box {
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.text-box--hud {
+  font-size: var(--font-hud);
+}
+
+.text-box--menu {
+  font-size: var(--font-menu);
+}
+
+.text-box--title {
+  font-size: var(--font-title);
+}
+
+.text-box--bordered {
+  padding: 0.5em;
+  border: var(--border-width) solid currentColor;
+}
+
+/* Overlay */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.overlay > * {
+  pointer-events: auto;
+}
+
+/* Settings: volume dual-button */
+
+.volume-control {
+  display: flex;
+  border: var(--border-width) solid currentColor;
+  font-size: var(--font-menu);
+}
+
+.volume-control__step {
+  padding: 0.5em;
+  width: calc(2em + 2 * var(--border-width));
+}
+
+.volume-control__label {
+  flex: 1;
+  padding: 0.5em;
+  border-inline: var(--border-width) solid currentColor;
+  text-align: center;
+}
+
+/* Intro */
+
+.intro-screen {
+  cursor: pointer;
+}
+
+.intro-screen__logo {
+  width: calc(1518 * var(--u));
+  pointer-events: none;
+}
+
+/* Game Over / You Win! */
+
+.result-screen__scores {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: space-between;
+  row-gap: calc(56 * var(--u));
+  width: calc(398 * var(--u));
+  margin: calc(84 * var(--u)) 0 calc(139 * var(--u));
+  font-size: var(--font-menu);
+}
+
+.result-screen__scores dd {
+  text-align: right;
+}
+
+/* Game (placeholder) */
+
+.game-screen {
+  gap: calc(64 * var(--u));
 }

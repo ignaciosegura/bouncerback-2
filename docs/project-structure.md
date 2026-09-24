@@ -53,6 +53,7 @@ root/
     │   ├── GameScreen.jsx          # Houses the PixiCanvas component & HUD overlay
     │   ├── GameOverScreen.jsx      # Game over screen (replaces the Game Screen)
     │   ├── YouWinScreen.jsx        # You win screen (replaces the Game Screen)
+    │   ├── ResultScreen.jsx        # Shared layout of the Game Over and You Win screens
     │   └── PauseOverlay.jsx        # Pause overlay on top of the Game Screen (second development cycle)
     ├── App.jsx                     # React top-level router / screen switcher
     ├── main.jsx                    # React entry point

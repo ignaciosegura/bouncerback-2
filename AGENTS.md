@@ -56,8 +56,8 @@ Mobile browsers block audio until an explicit user interaction. Ensure Howler.js
 - **Black background** (`#000000`) during gameplay; white (`#DDDDDD`) background only for inverted menu layouts.
 - All graphics: **2D vector only**, no textures, no images. White lines and filled circles on black.
 - Font: **"C64 Angled"** monospaced — `assets/fonts/c64_angled.ttf`. Weight normal, line height 1, always uppercase.
-- Font sizes (per `docs/graphical-specs.md`): **24px** for HUD text, **32px** for menu buttons, **64px** for the "GAME OVER" and "YOU WIN!" titles.
-- All text/menus wrapped in a **thin-border transparent rectangle** with 1em padding.
+- Font sizes (per `docs/graphical-specs.md`): **24px** for HUD text, **32px** for menu buttons, **64px** for the "GAME OVER" and "YOU WIN!" titles — at the 1080px-tall reference; the whole UI scales with the viewport (see `docs/graphical-specs.md`).
+- All text/menus wrapped in a **thin-border transparent rectangle** with 0.5em padding.
 - All text boxes: **single line**, centered justification text, no breaks.
 
 ---

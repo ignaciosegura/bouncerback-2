@@ -26,7 +26,7 @@ export default [
     rules: {
       '@stylistic/semi': ['error', 'never'],
       '@stylistic/space-before-function-paren': ['error', 'always'],
-      '@stylistic/indent': ['error', 2]
+      '@stylistic/indent': ['error', 2, { SwitchCase: 0 }]
     }
   },
   {
