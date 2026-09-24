@@ -59,6 +59,7 @@ Implementation is split into two cycles. The **first development cycle** builds 
 - The "rotate your device" portrait overlay (cycle 1 still forces landscape via CSS/layout; the portrait-warning overlay and the native `@capacitor/screen-orientation` hard lock are both deferred).
 - VFX (`palette_invert`, `glow_pulse`, and the "one life left" trigger). The `vfx` field stays in the level files as an empty array (`[]`) in cycle 1.
 - Level unlocking (all levels are playable from the start in cycle 1).
+- Results ambience track (Game Over and You Win! are silent in cycle 1: the music just fades out).
 - Mobile build (Capacitor `ios`/`android` packaging, native icons/splash, native orientation lock). Cycle 1 targets the web build only; Capacitor deps are installed in Phase 0 but `cap add`/`cap sync` and everything native happen in cycle 2.
 
 ---
@@ -76,7 +77,7 @@ Implementation is split into two cycles. The **first development cycle** builds 
 - Generic UI: `Button.jsx`, `Menu.jsx`, `TextBox.jsx`, `Overlay.jsx` implementing `graphical-specs.md` exactly — thin border in the text color, transparent fill, 0.5em padding, line height 1, uppercase, single line, C64 Angled font at the sizes listed in Decisions.
 
 ### Phase 2 — Audio manager
-- `src/audio/soundManager.js` (Howler wrapper): loads all SFX and tracks via Vite imports; unlocks by playing `silence.mp3` on the Intro screen's first tap (which then advances to Main Menu); exposes `playSfx(name)`, `playTrack(name)` with crossfade, and "don't restart if same track" continuity (`audio-map.md` rules 1–3); music/SFX volume (10 steps, 0–9) persisted to `localStorage` and available on every screen (AGENTS.md rule 5).
+- `src/audio/soundManager.js` (Howler wrapper): loads all SFX and tracks via Vite imports; unlocks by playing `silence.mp3` on the Intro screen's first tap (which then advances to Main Menu); exposes `playSfx(name)`, `playTrack(name)` with crossfade, `stopTrack()` (fade out to silence, used by Game Over and You Win!), and "don't restart if same track" continuity (`audio-map.md` rules 1–3); music/SFX volume (10 steps, 0–9) persisted to `localStorage` and available on every screen (AGENTS.md rule 5).
 - SFX mapping per `audio-map.md`: `launch` on spawn, `bounce` on paddle hit, `capture` on tap-destroy, `destroy` on escape, `vortex_creation` at the start of the swallow.
 
 ### Phase 3 — Level data & loader
@@ -128,6 +129,9 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 ### Phase 13 — Level unlocking
 - Only level 1 is available at first; winning a level unlocks the next, saved in `localStorage`. Needs a visual style for locked buttons on Level Select (to be designed).
 
+### Phase 14 — Results ambience track
+- Compose a dedicated ambience track for the Game Over and You Win! screens (silent in cycle 1) and add it to `assets/audio/tracks/` and `docs/audio-map.md`; those screens call `playTrack` with it instead of `stopTrack()`.
+
 ---
 
 ## Verification
@@ -137,7 +141,7 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 - Resize the browser window during gameplay: the ring stays centered and scales with the height; atom timing doesn't change.
 - Manual gameplay pass on `level1`: paddle placement (press/drag/release, lifetime starts on release, FIFO with a third paddle), straight-back bounce and charge, escape and life loss, tap-destroy at charge ≥ 3, timer countdown, 3-second safe swallow, and score math (including the `timerTenths × level` time bonus) all match `game-rules.md`.
 - High score updates live on the HUD when beaten and survives a reload.
-- Audio: `silence.mp3` fires on the first Intro tap before any other sound; track continuity/crossfade across screens; volume settings survive a reload.
+- Audio: `silence.mp3` fires on the first Intro tap before any other sound; track continuity/crossfade across screens; the music fades out to silence on Game Over and You Win!; volume settings survive a reload.
 - Production build (`npm run build` + `npm run preview`): assets load with hashed filenames.
 
 ### Second development cycle
@@ -147,3 +151,4 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 - Rotate-device overlay appears in a portrait emulated viewport (browser and native) and disappears when rotated back to landscape.
 - VFX fire at the correct level-timeline moments and the "one life left" `palette_invert` triggers correctly.
 - Level unlocking: only level 1 is available on a fresh install; winning unlocks the next one and survives a reload.
+- Game Over and You Win! play the ambience track; returning to the menu crossfades back to `main_title.mp3`.

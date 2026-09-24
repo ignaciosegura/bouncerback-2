@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import * as soundManager from './audio/soundManager.js'
 import IntroScreen from './screens/IntroScreen.jsx'
 import MainMenuScreen from './screens/MainMenuScreen.jsx'
 import LevelSelectionMenuScreen from './screens/LevelSelectionMenuScreen.jsx'
-import SettingsMenuScreen, { MAX_VOLUME } from './screens/SettingsMenuScreen.jsx'
+import SettingsMenuScreen from './screens/SettingsMenuScreen.jsx'
 import GameScreen from './screens/GameScreen.jsx'
 import GameOverScreen from './screens/GameOverScreen.jsx'
 import YouWinScreen from './screens/YouWinScreen.jsx'
@@ -28,10 +29,43 @@ export default function App () {
   const [level, setLevel] = useState(null)
   const [score, setScore] = useState(0)
   const [hiScore, setHiScore] = useState(0)
-  const [musicVolume, setMusicVolume] = useState(MAX_VOLUME)
-  const [sfxVolume, setSfxVolume] = useState(MAX_VOLUME)
+  const [musicVolume, setMusicVolume] = useState(soundManager.getMusicVolume)
+  const [sfxVolume, setSfxVolume] = useState(soundManager.getSfxVolume)
+
+  // Menus play the menu track, gameplay the level's track; Game Over and You Win! are silent.
+  // Nothing plays before the Intro tap unlocks audio.
+  useEffect(() => {
+    switch (screen) {
+    case SCREENS.INTRO:
+      return
+    case SCREENS.GAME:
+      soundManager.playTrack(level.soundTrack)
+      return
+    case SCREENS.GAME_OVER:
+    case SCREENS.YOU_WIN:
+      soundManager.stopTrack()
+      return
+    default:
+      soundManager.playTrack(soundManager.MENU_TRACK)
+    }
+  }, [screen, level])
 
   const goToMainMenu = () => setScreen(SCREENS.MAIN_MENU)
+
+  const leaveIntro = () => {
+    soundManager.unlock()
+    goToMainMenu()
+  }
+
+  const changeMusicVolume = (value) => {
+    soundManager.setMusicVolume(value)
+    setMusicVolume(soundManager.getMusicVolume())
+  }
+
+  const changeSfxVolume = (value) => {
+    soundManager.setSfxVolume(value)
+    setSfxVolume(soundManager.getSfxVolume())
+  }
 
   const startLevel = (selectedLevel) => {
     setLevel(selectedLevel)
@@ -47,7 +81,7 @@ export default function App () {
 
   switch (screen) {
   case SCREENS.INTRO:
-    return <IntroScreen onContinue={goToMainMenu} />
+    return <IntroScreen onContinue={leaveIntro} />
 
   case SCREENS.MAIN_MENU:
     return (
@@ -71,8 +105,8 @@ export default function App () {
       <SettingsMenuScreen
         musicVolume={musicVolume}
         sfxVolume={sfxVolume}
-        onMusicVolumeChange={setMusicVolume}
-        onSfxVolumeChange={setSfxVolume}
+        onMusicVolumeChange={changeMusicVolume}
+        onSfxVolumeChange={changeSfxVolume}
         onBack={goToMainMenu}
       />
     )

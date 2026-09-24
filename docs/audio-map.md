@@ -25,7 +25,8 @@ Tracks are assigned to screens or levels. Each level's track is declared in its 
 
 | File | Screen / Level |
 | :--- | :--- |
-| `main_title.mp3` | Main Menu, Settings, Level Selection (all non-gameplay screens) |
+| `main_title.mp3` | Main Menu, Settings, Level Selection |
+| *(none)* | Game Over, You Win! — the music fades out and the screen is silent. A dedicated ambience track is planned for the second development cycle. |
 | `learn.mp3` | Level 1 |
 | `neutronika.mp3` | Level 2 |
 | `femtocosmos.mp3` | Level 3 |
@@ -40,6 +41,6 @@ Tracks are assigned to screens or levels. Each level's track is declared in its 
 ## Audio Lifecycle Rules
 
 1. **Unlock on first interaction** — Play `silence.mp3` immediately when the player first interacts with any screen (e.g., tapping the main menu). This satisfies the mobile browser audio policy and ensures all subsequent sounds play without delay.
-2. **Music crossfade** — When transitioning between screens, fade out the current track before fading in the new one.
+2. **Music crossfade** — When transitioning between screens, fade out the current track before fading in the new one. When the destination screen has no track (Game Over, You Win!), just fade out.
 3. **Music continuity** — If the destination screen uses the same track as the origin (e.g., navigating Settings → Main Menu), do **not** restart or crossfade the track; let it continue playing seamlessly.
 4. **SFX volume and music volume** — Controlled independently via the Settings screen buttons and persisted in `soundManager.js`.

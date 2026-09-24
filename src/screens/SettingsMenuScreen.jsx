@@ -1,10 +1,7 @@
 import Screen from '../components/Screen.jsx'
 import Menu from '../components/Menu.jsx'
 import Button from '../components/Button.jsx'
-
-// Volume steps 0–9 (a single digit keeps the button width stable)
-export const MIN_VOLUME = 0
-export const MAX_VOLUME = 9
+import { MIN_VOLUME, MAX_VOLUME } from '../audio/soundManager.js'
 
 // "Dual button": [-] LABEL VALUE [+]
 function VolumeControl ({ label, value, onChange }) {
