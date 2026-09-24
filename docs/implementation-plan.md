@@ -35,7 +35,7 @@ Every doc, all seven mockups and the level schema were reviewed against each oth
   - Time bonus at level end: `initial timer value (tenths of a second) × level`. Example: a 2-minute level 3 gives `1200 × 3 = 3600`.
 - **Charge:** atoms start at 1, gain +1 per bounce, capped at 10; they can be tap-destroyed at the core once charge ≥ 3.
 - **High score:** common to all levels, updated and saved the moment it's beaten, visible on the HUD, Game Over and You Win! screens.
-- **Timing math:** `secondsPerBeat = 60 / bpm`. Atom pixel speed = `ringRadius / (atoms.speed × secondsPerBeat)`. Initial timer (tenths of a second) = `round(duration × signature × secondsPerBeat × 10)`. Spawn interval = `atoms.frequency × signature × secondsPerBeat`, with the actual spawn at a random moment inside each interval.
+- **Timing math:** `secondsPerBeat = 60 / bpm`. Atom pixel speed = `ringRadius / (atoms.travelTime × secondsPerBeat)`. Initial timer (tenths of a second) = `round(duration × signature × secondsPerBeat × 10)`. Spawn interval = `atoms.frequency × signature × secondsPerBeat`, with the actual spawn at a random moment inside each interval.
 
 ### Layout & UI
 - **Playfield scaling:** ring radius ≈ 31% of viewport height (a ring about 62% of the screen height, as in the GAMEPLAY mockup), centered; the core, atoms and paddle thickness scale with it. Recalculated on window resize/rotation. Because atom speed is defined in beats, gameplay timing is the same on every screen size.

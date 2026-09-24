@@ -68,11 +68,11 @@
         "atoms": {
             "type": "object",
             "required": [
-                "speed",
+                "travelTime",
                 "frequency"
             ],
             "properties": {
-                "speed": {
+                "travelTime": {
                     "type": "number",
                     "description": "Beats required for an atom to travel from the atom emitter to the containment ring."
                 },
