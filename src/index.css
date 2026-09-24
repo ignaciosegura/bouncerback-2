@@ -1,0 +1,64 @@
+@font-face {
+  font-family: 'C64 Angled';
+  src: url('../assets/fonts/c64_angled.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  --color-black: #000000;
+  --color-white: #FFFFFF;
+  --color-white-bg: #DDDDDD;
+  --font-game: 'C64 Angled', monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-black);
+  color: var(--color-white);
+}
+
+body {
+  font-family: var(--font-game);
+  font-weight: normal;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  touch-action: none;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: none;
+}
+
+#root {
+  padding:
+    env(safe-area-inset-top)
+    env(safe-area-inset-right)
+    env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  text-transform: inherit;
+  cursor: pointer;
+}
