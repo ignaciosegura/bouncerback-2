@@ -109,6 +109,7 @@ export default function App () {
     return (
       <GameScreen
         level={level}
+        hiScore={hiScore}
         onGameOver={endLevel(SCREENS.GAME_OVER)}
         onLevelWin={endLevel(SCREENS.YOU_WIN)}
       />
