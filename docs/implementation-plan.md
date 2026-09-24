@@ -76,7 +76,7 @@ Implementation is split into two cycles. The **first development cycle** builds 
 - Generic UI: `Button.jsx`, `Menu.jsx`, `TextBox.jsx`, `Overlay.jsx` implementing `graphical-specs.md` exactly — thin border in the text color, transparent fill, 0.5em padding, line height 1, uppercase, single line, C64 Angled font at the sizes listed in Decisions.
 
 ### Phase 2 — Audio manager
-- `src/audio/soundManager.js` (Howler wrapper): loads all SFX and tracks via Vite imports; unlocks by playing `silence.mp3` on the Intro screen's first tap (which then advances to Main Menu); exposes `playSfx(name)`, `playTrack(name)` with crossfade, and "don't restart if same track" continuity (`audio-map.md` rules 1–3); music/SFX volume (0–10 scale per the SETTINGS mockup) persisted to `localStorage` and available on every screen (AGENTS.md rule 5).
+- `src/audio/soundManager.js` (Howler wrapper): loads all SFX and tracks via Vite imports; unlocks by playing `silence.mp3` on the Intro screen's first tap (which then advances to Main Menu); exposes `playSfx(name)`, `playTrack(name)` with crossfade, and "don't restart if same track" continuity (`audio-map.md` rules 1–3); music/SFX volume (10 steps, 0–9) persisted to `localStorage` and available on every screen (AGENTS.md rule 5).
 - SFX mapping per `audio-map.md`: `launch` on spawn, `bounce` on paddle hit, `capture` on tap-destroy, `destroy` on escape, `vortex_creation` at the start of the swallow.
 
 ### Phase 3 — Level data & loader

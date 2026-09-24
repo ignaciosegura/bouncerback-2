@@ -2,7 +2,7 @@ import { useState } from 'react'
 import IntroScreen from './screens/IntroScreen.jsx'
 import MainMenuScreen from './screens/MainMenuScreen.jsx'
 import LevelSelectionMenuScreen from './screens/LevelSelectionMenuScreen.jsx'
-import SettingsMenuScreen from './screens/SettingsMenuScreen.jsx'
+import SettingsMenuScreen, { MAX_VOLUME } from './screens/SettingsMenuScreen.jsx'
 import GameScreen from './screens/GameScreen.jsx'
 import GameOverScreen from './screens/GameOverScreen.jsx'
 import YouWinScreen from './screens/YouWinScreen.jsx'
@@ -28,8 +28,8 @@ export default function App () {
   const [level, setLevel] = useState(null)
   const [score, setScore] = useState(0)
   const [hiScore, setHiScore] = useState(0)
-  const [musicVolume, setMusicVolume] = useState(10)
-  const [sfxVolume, setSfxVolume] = useState(10)
+  const [musicVolume, setMusicVolume] = useState(MAX_VOLUME)
+  const [sfxVolume, setSfxVolume] = useState(MAX_VOLUME)
 
   const goToMainMenu = () => setScreen(SCREENS.MAIN_MENU)
 
