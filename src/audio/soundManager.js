@@ -7,6 +7,9 @@ export const MAX_VOLUME = 9
 export const MENU_TRACK = 'main_title.mp3'
 
 const FADE_MS = 500
+// Max simultaneous voices per sound effect; when full, the oldest voice is faded out (voice stealing)
+const SFX_VOICE_LIMITS = { bounce: 1, destroy: 1 }
+const STEAL_FADE_MS = 15
 const STORAGE_KEYS = {
   music: 'bouncerback.musicVolume',
   sfx: 'bouncerback.sfxVolume'
@@ -22,6 +25,9 @@ const sfx = {}
 for (const [path, url] of Object.entries(sfxUrls)) {
   sfx[baseName(path).replace(/\.mp3$/, '')] = new Howl({ src: [url] })
 }
+
+// Voice IDs of the voice-limited effects, oldest first, keyed like `sfx`
+const activeVoices = {}
 
 // Tracks are large once decoded: each one is loaded when it starts (or is preloaded) and unloaded
 // when it stops. Keyed by file name ('learn.mp3'), as referenced by the level files' soundTrack field.
@@ -82,7 +88,23 @@ export function playSfx (name) {
     console.warn(`soundManager: unknown sound effect "${name}"`)
     return
   }
-  howl.play()
+
+  const limit = SFX_VOICE_LIMITS[name]
+  if (!limit) {
+    howl.play()
+    return
+  }
+
+  const voices = (activeVoices[name] ?? []).filter((id) => howl.playing(id))
+  while (voices.length >= limit) stealVoice(howl, voices.shift())
+  voices.push(howl.play())
+  activeVoices[name] = voices
+}
+
+// Quick fade before stopping, so cutting a voice short doesn't click
+function stealVoice (howl, id) {
+  howl.fade(howl.volume(), 0, STEAL_FADE_MS, id)
+  setTimeout(() => howl.stop(id), STEAL_FADE_MS)
 }
 
 /**
