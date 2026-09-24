@@ -37,4 +37,4 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 # Mockups
 
-Reference images can be found in the `docs/images` folder. The filenames specify the screen they represent.
+Reference images can be found in the `docs/mockups` folder. The filenames specify the screen they represent.

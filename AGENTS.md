@@ -17,7 +17,7 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 | `docs/game-rules.md` | Game mechanics, scoring, win/loss conditions |
 | `docs/implementation-guidelines.md` | Summary of architectural and implementation rules |
 | `docs/level-file-schema.json` | JSON Schema for all level files |
-| `docs/images/` | Reference mockups — filenames indicate which screen they represent |
+| `docs/mockups/` | Reference mockups — filenames indicate which screen they represent |
 | `docs/react-pixi-example.jsx` | Reference example of a React + PixiJS component integration |
 
 ---

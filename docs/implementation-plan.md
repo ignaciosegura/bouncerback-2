@@ -6,11 +6,6 @@ Bouncerback is fully documented (`AGENTS.md`, `docs/*`) but has zero implementat
 
 Before planning, every doc, all seven mockups, and the level schema were read in full, surfacing a few real gaps/contradictions. The three that would materially change the implementation were resolved via clarifying questions with the user; the rest are minor and are handled as stated assumptions below (flag if any are wrong).
 
-### Already applied (per user answers)
-1. **Stray `src/` asset dirs removed.** `src/fonts/`, `src/img/`, `src/sound/` duplicated (and partly diverged from — e.g. `bounce_dry/knackle/wet.mp3` instead of `bounce.mp3`, a leftover `tracks/tutorial.mp3`) the canonical `assets/` tree from `docs/project-structure.md`. Deleted via `git rm` — `assets/` is now the single source of truth for audio/fonts/vectors.
-2. **`docs/level-file-schema.json` fixed:** `paddles.angle` description changed from "grads" to "degrees" (was a documentation error).
-3. **`docs/level-file-schema.json` extended:** added a required `"lives"` (integer) field so each level can set its own starting life count — no per-level lives value existed before (only inferable from the GAMEPLAY.png mockup's 4 dots), and it needs to vary by level per the user's answer.
-
 ### Stated assumptions (not blocking, proceed unless corrected)
 - **Bundler:** Vite (fast ESM dev server, pairs well with PixiJS v8's async `app.init()` and with Capacitor).
 - **Language:** plain JavaScript/JSX — matches `.eslintrc.json` (no TS parser) and `project-structure.md` (all `.jsx`/`.js` files). The old deleted `docs/implementation-plan.md` mentioned TypeScript/Expo; that plan is stale/superseded and is ignored.
@@ -22,7 +17,7 @@ Before planning, every doc, all seven mockups, and the level schema were read in
 - **Score "level" multiplier** in the formulas (`10 * level * charge`, etc.) = the level's numeric index, 1–5.
 - **Atom speed derivation:** `atoms.speed` ("bars for a round trip") combined with `timeSignature` gives `secondsPerBar = 60/bpm * signature`; atom pixel speed = `(2 * ringRadius) / (atoms.speed * secondsPerBar)`. Timer initial value (tenths of a second) = `round(duration * secondsPerBar * 10)`.
 - No automated test framework is specified anywhere in the docs; a couple of lightweight Vitest unit tests for pure logic (score formulas, level-loader math) can be added since PixiJS/DOM rendering isn't practically unit-testable — this is additive, not required, and can be skipped to keep scope minimal.
-- Mobile app icon: `src/img/icon.png` was deleted with the stray folder, and `assets/vectors/` only has the wordmark logo (not a square icon). Mobile packaging (Phase 8) will use a placeholder square icon derived from the logo mark until a real one is supplied.
+- Mobile app icon: `src/img/icon.png` was deleted with the stray folder, and `assets/images/` only has the wordmark logo (not a square icon). Mobile packaging (Phase 8) will use a placeholder square icon derived from the logo mark until a real one is supplied.
 
 ---
 
@@ -50,7 +45,7 @@ Before planning, every doc, all seven mockups, and the level schema were read in
 - `src/game/entities/{AtomEmitter,ContainmentRing,Paddle,Atom}.js`: `PIXI.Graphics`-based vector shapes (white lines/fills on black, no textures, per `graphical-specs.md`) with per-entity `update(deltaMS)`.
 
 ### Phase 5 — Screens & HUD wiring
-- `src/screens/{MainMenuScreen,LevelSelectionMenuScreen,SettingsMenuScreen,GameScreen,GameOverOverlay,PauseOverlay}.jsx` + a `YouWinOverlay.jsx` (mirrors GameOver per the mockup, adds hi-score line), each matching its `docs/images/*.png` mockup.
+- `src/screens/{MainMenuScreen,LevelSelectionMenuScreen,SettingsMenuScreen,GameScreen,GameOverOverlay,PauseOverlay}.jsx` + a `YouWinOverlay.jsx` (mirrors GameOver per the mockup, adds hi-score line), each matching its `docs/mockups/*.png` mockup.
 - `src/components/HUD.jsx`: SCORE / TIME / HI-SCORE + life-dots row, updated only from the GameEngine's low-frequency callbacks (matches GAMEPLAY.png layout).
 - Pause button stops `app.ticker`; Resume restarts it; Settings/Main Menu buttons inside Pause reuse the existing screens.
 
@@ -69,7 +64,7 @@ Before planning, every doc, all seven mockups, and the level schema were read in
 ---
 
 ## Verification
-- `npm run dev`: click through Intro → Main Menu → Level Select → Settings → Game; compare pixel layout against each `docs/images/*.png` mockup at a landscape viewport, and confirm the rotate-device overlay appears in a portrait emulated viewport.
+- `npm run dev`: click through Intro → Main Menu → Level Select → Settings → Game; compare pixel layout against each `docs/mockups/*.png` mockup at a landscape viewport, and confirm the rotate-device overlay appears in a portrait emulated viewport.
 - Manual gameplay pass on `level1`: paddle placement (down/drag/release), atom bounce/charge/escape/destroy, timer countdown, life loss, win/loss overlays, and score math all match `game-rules.md`'s formulas.
 - Audio: confirm `silence.mp3` fires on first Intro tap before any other sound, track continuity/crossfade across screens, volume settings persist across a reload.
 - `npx cap sync` completes cleanly; app boots in an Android/iOS simulator with landscape locked and audio unlocking on first tap.
