@@ -1,0 +1,19 @@
+{
+  "name": "MEKANOMANCER",
+  "duration": 34,
+  "timeSignature": {
+    "bpm": 180,
+    "signature": 3
+  },
+  "soundTrack": "mekanomancer.mp3",
+  "vfx": [],
+  "atoms": {
+    "travelTime": 8,
+    "frequency": 2
+  },
+  "paddles": {
+    "angle": 30,
+    "duration": 3
+  },
+  "lives": 3
+}

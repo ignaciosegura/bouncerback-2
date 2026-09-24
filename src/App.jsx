@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import * as soundManager from './audio/soundManager.js'
+import { levels } from './game/levelLoader.js'
 import IntroScreen from './screens/IntroScreen.jsx'
 import MainMenuScreen from './screens/MainMenuScreen.jsx'
 import LevelSelectionMenuScreen from './screens/LevelSelectionMenuScreen.jsx'
@@ -17,12 +18,6 @@ const SCREENS = {
   GAME_OVER: 'gameOver',
   YOU_WIN: 'youWin'
 }
-
-// levelN.json → { number: N, ...levelData }, ordered by N
-const levelModules = import.meta.glob('./levels/level*.json', { eager: true, import: 'default' })
-const levels = Object.entries(levelModules)
-  .map(([path, data]) => ({ number: Number(path.match(/level(\d+)\.json$/)[1]), ...data }))
-  .sort((a, b) => a.number - b.number)
 
 export default function App () {
   const [screen, setScreen] = useState(SCREENS.INTRO)

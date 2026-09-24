@@ -1,0 +1,19 @@
+{
+  "name": "CHRONOSAEDR0N",
+  "duration": 24,
+  "timeSignature": {
+    "bpm": 130,
+    "signature": 4
+  },
+  "soundTrack": "chronosaedron.mp3",
+  "vfx": [],
+  "atoms": {
+    "travelTime": 8,
+    "frequency": 2
+  },
+  "paddles": {
+    "angle": 30,
+    "duration": 3
+  },
+  "lives": 4
+}

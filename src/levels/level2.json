@@ -1,0 +1,19 @@
+{
+  "name": "NEUTRONIKA",
+  "duration": 66,
+  "timeSignature": {
+    "bpm": 120,
+    "signature": 4
+  },
+  "soundTrack": "neutronika.mp3",
+  "vfx": [],
+  "atoms": {
+    "travelTime": 8,
+    "frequency": 2
+  },
+  "paddles": {
+    "angle": 30,
+    "duration": 3
+  },
+  "lives": 4
+}
