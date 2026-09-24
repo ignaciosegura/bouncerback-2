@@ -8,12 +8,12 @@
   "soundTrack": "femtocosmos.mp3",
   "vfx": [],
   "atoms": {
-    "travelTime": 8,
-    "frequency": 2
+    "travelTime": 12,
+    "frequency": 1
   },
   "paddles": {
     "angle": 30,
     "duration": 3
   },
-  "lives": 4
+  "lives": 5
 }

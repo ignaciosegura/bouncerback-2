@@ -8,7 +8,7 @@
   "soundTrack": "learn.mp3",
   "vfx": [],
   "atoms": {
-    "travelTime": 8,
+    "travelTime": 16,
     "frequency": 2
   },
   "paddles": {
