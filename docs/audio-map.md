@@ -44,4 +44,4 @@ Tracks are assigned to screens or levels. Each level's track is declared in its 
 2. **Music crossfade** — When transitioning between screens, fade out the current track before fading in the new one. When the destination screen has no track (Game Over, You Win!), just fade out.
 3. **Level start** — Entering the Game Screen fades the music out. The level's track starts when the level's 3-second start delay ends, at the same moment as the timer (see `game-rules.md`); it is preloaded during the delay so it starts on time.
 4. **Music continuity** — If the destination screen uses the same track as the origin (e.g., navigating Settings → Main Menu), do **not** restart or crossfade the track; let it continue playing seamlessly.
-5. **SFX volume and music volume** — Controlled independently via the Settings screen buttons and persisted in `soundManager.js`.
+5. **SFX volume and music volume** — Controlled independently via the Settings screen buttons and persisted in `soundManager.js`. Both are capped at -6 dB (setting 9), so music and SFX at full volume sum to at most 0 dB instead of clipping.

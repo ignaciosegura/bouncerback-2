@@ -6,6 +6,9 @@ export const MAX_VOLUME = 9
 // Track played on every screen except gameplay (see docs/audio-map.md)
 export const MENU_TRACK = 'main_title.mp3'
 
+// Gain at the top volume setting: -6 dB, so music and SFX at full volume can sum without clipping
+const MAX_GAIN = 10 ** (-6 / 20)
+
 const FADE_MS = 500
 // Max simultaneous voices per sound effect; when full, the oldest voice is faded out (voice stealing)
 const SFX_VOICE_LIMITS = { bounce: 1, destroy: 1 }
@@ -65,9 +68,9 @@ function clampVolume (value) {
   return Math.min(MAX_VOLUME, Math.max(MIN_VOLUME, value))
 }
 
-// 0–9 setting → 0–1 gain
+// 0–9 setting → 0–MAX_GAIN gain
 function gain (value) {
-  return value / MAX_VOLUME
+  return (value / MAX_VOLUME) * MAX_GAIN
 }
 
 function applySfxVolume () {
