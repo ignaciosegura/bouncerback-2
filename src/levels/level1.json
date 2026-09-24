@@ -1,0 +1,19 @@
+{
+  "name": "LEARN",
+  "duration": 48,
+  "timeSignature": {
+    "bpm": 130,
+    "signature": 4
+  },
+  "soundTrack": "learn.mp3",
+  "vfx": [],
+  "atoms": {
+    "speed": 8,
+    "frequency": 2
+  },
+  "paddles": {
+    "angle": 30,
+    "duration": 3
+  },
+  "lives": 8
+}
