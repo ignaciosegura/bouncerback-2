@@ -73,7 +73,7 @@
             "properties": {
                 "speed": {
                     "type": "number",
-                    "description": "Bars required for an atom to complete a round trip."
+                    "description": "Beats required for an atom to travel from the atom emitter to the containment ring."
                 },
                 "frequency": {
                     "type": "number",
