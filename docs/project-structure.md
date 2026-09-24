@@ -26,15 +26,14 @@ root/
     ├── components/                 # React UI components (HUD, Menus, Modals)
     │   ├── Button.jsx              # Reusable button component
     │   ├── HUD.jsx                 # Heads-Up Display for in-game information
-    │   ├── MainMenu.jsx            # Main menu screen
     │   ├── Menu.jsx                # Generic menu container component
     │   ├── Screen.jsx              # Base screen wrapper component (handles transitions, safe areas, etc.)
-    │   ├── SettingsMenu.jsx        # Settings menu screen
-    │   ├── LevelSelectionMenu.jsx  # Level selection menu screen
     │   ├── Overlay.jsx             # Generic overlay component to be placed on top of current screen content
     │   └── TextBox.jsx             # Floating text box component.
     ├── game/                       # Pure game logic & PixiJS implementation
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
+    │   ├── levelLoader.js          # Validates level JSON and derives runtime values (timer, speeds, intervals)
+    │   ├── scoring.js              # Pure score formulas and high-score persistence
     │   └── entities/               # Game objects
     │   │   ├── AtomEmitter.js      # The central element that stays in place and spawns atoms.
     │   │   ├── ContainmentRing.js  # The ring where the atoms are escaping from
@@ -46,13 +45,15 @@ root/
     │   ├── level3.json             # Level 3 data
     │   ├── level4.json             # Level 4 data
     │   └── level5.json             # Level 5 data
-    ├── screens/                    # React screen wrappers
+    ├── screens/                    # React screens, built from the generic components above
+    │   ├── IntroScreen.jsx         # Intro screen (first tap unlocks audio)
+    │   ├── MainMenuScreen.jsx      # Main menu screen
+    │   ├── SettingsMenuScreen.jsx  # Settings menu screen
+    │   ├── LevelSelectionMenuScreen.jsx  # Level selection menu screen
     │   ├── GameScreen.jsx          # Houses the PixiCanvas component & HUD overlay
-    │   ├── MainMenuScreen.jsx      # Main menu screen wrapper
-    │   ├── SettingsMenuScreen.jsx  # Settings menu screen wrapper
-    │   ├── LevelSelectionMenuScreen.jsx  # Level selection menu screen wrapper
-    │   ├── GameOverOverlay.jsx     # Game over overlay screen wrapper
-    │   └── PauseOverlay.jsx        # Pause overlay screen wrapper
+    │   ├── GameOverScreen.jsx      # Game over screen (replaces the Game Screen)
+    │   ├── YouWinScreen.jsx        # You win screen (replaces the Game Screen)
+    │   └── PauseOverlay.jsx        # Pause overlay on top of the Game Screen (second development cycle)
     ├── App.jsx                     # React top-level router / screen switcher
     ├── main.jsx                    # React entry point
     └── index.css                   # Global styles & mobile safe-area setup

@@ -18,6 +18,12 @@ If the player runs out of lives (it reaches zero), the game will end in a "Game 
 
 When the timer runs out, the core will attract all atoms and "swallow" them. The level will end succesfuly and the player will be taken to the "YOU WIN!" screen.
 
+The swallow phase is safe for the player:
+
+* When the timer reaches zero, the core stops emitting atoms, all paddles disappear and player input is disabled.
+* Every atom still inside the containment ring is pulled into the core. No atom can escape during the swallow, so no lives can be lost. Atoms that were already fading out after escaping are ignored.
+* The swallow lasts 3 seconds. Then the "YOU WIN!" screen is shown.
+
 # Player input mechanics
 
 ## Paddles
@@ -27,9 +33,11 @@ The paddle's exact position on the circumference of the ring will be calculated 
 To help the player set the paddles at the exact desired place, two events will be used: onMouseDown the paddle will be drawn, but inactive. The user can drag 
 the mouse while holding the left-click button (or doing the equivalent gesture with a touchscreen), and the paddle will rotate around the core following the mouse position. When the user releases the button, the paddle will be set at the current position.
 
+The paddle's lifetime (the `paddles.duration` value in the level file) starts counting when the paddle is set (on release), not when the button is pressed. While the player is dragging, the paddle is inactive and doesn't expire.
+
 ## Atom capture
 
-Every time an atom is blocked by a paddle, its direction will be reversed and it will gain a "charge". When the atom has three chargers, the player can destroy it by tapping on it while crossing the core.
+Every time an atom is blocked by a paddle, its direction will be reversed and it will gain a "charge". The reversal is exact: the atom travels straight back through the core and out toward the opposite side of the ring. When the atom has three chargers, the player can destroy it by tapping on it while crossing the core.
 
 Destroying atoms is optional, the player can keep bouncing them for extra points and charges, up to a limit of ten charges. At ten charges, the atom will not gain charges, but otherwise it will behave as a normal atom.
 
@@ -50,7 +58,7 @@ The player will get:
 * 10 points * level * atom charge value every time it bounces back an atom using a paddle. 
 * 100 points * level * atom charge value for every atom captured
 * 200 points * level * atom charge value * remaining lives for every atom contained at the end of the level, when the core "swallows" all remaining atoms.
-* Additional bonus after all remaining atoms have been swallowed (the player needs to pass the level): 1 point for every 0.1 seconds.
+* Additional time bonus after all remaining atoms have been swallowed (the player needs to pass the level): 1 point * level for every 0.1 seconds of the level's total duration. In other words, the level's initial timer value (in tenths of a second) * level. For example, a 2-minute level 3 gives 1200 * 3 = 3600 points.
  
 # High Score
 

@@ -8,6 +8,7 @@
         "timeSignature",
         "soundTrack",
         "atoms",
+        "paddles",
         "lives"
     ],
     "properties": {
@@ -91,11 +92,11 @@
             "properties": {
                 "angle": {
                     "type": "number",
-                    "description": "Arc length (width) of the paddle, measured in degrees."
+                    "description": "Arc length (width) of the paddle, measured in degrees. Suggested starting value: 30."
                 },
                 "duration": {
                     "type": "number",
-                    "description": "Duration of the paddle action measured in seconds."
+                    "description": "Duration of the paddle action measured in seconds, counted from the moment the paddle is set (pointer released). Suggested starting value: 3."
                 }
             },
             "additionalProperties": false
