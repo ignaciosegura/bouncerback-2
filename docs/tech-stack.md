@@ -48,3 +48,15 @@ To maintain high performance (60 FPS) and clean code organization, a **strict se
    * Always properly destroy the PixiJS application instance on React component unmount (`app.destroy(true, { children: true, texture: true })`) to prevent memory leaks or duplicate canvases inside mobile WebViews.
 
 ---
+
+## 4. Development Environment Prerequisites
+
+| Target | Requirement | Notes |
+| :--- | :--- | :--- |
+| **Web dev (Vite)** | Node.js + npm | No Docker, VMs, or background daemons needed. `npm run dev` is a plain foreground process. |
+| **iOS packaging (Capacitor)** | Full **Xcode** app (from the App Store), not just Xcode Command Line Tools | `npx cap add ios` and running/building in the iOS Simulator require the full Xcode app. CLI tools alone are insufficient — `xcodebuild` fails if `xcode-select` still points at a Command Line Tools-only install. After installing Xcode, run `xcode-select -s /Applications/Xcode.app`. |
+| **Android packaging (Capacitor)** | Android Studio + Android SDK | Separate toolchain from iOS; not needed for the iOS path. |
+
+Web development (Vite dev server, Phases 0–7) does not require any of the mobile toolchains above. They are only needed starting at mobile packaging (second development cycle).
+
+---

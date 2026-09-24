@@ -81,6 +81,7 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 - Replace the immediate screen swaps in `src/App.jsx`/`Screen.jsx` with animated transitions between screens (style/timing per `graphical-specs.md` and the mockups, if specified; otherwise a simple consistent fade/cut is acceptable).
 
 ### Phase 10 — Mobile packaging
+- **Prerequisites (verify before starting):** full **Xcode** app installed from the App Store (Xcode Command Line Tools alone are not sufficient for `npx cap add ios` or building/running in the iOS Simulator — confirm with `xcodebuild -version`; if it errors, install Xcode and run `xcode-select -s /Applications/Xcode.app`), and Android Studio + Android SDK for the Android side. See `docs/tech-stack.md` §4.
 - `npx cap add ios android` (generated output is off-limits to hand-edit per AGENTS.md — only touch it via the Capacitor CLI), wire `@capacitor/screen-orientation` to lock landscape on native, generate icons/splash from `assets/images/icon.png`.
 
 ### Phase 11 — Rotate-device overlay
