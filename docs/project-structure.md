@@ -8,10 +8,10 @@ root/
 ├── package.json                  
 └── assets/                         # Static assets
     ├── audio/                      # Sound effects & music files for Howler.js
-    ├── vectors/                    # SVG Vector assets
+    ├── images/                     # SVG vector assets and mobile app icon
     └── fonts/                      # Font files for the game (TTF and OTF formats).
 └── docs/                           # Documentation for the implementation
-    ├── images/                     # Reference images for layout and style
+    ├── mockups/                    # Reference images for layout and style
     ├── tech-stack.md               # Tech stack & architectural boundaries
     ├── navigation.md               # Navigation flow
     ├── graphical-specs.md          # Graphical specifications

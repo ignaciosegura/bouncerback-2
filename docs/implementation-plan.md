@@ -17,7 +17,7 @@ Before planning, every doc, all seven mockups, and the level schema were read in
 - **Score "level" multiplier** in the formulas (`10 * level * charge`, etc.) = the level's numeric index, 1–5.
 - **Atom speed derivation:** `atoms.speed` ("bars for a round trip") combined with `timeSignature` gives `secondsPerBar = 60/bpm * signature`; atom pixel speed = `(2 * ringRadius) / (atoms.speed * secondsPerBar)`. Timer initial value (tenths of a second) = `round(duration * secondsPerBar * 10)`.
 - No automated test framework is specified anywhere in the docs; a couple of lightweight Vitest unit tests for pure logic (score formulas, level-loader math) can be added since PixiJS/DOM rendering isn't practically unit-testable — this is additive, not required, and can be skipped to keep scope minimal.
-- Mobile app icon: `src/img/icon.png` was deleted with the stray folder, and `assets/images/` only has the wordmark logo (not a square icon). Mobile packaging (Phase 8) will use a placeholder square icon derived from the logo mark until a real one is supplied.
+- Mobile app icon: `assets/images/icon.png` is the real square app icon. Mobile packaging (Phase 8) generates native icons/splash from it directly — no placeholder needed.
 
 ---
 
@@ -56,7 +56,7 @@ Before planning, every doc, all seven mockups, and the level schema were read in
 - Small vfx registry (`palette_invert`, `glow_pulse`) driven both by a level's `vfx` timeline (bar-offset → seconds, via the loader) and directly by game state (1 life left → `palette_invert`).
 
 ### Phase 8 — Mobile packaging
-- `npx cap add ios android` (generated output is off-limits to hand-edit per AGENTS.md — only touch it via the Capacitor CLI), wire `@capacitor/screen-orientation` to lock landscape on native, generate icons/splash from a placeholder square icon (flag that a real one should replace it).
+- `npx cap add ios android` (generated output is off-limits to hand-edit per AGENTS.md — only touch it via the Capacitor CLI), wire `@capacitor/screen-orientation` to lock landscape on native, generate icons/splash from `assets/images/icon.png`.
 
 ### Phase 9 — QA pass
 - Manual verification per `implementation-guidelines.md`'s per-step "Verify" checklists; optional Vitest unit tests for the pure math (scoring, level loader) as a nice-to-have.
