@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import * as soundManager from './audio/soundManager.js'
 import { levels } from './game/levelLoader.js'
+import { getHiScore, beatHiScore } from './game/highScore.js'
 import IntroScreen from './screens/IntroScreen.jsx'
 import MainMenuScreen from './screens/MainMenuScreen.jsx'
 import LevelSelectionMenuScreen from './screens/LevelSelectionMenuScreen.jsx'
@@ -23,7 +24,7 @@ export default function App () {
   const [screen, setScreen] = useState(SCREENS.INTRO)
   const [level, setLevel] = useState(null)
   const [score, setScore] = useState(0)
-  const [hiScore, setHiScore] = useState(0)
+  const [hiScore, setHiScore] = useState(getHiScore)
   const [musicVolume, setMusicVolume] = useState(soundManager.getMusicVolume)
   const [sfxVolume, setSfxVolume] = useState(soundManager.getSfxVolume)
 
@@ -67,9 +68,11 @@ export default function App () {
     setScreen(SCREENS.GAME)
   }
 
+  // Saves the high score to localStorage the instant it's beaten, live during gameplay
+  const registerScore = (currentScore) => setHiScore(beatHiScore(currentScore))
+
   const endLevel = (nextScreen) => ({ score: finalScore }) => {
     setScore(finalScore)
-    setHiScore((current) => Math.max(current, finalScore))
     setScreen(nextScreen)
   }
 
@@ -110,6 +113,7 @@ export default function App () {
       <GameScreen
         level={level}
         hiScore={hiScore}
+        onScoreChange={registerScore}
         onGameOver={endLevel(SCREENS.GAME_OVER)}
         onLevelWin={endLevel(SCREENS.YOU_WIN)}
       />

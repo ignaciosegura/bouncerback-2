@@ -3,18 +3,19 @@ import Screen from '../components/Screen.jsx'
 import HUD from '../components/HUD.jsx'
 import GameEngine from '../game/GameEngine.js'
 
-export default function GameScreen ({ level, hiScore, onGameOver, onLevelWin }) {
+export default function GameScreen ({ level, hiScore, onScoreChange, onGameOver, onLevelWin }) {
   const canvasContainerRef = useRef(null)
   const [score, setScore] = useState(0)
   const [lives, setLives] = useState(level.lives)
   const [timeTenths, setTimeTenths] = useState(level.timerTenths)
+  const handleScoreChange = useEffectEvent((value) => onScoreChange(value))
   const handleGameOver = useEffectEvent((result) => onGameOver(result))
   const handleLevelWin = useEffectEvent((result) => onLevelWin(result))
 
   // PixiJS owns the canvas and the game loop; React only receives the engine's low-frequency updates
   useEffect(() => {
     const engine = new GameEngine(level, {
-      onScoreChange: setScore,
+      onScoreChange: (value) => { setScore(value); handleScoreChange(value) },
       onLivesChange: setLives,
       onTimeChange: setTimeTenths,
       onGameOver: (result) => handleGameOver(result),

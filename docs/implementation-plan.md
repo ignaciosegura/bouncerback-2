@@ -100,7 +100,8 @@ Implementation is split into two cycles. The **first development cycle** builds 
 - `src/components/HUD.jsx`: SCORE / TIME / HI-SCORE + life-dots row, updated only from the GameEngine's low-frequency callbacks (GAMEPLAY mockup layout).
 
 ### Phase 6 — Scoring & rules
-- `src/game/scoring.js`: pure functions for the four score formulas in Decisions, plus the high-score update that saves to `localStorage` the moment it's beaten.
+- `src/game/scoring.js`: pure functions for the four score formulas in Decisions.
+- `src/game/highScore.js`: reads/writes the high score in `localStorage` (`beatHiScore(score)` saves it the instant it's beaten); `App.jsx` calls it on every score change during gameplay, not just at level end, so it updates live on the HUD per `game-rules.md`.
 
 ### Phase 7 — QA pass (web)
 - Manual verification per `implementation-guidelines.md` and the Verification section below, web build only; optional Vitest unit tests for scoring and level-loader math.
