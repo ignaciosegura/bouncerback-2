@@ -69,16 +69,16 @@
             "type": "object",
             "required": [
                 "travelTime",
-                "frequency"
+                "barsInterval"
             ],
             "properties": {
                 "travelTime": {
                     "type": "number",
                     "description": "Beats required for an atom to travel from the atom emitter to the containment ring."
                 },
-                "frequency": {
+                "barsInterval": {
                     "type": "number",
-                    "description": "Bars interval between atom spawns (actual spawn moment within each interval is random)."
+                    "description": "Spawn interval in bars: an atom can only appear once every X bars, at a random moment inside each interval."
                 }
             },
             "additionalProperties": false

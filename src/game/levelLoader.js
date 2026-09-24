@@ -43,7 +43,7 @@ function checkRanges (level) {
     'timeSignature.bpm': level.timeSignature.bpm,
     'timeSignature.signature': level.timeSignature.signature,
     'atoms.travelTime': level.atoms.travelTime,
-    'atoms.frequency': level.atoms.frequency,
+    'atoms.barsInterval': level.atoms.barsInterval,
     'paddles.angle': level.paddles.angle,
     'paddles.duration': level.paddles.duration,
     lives: level.lives
@@ -87,7 +87,7 @@ export function loadLevel (data, number) {
     // Atom speed in core-to-ring trips per second (multiply by that distance in px to get px/s)
     atomSpeed: 1 / (data.atoms.travelTime * secondsPerBeat),
     // One atom spawns at a random moment inside each interval (see spawnDelay)
-    spawnInterval: data.atoms.frequency * secondsPerBar,
+    spawnInterval: data.atoms.barsInterval * secondsPerBar,
     paddleArc: data.paddles.angle * Math.PI / 180,
     paddleDuration: data.paddles.duration,
     vfx: (data.vfx ?? []).map(({ name, time }) => ({ name, time: time * secondsPerBar }))
