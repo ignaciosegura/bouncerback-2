@@ -45,6 +45,7 @@ export default class GameEngine {
     this.app = new Application()
     this.mounted = false
     this.destroyed = false
+    this.paused = false
 
     this.state = STATE.STARTING
     this.time = 0
@@ -96,6 +97,7 @@ export default class GameEngine {
     this.destroyed = true
     if (!this.mounted) return
     this.mounted = false
+    window.removeEventListener('keydown', this.onKeyDown)
     this.app.destroy(true, { children: true, texture: true })
   }
 
@@ -130,10 +132,29 @@ export default class GameEngine {
     stage.on('globalpointermove', this.onPointerMove)
     stage.on('pointerup', this.onPointerUp)
     stage.on('pointerupoutside', this.onPointerUp)
+    window.addEventListener('keydown', this.onKeyDown)
+  }
+
+  onKeyDown = (event) => {
+    if (event.code === 'KeyP' && !event.repeat) this.togglePause()
+  }
+
+  // Pause freezes the game loop (and with it the clock and the rendering) and the music
+  togglePause () {
+    if (this.state === STATE.ENDED) return
+
+    this.paused = !this.paused
+    if (this.paused) {
+      this.app.ticker.stop()
+      soundManager.pauseTrack()
+    } else {
+      this.app.ticker.start()
+      soundManager.resumeTrack()
+    }
   }
 
   onPointerDown = (event) => {
-    if (this.state !== STATE.PLAYING) return
+    if (this.state !== STATE.PLAYING || this.paused) return
 
     const { x, y } = this.playfield.toLocal(event.global)
     if (Math.hypot(x, y) <= CAPTURE_TAP_RADIUS && this.captureAtCore()) return
@@ -147,7 +168,7 @@ export default class GameEngine {
 
   onPointerMove = (event) => {
     const paddle = this.draggedPaddles.get(event.pointerId)
-    if (!paddle) return
+    if (!paddle || this.paused) return
 
     const { x, y } = this.playfield.toLocal(event.global)
     paddle.setAngle(Math.atan2(y, x))

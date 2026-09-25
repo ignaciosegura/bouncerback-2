@@ -43,6 +43,7 @@ let musicVolume = readVolume(STORAGE_KEYS.music)
 let sfxVolume = readVolume(STORAGE_KEYS.sfx)
 let currentTrack = null
 let fadeInTimer = null
+let musicPaused = false
 
 applySfxVolume()
 
@@ -122,6 +123,7 @@ export function playTrack (name) {
   }
 
   currentTrack = name
+  musicPaused = false
   clearTimeout(fadeInTimer)
   const fadingOut = fadeOutOtherTracks()
   fadeInTimer = setTimeout(startCurrentTrack, fadingOut ? FADE_MS : 0)
@@ -134,9 +136,32 @@ export function stopTrack () {
   if (currentTrack === null) return
 
   currentTrack = null
+  musicPaused = false
   clearTimeout(fadeInTimer)
   fadeOutOtherTracks()
   fadeInTimer = setTimeout(() => unloadOtherTracks(), FADE_MS)
+}
+
+/**
+ * Pauses the current track where it is (game paused). A track due to start meanwhile waits for resumeTrack.
+ */
+export function pauseTrack () {
+  musicPaused = true
+  const track = tracks[currentTrack]
+  if (track?.started) track.howl.pause()
+}
+
+/**
+ * Resumes the current track from where it was paused, fading it back in.
+ */
+export function resumeTrack () {
+  if (!musicPaused) return
+  musicPaused = false
+  const track = tracks[currentTrack]
+  if (!track?.started) return
+  track.howl.play()
+  // Pausing interrupts any fade in progress: finish it now
+  track.howl.fade(track.howl.volume(), gain(musicVolume), FADE_MS)
 }
 
 /**
@@ -184,7 +209,7 @@ function startCurrentTrack () {
   const track = tracks[currentTrack]
   if (!track.howl) track.howl = createTrackHowl(track.url)
   if (!track.started) {
-    track.howl.play()
+    if (!musicPaused) track.howl.play()
     track.started = true
   }
   // Also fades a track back in if it was requested again while fading out
