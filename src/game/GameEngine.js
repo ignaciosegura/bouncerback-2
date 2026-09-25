@@ -24,6 +24,7 @@ const MAX_ACTIVE_PADDLES = 2
 const SWALLOW_TIME = 3
 const SWALLOW_SPIN = 2 * Math.PI // radians per second at the end of the swallow
 const GAME_OVER_DELAY = 1 // lets the last escaping atom fade out before Game Over
+const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen before the WebGL context is lost
 
 const STATE = {
   STARTING: 'starting',
@@ -98,7 +99,12 @@ export default class GameEngine {
     if (!this.mounted) return
     this.mounted = false
     window.removeEventListener('keydown', this.onKeyDown)
-    this.app.destroy(true, { children: true, texture: true })
+    this.app.ticker.stop()
+    // Losing the WebGL context while the canvas is still on screen flashes it white: wait until
+    // the next screen has been painted (two frames), then until the GPU has put it on screen
+    requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => {
+      this.app.destroy(true, { children: true, texture: true })
+    }, TEARDOWN_DELAY)))
   }
 
   emit (name, ...args) {
