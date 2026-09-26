@@ -126,9 +126,8 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 ### Phase 11 — Rotate-device overlay
 - Add the portrait "rotate your device" overlay to `src/components/Screen.jsx`, shown whenever the viewport is portrait (covers desktop browsers without a reliable orientation-lock API, and native before the Phase 10 hard lock takes effect).
 
-### Phase 12 — Visual effects
+### Phase 12 — Optional visual effects
 - Small vfx registry (`palette_invert`, `glow_pulse`) driven by a level's `vfx` timeline (bar offset → seconds, via the loader).
-- "One life left" state, driven directly by game state: the gameplay background fades from black to dark red (`#660000`) over 0.5 s (graphical-specs "Visual feedback").
 - Fill in the `vfx` arrays in `src/levels/level1.json`…`level5.json`.
 
 ### Phase 13 — Level unlocking
@@ -139,6 +138,9 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 
 ### Phase 15 — Capturable atom cue
 - Make atoms with charge ≥ 3 (capturable at the core) visually distinct from the others, so the player knows which ones can be tapped. Per graphical-specs "Visual feedback": at charge 3 the atom fades from white to yellow (`#FFFF00`), then shifts a step closer to red (`#FF0000`) on each further charge, reaching red at charge 10. Each color change transitions over 0.5 s.
+
+### Phase 16 — One-life-left background
+- "One life left" state, driven directly by game state (not part of the level `vfx` timeline): the gameplay background fades from black to dark red (`#660000`) over 0.5 s (graphical-specs "Visual feedback").
 
 ---
 
@@ -157,7 +159,8 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 - Screen transitions play consistently across every navigation path in `navigation.md`.
 - `npx cap sync` completes cleanly; app boots in an Android/iOS simulator with landscape locked and audio unlocking on first tap.
 - Rotate-device overlay appears in a portrait emulated viewport (browser and native) and disappears when rotated back to landscape.
-- VFX fire at the correct level-timeline moments, and the background fades to dark red (`#660000`) over 0.5 s when the player drops to one life.
+- VFX fire at the correct level-timeline moments.
 - Level unlocking: only level 1 is available on a fresh install; winning unlocks the next one and survives a reload.
 - Game Over and You Win! play the ambience track; returning to the menu crossfades back to `main_title.mp3`.
 - Visual feedback for the atoms being charged: an atom turns yellow (`#FFFF00`) on the bounce that brings it to charge 3, then moves toward red (`#FF0000`) with each further charge until charge 10, with 0.5 s color transitions.
+- One-life-left background: the gameplay background fades to dark red (`#660000`) over 0.5 s when the player drops to one life.

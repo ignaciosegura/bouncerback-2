@@ -24,7 +24,8 @@ Legend: `[x]` done · `[ ]` pending
 - [ ] **Phase 9** — Screen transitions
 - [ ] **Phase 10** — Mobile packaging (Capacitor iOS/Android, orientation lock, icons/splash)
 - [ ] **Phase 11** — Rotate-device overlay
-- [ ] **Phase 12** — Visual effects (`palette_invert`, `glow_pulse`, one-life-left dark red background, level `vfx` timelines)
+- [ ] **Phase 12** — Optional visual effects (`palette_invert`, `glow_pulse`, level `vfx` timelines)
 - [ ] **Phase 13** — Level unlocking
 - [ ] **Phase 14** — Results ambience track
 - [x] **Phase 15** — Capturable atom cue (charge ≥ 3 yellow → red)
+- [ ] **Phase 16** — One-life-left background (fade to dark red `#660000`)
