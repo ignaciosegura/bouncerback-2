@@ -248,7 +248,7 @@ export default class GameEngine {
       }
       atom.move(step)
       if (atom.movingOutward && Math.abs(atom.distance) >= CONTACT_DISTANCE) this.resolveContact(atom)
-      atom.render()
+      atom.render(dt)
     }
 
     if (this.lives === 0) {
@@ -281,7 +281,7 @@ export default class GameEngine {
 
   updateEscapingAtom (atom, dt, step) {
     if (atom.updateEscape(dt, step)) {
-      atom.render()
+      atom.render(dt)
     } else {
       this.releaseAtom(atom)
     }
@@ -340,7 +340,7 @@ export default class GameEngine {
     for (const atom of this.atoms) {
       if (atom.state !== ATOM_STATE.SWALLOWED) continue
       atom.updateSwallow(progress, spin)
-      atom.render()
+      atom.render(dt)
     }
 
     if (progress === 1) this.win()

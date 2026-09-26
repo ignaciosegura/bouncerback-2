@@ -27,4 +27,4 @@ Legend: `[x]` done · `[ ]` pending
 - [ ] **Phase 12** — Visual effects (`palette_invert`, `glow_pulse`, one-life-left dark red background, level `vfx` timelines)
 - [ ] **Phase 13** — Level unlocking
 - [ ] **Phase 14** — Results ambience track
-- [ ] **Phase 15** — Capturable atom cue (charge ≥ 3 yellow → red)
+- [x] **Phase 15** — Capturable atom cue (charge ≥ 3 yellow → red)
