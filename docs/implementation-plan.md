@@ -47,7 +47,7 @@ Every doc, all seven mockups and the level schema were reviewed against each oth
 - **Try Again** restarts the same level from scratch (score reset to 0, lives from the level file).
 
 ### VFX vocabulary
-`level-file-schema.json`'s `vfx[].name` and `graphical-specs.md`'s "optional effects" have no concrete identifiers yet. Two are introduced for cycle 2: `palette_invert` (black/white swap, used for the "one life left" state per graphical-specs) and `glow_pulse` (paddle glow). Level files can reference these by name in their `vfx` timeline; the one-life-left trigger fires `palette_invert` directly from game state regardless of the level's own vfx list.
+`level-file-schema.json`'s `vfx[].name` and `graphical-specs.md`'s "optional effects" have no concrete identifiers yet. Two are introduced for cycle 2: `palette_invert` (black/white swap) and `glow_pulse` (paddle glow). Level files can reference these by name in their `vfx` timeline. The "one life left" state is not a timeline vfx: per graphical-specs "Visual feedback", the gameplay background fades to dark red (`#660000`) over 0.5 s, driven directly by game state regardless of the level's own vfx list.
 
 ---
 
@@ -58,7 +58,7 @@ Implementation is split into two cycles. The **first development cycle** builds 
 - Pause game functionality and overlay (no Pause screen/button in cycle 1; the game simply runs until win/loss).
 - Transitions between screens (all screen changes are immediate swaps in cycle 1).
 - The "rotate your device" portrait overlay (cycle 1 still forces landscape via CSS/layout; the portrait-warning overlay and the native `@capacitor/screen-orientation` hard lock are both deferred).
-- VFX (`palette_invert`, `glow_pulse`, and the "one life left" trigger). The `vfx` field stays in the level files as an empty array (`[]`) in cycle 1.
+- VFX (`palette_invert`, `glow_pulse`, and the "one life left" dark red background). The `vfx` field stays in the level files as an empty array (`[]`) in cycle 1.
 - Level unlocking (all levels are playable from the start in cycle 1).
 - Results ambience track (Game Over and You Win! are silent in cycle 1: the music just fades out).
 - Visual cue for capturable atoms (charge ≥ 3). In cycle 1 all atoms look the same.
@@ -127,7 +127,8 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 - Add the portrait "rotate your device" overlay to `src/components/Screen.jsx`, shown whenever the viewport is portrait (covers desktop browsers without a reliable orientation-lock API, and native before the Phase 10 hard lock takes effect).
 
 ### Phase 12 — Visual effects
-- Small vfx registry (`palette_invert`, `glow_pulse`) driven both by a level's `vfx` timeline (bar offset → seconds, via the loader) and directly by game state (one life left → `palette_invert`).
+- Small vfx registry (`palette_invert`, `glow_pulse`) driven by a level's `vfx` timeline (bar offset → seconds, via the loader).
+- "One life left" state, driven directly by game state: the gameplay background fades from black to dark red (`#660000`) over 0.5 s (graphical-specs "Visual feedback").
 - Fill in the `vfx` arrays in `src/levels/level1.json`…`level5.json`.
 
 ### Phase 13 — Level unlocking
@@ -137,7 +138,7 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 - Compose a dedicated ambience track for the Game Over and You Win! screens (silent in cycle 1) and add it to `assets/audio/tracks/` and `docs/audio-map.md`; those screens call `playTrack` with it instead of `stopTrack()`.
 
 ### Phase 15 — Capturable atom cue
-- Make atoms with charge ≥ 3 (capturable at the core) visually distinct from the others, so the player knows which ones can be tapped. Style to be designed; it must stay within the 2D vector, white-on-black rules of `graphical-specs.md`.
+- Make atoms with charge ≥ 3 (capturable at the core) visually distinct from the others, so the player knows which ones can be tapped. Per graphical-specs "Visual feedback": at charge 3 the atom fades from white to yellow (`#FFFF00`), then shifts a step closer to red (`#FF0000`) on each further charge, reaching red at charge 10. Each color change transitions over 0.5 s.
 
 ---
 
@@ -156,7 +157,7 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 - Screen transitions play consistently across every navigation path in `navigation.md`.
 - `npx cap sync` completes cleanly; app boots in an Android/iOS simulator with landscape locked and audio unlocking on first tap.
 - Rotate-device overlay appears in a portrait emulated viewport (browser and native) and disappears when rotated back to landscape.
-- VFX fire at the correct level-timeline moments and the "one life left" `palette_invert` triggers correctly.
+- VFX fire at the correct level-timeline moments, and the background fades to dark red (`#660000`) over 0.5 s when the player drops to one life.
 - Level unlocking: only level 1 is available on a fresh install; winning unlocks the next one and survives a reload.
 - Game Over and You Win! play the ambience track; returning to the menu crossfades back to `main_title.mp3`.
-- Atoms with charge ≥ 3 are visually distinct, and the cue appears on the bounce that brings an atom to charge 3.
+- Visual feedback for the atoms being charged: an atom turns yellow (`#FFFF00`) on the bounce that brings it to charge 3, then moves toward red (`#FF0000`) with each further charge until charge 10, with 0.5 s color transitions.

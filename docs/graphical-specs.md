@@ -4,8 +4,8 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 ## The background
 
-* The background will always be black, except in the inverted menu layouts, where the background will be white.
-    * During the game, black background, white lines and full circles only. No textures. The vector assets provided will also be in black and white.
+* The background will always be black, except in the inverted menu layouts, where the background will be white, and during gameplay when the player has only one life left, where it turns dark red (see "Visual feedback" below).
+    * During the game, black background, white lines and full circles only (except for the color changes in "Visual feedback" below). No textures. The vector assets provided will also be in black and white.
     * During the menus, the same font and visual style will be used. The background will be black, with white text. In some cases, the layout will be inverted, white background, black texts and outlines.
 
 ## Text and menus
@@ -34,11 +34,23 @@ The screen will be used in forced landscape mode. The visual style is based on e
     * Color palette switch (e.g. when the player has only one life left)
     * Glow effects (e.g. when the player uses a power-up)
 
+## Visual feedback (changes in the visuals during gameplay to communicate the player relevant information)
+
+Note: All color changes use a transition time of 0.5 seconds unless otherwise specified.
+
+* Every time an atom bounces back, it gets a charged.
+    - At 3 charges, the atom should transition to yellow (#FFFF00)
+    - For every charge from 3 onwards, the atom should transition its color until the tenth charge, to get closer to red (#FF0000) for every additional charge.
+* When the player has only one life, turn the background dark red (#660000)
+
 # Colors
 
 * Black background: #000000
 * White: #FFFFFF
 * White background: #DDDDDD
+* Dark red background (one life left): #660000
+* Yellow (atom at 3 charges): #FFFF00
+* Red (atom at 10 charges): #FF0000
 
 # Mockups
 
