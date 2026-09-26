@@ -16,6 +16,8 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 | `docs/graphical-specs.md` | Visual style, colors, fonts, layout rules |
 | `docs/game-rules.md` | Game mechanics, scoring, win/loss conditions |
 | `docs/implementation-guidelines.md` | Summary of architectural and implementation rules |
+| `docs/implementation-plan.md` | Design decisions and the phase-by-phase implementation plan |
+| `docs/implementation-status.md` | Which implementation phases are completed and which are pending |
 | `docs/level-file-schema.json` | JSON Schema for all level files |
 | `docs/mockups/` | Reference mockups — filenames indicate which screen they represent |
 | `docs/react-pixi-example.jsx` | Reference example of a React + PixiJS component integration |
