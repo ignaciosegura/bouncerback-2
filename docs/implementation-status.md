@@ -28,4 +28,4 @@ Legend: `[x]` done · `[ ]` pending
 - [ ] **Phase 13** — Level unlocking
 - [ ] **Phase 14** — Results ambience track
 - [x] **Phase 15** — Capturable atom cue (charge ≥ 3 yellow → red)
-- [ ] **Phase 16** — One-life-left background (fade to dark red `#660000`)
+- [x] **Phase 16** — One-life-left background (fade to dark red `#660000`)

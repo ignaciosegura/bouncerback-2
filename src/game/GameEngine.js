@@ -1,6 +1,7 @@
 import { Application, Container } from 'pixi.js'
 import * as soundManager from '../audio/soundManager.js'
 import { bouncePoints, capturePoints, containmentPoints, timeBonus } from './scoring.js'
+import { lerpColor } from './color.js'
 import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
 import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
 import Atom, { ATOM_RADIUS, ATOM_STATE, CAPTURE_MIN_CHARGE } from './entities/Atom.js'
@@ -25,6 +26,13 @@ const SWALLOW_TIME = 3
 const SWALLOW_SPIN = 2 * Math.PI // radians per second at the end of the swallow
 const GAME_OVER_DELAY = 1 // lets the last escaping atom fade out before Game Over
 const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen before the WebGL context is lost
+
+// The background turns dark red while the player has only one life left
+const BACKGROUND_COLORS = {
+  DEFAULT: 0x000000,
+  ONE_LIFE_LEFT: 0x660000
+}
+const BACKGROUND_TRANSITION_TIME = 0.5
 
 const STATE = {
   STARTING: 'starting',
@@ -56,6 +64,12 @@ export default class GameEngine {
     this.timeTenths = level.timerTenths
     this.atomSpeed = CONTACT_DISTANCE * level.atomSpeed
 
+    // Starts on its target color: no fade if the level begins with a single life
+    this.backgroundColor = this.backgroundTarget()
+    this.backgroundFrom = this.backgroundColor
+    this.backgroundTo = this.backgroundColor
+    this.backgroundTime = BACKGROUND_TRANSITION_TIME
+
     this.atoms = []
     this.atomPool = []
     this.activePaddles = []
@@ -69,7 +83,7 @@ export default class GameEngine {
 
     await this.app.init({
       resizeTo: container,
-      background: '#000000',
+      background: this.backgroundColor,
       antialias: true,
       resolution: window.devicePixelRatio || 1,
       autoDensity: true
@@ -197,6 +211,7 @@ export default class GameEngine {
 
   update = (ticker) => {
     const dt = ticker.deltaMS / 1000
+    this.updateBackground(dt)
 
     switch (this.state) {
     case STATE.STARTING:
@@ -275,6 +290,7 @@ export default class GameEngine {
       atom.escape()
       this.lives = Math.max(0, this.lives - 1)
       this.emit('onLivesChange', this.lives)
+      this.fadeBackgroundTo(this.backgroundTarget())
       soundManager.playSfx('destroy')
     }
   }
@@ -362,6 +378,27 @@ export default class GameEngine {
     for (let i = this.atoms.length - 1; i >= 0; i--) {
       if (this.atoms[i].state === ATOM_STATE.ESCAPING) this.updateEscapingAtom(this.atoms[i], dt, step)
     }
+  }
+
+  // Background
+
+  // Stays dark red at 0 lives, through the Game Over delay
+  backgroundTarget () {
+    return this.lives <= 1 ? BACKGROUND_COLORS.ONE_LIFE_LEFT : BACKGROUND_COLORS.DEFAULT
+  }
+
+  fadeBackgroundTo (color) {
+    if (color === this.backgroundTo) return
+    this.backgroundFrom = this.backgroundColor
+    this.backgroundTo = color
+    this.backgroundTime = 0
+  }
+
+  updateBackground (dt) {
+    if (this.backgroundTime >= BACKGROUND_TRANSITION_TIME) return
+    this.backgroundTime = Math.min(BACKGROUND_TRANSITION_TIME, this.backgroundTime + dt)
+    this.backgroundColor = lerpColor(this.backgroundFrom, this.backgroundTo, this.backgroundTime / BACKGROUND_TRANSITION_TIME)
+    this.app.renderer.background.color = this.backgroundColor
   }
 
   addScore (points) {

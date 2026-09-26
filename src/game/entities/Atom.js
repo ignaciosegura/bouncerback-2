@@ -1,4 +1,5 @@
 import { Graphics } from 'pixi.js'
+import { lerpColor } from '../color.js'
 
 export const ATOM_RADIUS = 20
 export const MAX_CHARGE = 10
@@ -25,16 +26,6 @@ function chargeColor (charge) {
   if (charge < CAPTURE_MIN_CHARGE) return ATOM_COLORS.WHITE
   const t = (charge - CAPTURE_MIN_CHARGE) / (MAX_CHARGE - CAPTURE_MIN_CHARGE)
   return lerpColor(ATOM_COLORS.YELLOW, ATOM_COLORS.RED, t)
-}
-
-function lerpColor (from, to, t) {
-  let color = 0
-  for (const shift of [16, 8, 0]) {
-    const a = (from >> shift) & 0xff
-    const b = (to >> shift) & 0xff
-    color |= Math.round(a + (b - a) * t) << shift
-  }
-  return color
 }
 
 // Atoms only travel along a diameter of the ring: `angle` is that axis, `distance` the signed
