@@ -10,9 +10,11 @@ import Paddle, { PADDLE_THICKNESS } from './entities/Paddle.js'
 // The playfield is laid out in mockup pixels for a 1080px-tall screen, then scaled to fit
 const REFERENCE_SIZE = 1080
 
-// Distance from the core at which an atom touches a paddle, or escapes if there is none.
-// Atoms cover it in exactly `atoms.travelTime` beats.
+// Distance from the core at which an atom touches a paddle. Atoms cover it in exactly
+// `atoms.travelTime` beats.
 const CONTACT_DISTANCE = RING_RADIUS - PADDLE_THICKNESS / 2 - ATOM_RADIUS
+// An atom escapes once its center crosses the ring. Until then a late paddle still bounces it.
+const ESCAPE_DISTANCE = RING_RADIUS
 // Angular half-size of an atom at the paddles: a paddle blocks any atom it overlaps
 const ATOM_ANGULAR_RADIUS = ATOM_RADIUS / (RING_RADIUS - PADDLE_THICKNESS / 2)
 // An atom can be captured while it overlaps the core
@@ -262,7 +264,7 @@ export default class GameEngine {
         continue
       }
       atom.move(step)
-      if (atom.movingOutward && Math.abs(atom.distance) >= CONTACT_DISTANCE) this.resolveContact(atom)
+      if (atom.movingOutward && Math.abs(atom.distance) >= CONTACT_DISTANCE) this.checkContact(atom)
       atom.render(dt)
     }
 
@@ -279,14 +281,16 @@ export default class GameEngine {
     if (timeTenths === 0) this.startSwallow()
   }
 
-  // An atom reaches the ring: bounced by a paddle, or it escapes
-  resolveContact (atom) {
+  // An atom between the paddles and the ring: bounced if a paddle covers it (mirrored around the
+  // contact distance, so it stays on the beat even when the paddle is set late), escapes once its
+  // center crosses the ring, otherwise keeps moving
+  checkContact (atom) {
     const angle = atom.positionAngle
     if (this.activePaddles.some((paddle) => paddle.covers(angle, ATOM_ANGULAR_RADIUS))) {
       this.addScore(bouncePoints(this.level.number, atom.charge))
       atom.bounce(CONTACT_DISTANCE)
       soundManager.playSfx('bounce')
-    } else {
+    } else if (Math.abs(atom.distance) >= ESCAPE_DISTANCE) {
       atom.escape()
       this.lives = Math.max(0, this.lives - 1)
       this.emit('onLivesChange', this.lives)

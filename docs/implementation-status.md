@@ -29,3 +29,4 @@ Legend: `[x]` done · `[ ]` pending
 - [ ] **Phase 14** — Results ambience track
 - [x] **Phase 15** — Capturable atom cue (charge ≥ 3 yellow → red)
 - [x] **Phase 16** — One-life-left background (fade to dark red `#660000`)
+- [x] **Phase 17** — Late-paddle grace window (atoms escape only once their center crosses the ring)

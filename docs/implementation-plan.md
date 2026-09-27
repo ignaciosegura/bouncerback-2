@@ -25,6 +25,7 @@ Every doc, all seven mockups and the level schema were reviewed against each oth
 
 ### Gameplay
 - **Bounce:** a paddle reverses an atom's direction exactly — it travels straight back through the core and out toward the opposite side of the ring (this is what makes the tap-at-the-core capture possible).
+- **Late bounce (grace window):** an atom reaching the paddles (`contactDistance`) with no paddle covering it doesn't escape yet: it keeps moving and is checked every frame until its center crosses the ring (`RING_RADIUS`), and only then escapes (life lost). A paddle set inside that window bounces it, mirrored around `contactDistance` so it stays on the beat — a visible jump back of up to twice the window, accepted as a trade-off.
 - **Paddle lifetime** (`paddles.duration`) starts when the paddle is set (pointer released). While dragging, the paddle is inactive and doesn't expire.
 - **`paddles` is required** in the level schema. Suggested starting values: `angle` 30°, `duration` 3 s.
 - **Start delay:** entering a level shows the ring and core, then waits **3 seconds** before the timer, the atom emitter, the level track and player input start. The menu track fades out during the delay and the level track is preloaded, so music and timer start together.
@@ -142,6 +143,9 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 ### Phase 16 — One-life-left background
 - "One life left" state, driven directly by game state (not part of the level `vfx` timeline): the gameplay background fades from black to dark red (`#660000`) over 0.5 s (graphical-specs "Visual feedback").
 
+### Phase 17 — Late-paddle grace window
+- An atom with no paddle at the contact distance keeps being checked every frame until its center crosses the ring; only then does it escape. A paddle set within that window bounces it, repositioned back on the beat (see "Late bounce" in Decisions).
+
 ---
 
 ## Verification
@@ -164,3 +168,4 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 - Game Over and You Win! play the ambience track; returning to the menu crossfades back to `main_title.mp3`.
 - Visual feedback for the atoms being charged: an atom turns yellow (`#FFFF00`) on the bounce that brings it to charge 3, then moves toward red (`#FF0000`) with each further charge until charge 10, with 0.5 s color transitions.
 - One-life-left background: the gameplay background fades to dark red (`#660000`) over 0.5 s when the player drops to one life.
+- Late-paddle grace window: a paddle released while an atom already overlaps it (center still inside the ring) bounces the atom, which jumps back and returns to the core on the beat; releasing after the center crosses the ring doesn't save it, and the life is lost at that moment.

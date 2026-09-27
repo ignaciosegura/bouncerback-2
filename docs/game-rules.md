@@ -12,6 +12,8 @@ At the center of the containment ring there's the atom emitter, or core. It will
 
 The player can place paddles by clicking or tapping at the screen. These paddles will appear at the containment ring for a short period of time, and they will bounce the atoms back, reversing their course. The player can only set two paddles at a time. If it puts a third one, the first one will dissapear inmediately ("first in, first out").
 
+An atom escapes the containment ring when its center crosses the ring. Until then, a paddle set at the last moment still bounces it back, even if the atom already overlaps the paddle; the atom is then placed back where a bounce at the exact moment of contact would have left it, so it stays on the beat (a small visible jump back).
+
 If an atom escapes the containment ring, the player will lose one life immediately, and the atom will vanish (fade out) while keeping the same speed and direction.
 
 ## Game over condition
