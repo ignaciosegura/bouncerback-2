@@ -40,6 +40,7 @@ root/
     │   │   ├── ContainmentRing.js  # The ring where the atoms are escaping from
     │   │   ├── Paddle.js           # The paddles to be spawned by the player
     │   │   ├── PaddleFlash.js      # Subtle echo arc drawn outside the ring when a paddle bounces an atom
+    │   │   ├── AtomPulse.js        # Beat pulse around a charged atom while it crosses the core (capture window)
     │   │   └── Atom.js             # The balls moving around
     ├── levels/                     # Levels
     │   ├── level1.json             # Level 1 data
