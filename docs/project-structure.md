@@ -39,6 +39,7 @@ root/
     │   │   ├── AtomEmitter.js      # The central element that stays in place and spawns atoms.
     │   │   ├── ContainmentRing.js  # The ring where the atoms are escaping from
     │   │   ├── Paddle.js           # The paddles to be spawned by the player
+    │   │   ├── PaddleFlash.js      # Subtle echo arc drawn outside the ring when a paddle bounces an atom
     │   │   └── Atom.js             # The balls moving around
     ├── levels/                     # Levels
     │   ├── level1.json             # Level 1 data

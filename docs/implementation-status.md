@@ -30,3 +30,6 @@ Legend: `[x]` done · `[ ]` pending
 - [x] **Phase 15** — Capturable atom cue (charge ≥ 3 yellow → red)
 - [x] **Phase 16** — One-life-left background (fade to dark red `#660000`)
 - [x] **Phase 17** — Late-paddle grace window (atoms escape only once their center crosses the ring)
+- Paddle visual feedback:
+  - [ ] **Phase 18** — Paddle lifetime fade (set paddles fade 100% → 20% opacity over the second half of their lifetime)
+  - [ ] **Phase 19** — Paddle bounce flash (subtle arc echo drifting outward from the paddle, outside the ring; restarts on each bounce)

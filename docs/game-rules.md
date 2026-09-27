@@ -39,7 +39,7 @@ The paddle's exact position on the circumference of the ring will be calculated 
 To help the player set the paddles at the exact desired place, two events will be used: onMouseDown the paddle will be drawn, but inactive. The user can drag 
 the mouse while holding the left-click button (or doing the equivalent gesture with a touchscreen), and the paddle will rotate around the core following the mouse position. When the user releases the button, the paddle will be set at the current position.
 
-The paddle's lifetime (the `paddles.duration` value in the level file) starts counting when the paddle is set (on release), not when the button is pressed. While the player is dragging, the paddle is inactive and doesn't expire.
+The paddle's lifetime (the `paddles.duration` value in the level file) starts counting when the paddle is set (on release), not when the button is pressed. While the player is dragging, the paddle is inactive and doesn't expire. Once set, the paddle fades out gradually during the second half of its lifetime so the player can see how much time it has left, and it flashes every time it bounces an atom (see "Visual feedback" in `graphical-specs.md`; planned for the second development cycle).
 
 ## Atom capture
 

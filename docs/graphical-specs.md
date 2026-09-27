@@ -42,6 +42,8 @@ Note: All color changes use a transition time of 0.5 seconds unless otherwise sp
     - At 3 charges, the atom should transition to yellow (#FFFF00)
     - For every charge from 3 onwards, the atom should transition its color until the tenth charge, to get closer to red (#FF0000) for every additional charge.
 * When the player has only one life, turn the background dark red (#660000)
+* Paddle lifetime: once set, a paddle stays at full opacity for the first half of its lifetime, then fades steadily to 20% opacity over the second half, and disappears when it expires. This fade lasts half the paddle's lifetime and doesn't follow the 0.5 s default above. While the player is still dragging it, the paddle is shown at full opacity.
+* Paddle bounce: every time a paddle bounces an atom back, a subtle, thin, semi-transparent white arc (an "echo" of that paddle) appears at the paddle's outer edge and drifts outward (about one paddle thickness) while fading out, in 0.25 s. Nothing of this effect is drawn inside the containment ring, so the playable area stays clean. If the same paddle bounces another atom while its echo is still visible, the echo restarts from the beginning. This is cosmetic only.
 
 # Colors
 
