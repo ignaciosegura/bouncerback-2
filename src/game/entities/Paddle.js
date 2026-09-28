@@ -1,5 +1,6 @@
 import { Graphics } from 'pixi.js'
 import { RING_RADIUS } from './ContainmentRing.js'
+import PaddleFlash from './PaddleFlash.js'
 
 export const PADDLE_THICKNESS = 20
 const OUTLINE_WIDTH = 2
@@ -14,13 +15,14 @@ function angleDifference (a, b) {
 
 // An arc on the ring centred on `angle`. Drawn as an outline while the player drags it (inactive),
 // filled once set (active). Expires `duration` seconds after being set, fading out over the end
-// of its lifetime.
+// of its lifetime. Owns the flash shown when it bounces an atom.
 export default class Paddle {
   constructor (arc, duration) {
     this.arc = arc
     this.duration = duration
     this.view = new Graphics()
     this.view.visible = false
+    this.flash = new PaddleFlash()
   }
 
   start (angle) {
@@ -45,6 +47,10 @@ export default class Paddle {
 
   hide () {
     this.view.visible = false
+  }
+
+  bounce () {
+    this.flash.start(this.angle, this.arc)
   }
 
   // Returns false once the paddle has expired

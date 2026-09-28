@@ -79,6 +79,7 @@ export default class GameEngine {
     this.activePaddles = []
     this.draggedPaddles = new Map() // pointerId → inactive paddle
     this.paddlePool = []
+    this.paddles = [] // every paddle instance, active or pooled, to update their flashes
   }
 
   async mount (container) {
@@ -133,9 +134,10 @@ export default class GameEngine {
     this.playfield = new Container()
     this.ring = new ContainmentRing()
     this.emitter = new AtomEmitter(this.level.spawnInterval)
+    this.flashLayer = new Container()
     this.paddleLayer = new Container()
     this.atomLayer = new Container()
-    this.playfield.addChild(this.ring.view, this.paddleLayer, this.emitter.view, this.atomLayer)
+    this.playfield.addChild(this.ring.view, this.flashLayer, this.paddleLayer, this.emitter.view, this.atomLayer)
     this.app.stage.addChild(this.playfield)
   }
 
@@ -216,6 +218,8 @@ export default class GameEngine {
   update = (ticker) => {
     const dt = ticker.deltaMS / 1000
     this.updateBackground(dt)
+    // Flashes outlive their paddles and finish during the core collapse
+    for (const paddle of this.paddles) paddle.flash.update(dt)
 
     switch (this.state) {
     case STATE.STARTING:
@@ -288,7 +292,9 @@ export default class GameEngine {
   // center crosses the ring, otherwise keeps moving
   checkContact (atom) {
     const angle = atom.positionAngle
-    if (this.activePaddles.some((paddle) => paddle.covers(angle, ATOM_ANGULAR_RADIUS))) {
+    const paddle = this.activePaddles.find((p) => p.covers(angle, ATOM_ANGULAR_RADIUS))
+    if (paddle) {
+      paddle.bounce()
       this.addScore(bouncePoints(this.level.number, atom.charge))
       atom.bounce(CONTACT_DISTANCE)
       soundManager.playSfx('bounce')
@@ -444,6 +450,8 @@ export default class GameEngine {
   createPaddle () {
     const paddle = new Paddle(this.level.paddleArc, this.level.paddleDuration)
     this.paddleLayer.addChild(paddle.view)
+    this.flashLayer.addChild(paddle.flash.view)
+    this.paddles.push(paddle)
     return paddle
   }
 
