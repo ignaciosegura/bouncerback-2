@@ -28,7 +28,7 @@ The swallow phase is safe for the player:
 
 * When the timer reaches zero, the core stops emitting atoms, all paddles disappear and player input is disabled.
 * Every atom still inside the containment ring is pulled into the core. No atom can escape during the swallow, so no lives can be lost. Atoms that were already fading out after escaping are ignored.
-* The swallow lasts 3 seconds. Then the "YOU WIN!" screen is shown.
+* The swallow lasts 2 seconds and plays together with the `vortex_creation` sound effect. The core grows to the size of the ring while every atom slows down to a stop, then the core collapses and takes all atoms with it (see "Level end (swallow)" in `graphical-specs.md`). Then the "YOU WIN!" screen is shown.
 
 # Player input mechanics
 
