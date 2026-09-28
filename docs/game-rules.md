@@ -22,13 +22,13 @@ If the player runs out of lives (it reaches zero), the game will end in a "Game 
 
 ## Level end condition
 
-When the timer runs out, the core will attract all atoms and "swallow" them. The level will end succesfuly and the player will be taken to the "YOU WIN!" screen.
+When the timer runs out, the core will attract all atoms and collapse, taking them with it. The level will end succesfuly and the player will be taken to the "YOU WIN!" screen.
 
-The swallow phase is safe for the player:
+The core collapse is safe for the player:
 
 * When the timer reaches zero, the core stops emitting atoms, all paddles disappear and player input is disabled.
-* Every atom still inside the containment ring is pulled into the core. No atom can escape during the swallow, so no lives can be lost. Atoms that were already fading out after escaping are ignored.
-* The swallow lasts 2 seconds and plays together with the `vortex_creation` sound effect. The core grows to the size of the ring while every atom slows down to a stop, then the core collapses and takes all atoms with it (see "Level end (swallow)" in `graphical-specs.md`). Then the "YOU WIN!" screen is shown.
+* Every atom still inside the containment ring is pulled into the core. No atom can escape during the core collapse, so no lives can be lost. Atoms that were already fading out after escaping are ignored.
+* The core collapse lasts 2 seconds and plays together with the `vortex_creation` sound effect. The core grows to the size of the ring while every atom slows down to a stop, then the core collapses and takes all atoms with it (see "Level end (core collapse)" in `graphical-specs.md`). Then the "YOU WIN!" screen is shown.
 
 # Player input mechanics
 
@@ -63,8 +63,8 @@ The player will get:
 
 * 10 points * level * atom charge value every time it bounces back an atom using a paddle. 
 * 100 points * level * atom charge value for every atom captured
-* 200 points * level * atom charge value * remaining lives for every atom contained at the end of the level, when the core "swallows" all remaining atoms.
-* Additional time bonus after all remaining atoms have been swallowed (the player needs to pass the level): 1 point * level for every 0.1 seconds of the level's total duration. In other words, the level's initial timer value (in tenths of a second) * level. For example, a 2-minute level 3 gives 1200 * 3 = 3600 points.
+* 200 points * level * atom charge value * remaining lives for every atom contained at the end of the level, when the core collapse takes all remaining atoms.
+* Additional time bonus after the core collapse has taken all remaining atoms (the player needs to pass the level): 1 point * level for every 0.1 seconds of the level's total duration. In other words, the level's initial timer value (in tenths of a second) * level. For example, a 2-minute level 3 gives 1200 * 3 = 3600 points.
  
 # High Score
 

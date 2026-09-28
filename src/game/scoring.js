@@ -10,7 +10,7 @@ export function capturePoints (level, charge) {
   return 100 * level * charge
 }
 
-// Level end: an atom still inside the ring is swallowed by the core
+// Level end: an atom still inside the ring is taken by the core collapse
 export function containmentPoints (level, charge, lives) {
   return 200 * level * charge * lives
 }

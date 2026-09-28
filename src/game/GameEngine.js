@@ -24,8 +24,8 @@ const CAPTURE_TAP_RADIUS = 60
 
 const START_DELAY = 3 // seconds before the timer, spawns and music start: the menu music fades out, the player gets ready
 const MAX_ACTIVE_PADDLES = 2
-const SWALLOW_TIME = 3
-const SWALLOW_SPIN = 2 * Math.PI // radians per second at the end of the swallow
+const CORE_COLLAPSE_TIME = 3
+const CORE_COLLAPSE_SPIN = 2 * Math.PI // radians per second at the end of the core collapse
 const GAME_OVER_DELAY = 1 // lets the last escaping atom fade out before Game Over
 const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen before the WebGL context is lost
 
@@ -39,7 +39,7 @@ const BACKGROUND_TRANSITION_TIME = 0.5
 const STATE = {
   STARTING: 'starting',
   PLAYING: 'playing',
-  SWALLOWING: 'swallowing',
+  COLLAPSING: 'collapsing',
   LOST: 'lost',
   ENDED: 'ended'
 }
@@ -222,8 +222,8 @@ export default class GameEngine {
     case STATE.PLAYING:
       this.updatePlaying(dt)
       break
-    case STATE.SWALLOWING:
-      this.updateSwallowing(dt)
+    case STATE.COLLAPSING:
+      this.updateCollapsing(dt)
       break
     case STATE.LOST:
       this.updateLost(dt)
@@ -278,7 +278,7 @@ export default class GameEngine {
       this.timeTenths = timeTenths
       this.emit('onTimeChange', timeTenths)
     }
-    if (timeTenths === 0) this.startSwallow()
+    if (timeTenths === 0) this.startCoreCollapse()
   }
 
   // An atom between the paddles and the ring: bounced if a paddle covers it (mirrored around the
@@ -341,25 +341,25 @@ export default class GameEngine {
   }
 
   // Timer reached 0: no spawns, paddles or input; the core pulls every atom inside the ring in
-  startSwallow () {
-    this.state = STATE.SWALLOWING
+  startCoreCollapse () {
+    this.state = STATE.COLLAPSING
     this.stateTime = 0
     this.clearPaddles()
     for (const atom of this.atoms) {
-      if (atom.state === ATOM_STATE.MOVING) atom.startSwallow()
+      if (atom.state === ATOM_STATE.MOVING) atom.startCollapse()
     }
     soundManager.playSfx('vortex_creation')
   }
 
-  updateSwallowing (dt) {
+  updateCollapsing (dt) {
     this.stateTime += dt
-    const progress = Math.min(1, this.stateTime / SWALLOW_TIME)
-    const spin = SWALLOW_SPIN * progress * dt
+    const progress = Math.min(1, this.stateTime / CORE_COLLAPSE_TIME)
+    const spin = CORE_COLLAPSE_SPIN * progress * dt
 
     this.updateEscapingAtoms(dt)
     for (const atom of this.atoms) {
-      if (atom.state !== ATOM_STATE.SWALLOWED) continue
-      atom.updateSwallow(progress, spin)
+      if (atom.state !== ATOM_STATE.COLLAPSING) continue
+      atom.updateCollapse(progress, spin)
       atom.render(dt)
     }
 
@@ -368,7 +368,7 @@ export default class GameEngine {
 
   win () {
     let bonus = timeBonus(this.level.number, this.level.timerTenths)
-    for (const atom of this.atoms.filter((a) => a.state === ATOM_STATE.SWALLOWED)) {
+    for (const atom of this.atoms.filter((a) => a.state === ATOM_STATE.COLLAPSING)) {
       bonus += containmentPoints(this.level.number, atom.charge, this.lives)
       this.releaseAtom(atom)
     }

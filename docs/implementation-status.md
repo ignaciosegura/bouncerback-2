@@ -34,4 +34,4 @@ Legend: `[x]` done · `[ ]` pending
   - [x] **Phase 18** — Paddle lifetime fade (set paddles fade 100% → 20% opacity over the second half of their lifetime)
   - [ ] **Phase 19** — Paddle bounce flash (subtle arc echo drifting outward from the paddle, outside the ring; restarts on each bounce)
 - [ ] **Phase 20** — Capture window feedback (core 25% larger; charged atoms crossing the core pulse once per beat in their color, 50% → 0% opacity)
-- [ ] **Phase 21** — Swallow animation (2 s: core grows to ring size with grey fill while atoms ease to a stop, then everything collapses into the center)
+- [ ] **Phase 21** — Core collapse animation (2 s: core grows to ring size with grey fill while atoms ease to a stop, then everything collapses into the center)

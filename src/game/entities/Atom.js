@@ -8,7 +8,7 @@ export const CAPTURE_MIN_CHARGE = 3
 export const ATOM_STATE = {
   MOVING: 'moving',
   ESCAPING: 'escaping',
-  SWALLOWED: 'swallowed'
+  COLLAPSING: 'collapsing'
 }
 
 const ESCAPE_FADE_TIME = 0.5
@@ -100,15 +100,15 @@ export default class Atom {
     return this.escapeTime < ESCAPE_FADE_TIME
   }
 
-  startSwallow () {
-    this.state = ATOM_STATE.SWALLOWED
-    this.swallowFrom = this.distance
+  startCollapse () {
+    this.state = ATOM_STATE.COLLAPSING
+    this.collapseFrom = this.distance
   }
 
   // progress 0 → 1: pulled into the core with increasing speed, spiralling by `spin` and shrinking
-  updateSwallow (progress, spin) {
+  updateCollapse (progress, spin) {
     const pull = progress * progress
-    this.distance = this.swallowFrom * (1 - pull)
+    this.distance = this.collapseFrom * (1 - pull)
     this.angle += spin
     this.view.scale.set(1 - pull)
   }

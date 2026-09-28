@@ -25,7 +25,7 @@
   - Hi-Score
   - Try Again Button (restarts the same level from scratch: score reset to 0, lives reset to the level file's value)
   - Main Menu Button
-- **You Win! Screen** *(replaces the Game Screen after the core swallows the remaining atoms)*
+- **You Win! Screen** *(replaces the Game Screen after the core collapse takes the remaining atoms)*
   - Score
   - Hi-Score
   - Try Again Button (restarts the same level from scratch: score reset to 0, lives reset to the level file's value)
