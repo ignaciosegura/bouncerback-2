@@ -3,6 +3,9 @@ import { RING_RADIUS } from './ContainmentRing.js'
 
 export const PADDLE_THICKNESS = 20
 const OUTLINE_WIDTH = 2
+// Lifetime fade: full opacity until FADE_START of the lifetime, then linear down to FADE_MIN_ALPHA
+const FADE_START = 0.5
+const FADE_MIN_ALPHA = 0.2
 
 // Signed smallest difference between two angles, in (-π, π]
 function angleDifference (a, b) {
@@ -10,7 +13,8 @@ function angleDifference (a, b) {
 }
 
 // An arc on the ring centred on `angle`. Drawn as an outline while the player drags it (inactive),
-// filled once set (active). Expires `duration` seconds after being set.
+// filled once set (active). Expires `duration` seconds after being set, fading out over the end
+// of its lifetime.
 export default class Paddle {
   constructor (arc, duration) {
     this.arc = arc
@@ -24,6 +28,7 @@ export default class Paddle {
     this.age = 0
     this.setAngle(angle)
     this.draw()
+    this.view.alpha = 1
     this.view.visible = true
   }
 
@@ -34,6 +39,7 @@ export default class Paddle {
 
   activate () {
     this.active = true
+    this.view.alpha = 1
     this.draw()
   }
 
@@ -44,6 +50,9 @@ export default class Paddle {
   // Returns false once the paddle has expired
   update (dt) {
     this.age += dt
+    const fadeStart = this.duration * FADE_START
+    const progress = Math.min(Math.max((this.age - fadeStart) / (this.duration - fadeStart), 0), 1)
+    this.view.alpha = 1 - (1 - FADE_MIN_ALPHA) * progress
     return this.age < this.duration
   }
 
