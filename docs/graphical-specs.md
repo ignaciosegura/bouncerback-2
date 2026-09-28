@@ -41,6 +41,7 @@ Note: All color changes use a transition time of 0.5 seconds unless otherwise sp
 * Every time an atom bounces back, it gets a charged.
     - At 3 charges, the atom should transition to yellow (#FFFF00)
     - For every charge from 3 onwards, the atom should transition its color until the tenth charge, to get closer to red (#FF0000) for every additional charge.
+* Draw order: every new atom is drawn behind all the atoms already on screen, so fresh (uncharged) atoms never hide charged ones that the player may want to capture.
 * Capture window: while an atom that can be captured (3 or more charges) is crossing the core, it emits a pulse on every beat of the music: a filled circle of the atom's current color that grows outward from the atom while fading from 50% to 0% opacity over one beat. The pulse follows the atom and is drawn behind it. Pulses only start while the atom overlaps the core (the moment a tap captures it); a pulse that has already started finishes its fade even if the atom leaves the core. Atoms with fewer than 3 charges never pulse.
 * The core (atom emitter) is 25% larger than in the first cycle (radius 20 → 25 at the reference size, now slightly bigger than the atoms), so the moment an atom crosses it is easier to see.
 * When the player has only one life, turn the background dark red (#660000)

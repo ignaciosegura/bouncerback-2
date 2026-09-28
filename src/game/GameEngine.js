@@ -426,11 +426,10 @@ export default class GameEngine {
   // Entity pools
 
   spawnAtom () {
-    let atom = this.atomPool.pop()
-    if (!atom) {
-      atom = new Atom()
-      this.atomLayer.addChild(atom.view)
-    }
+    const atom = this.atomPool.pop() ?? new Atom()
+    // New atoms go behind all the others, so fresh atoms never hide charged ones. Pooled atoms
+    // keep their old slot in the layer, so they are moved to the back too
+    this.atomLayer.addChildAt(atom.view, 0)
     atom.spawn(Math.random() * 2 * Math.PI)
     this.atoms.push(atom)
     soundManager.playSfx('launch')
