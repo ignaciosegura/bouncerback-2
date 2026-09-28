@@ -47,7 +47,7 @@ Note: All color changes use a transition time of 0.5 seconds unless otherwise sp
 * Paddle lifetime: once set, a paddle stays at full opacity for the first half of its lifetime, then fades steadily to 20% opacity over the second half, and disappears when it expires. This fade lasts half the paddle's lifetime and doesn't follow the 0.5 s default above. While the player is still dragging it, the paddle is shown at full opacity.
 * Paddle bounce: every time a paddle bounces an atom back, a subtle, thin, semi-transparent white arc (an "echo" of that paddle) appears at the paddle's outer edge and drifts outward (about one paddle thickness) while fading out, in 0.25 s. Nothing of this effect is drawn inside the containment ring, so the playable area stays clean. If the same paddle bounces another atom while its echo is still visible, the echo restarts from the beginning. This is cosmetic only.
 * Level end (core collapse): a 2-second animation that starts together with the `vortex_creation` sound effect when the timer reaches zero. It doesn't follow the 0.5 s default above.
-    - 0 → 1.85 s: the core grows (ease-in-out) until it matches the containment ring's size and position, while its fill fades in from transparent to grey (#888888). The core keeps its white outline, which ends on top of the ring. At the same time, every atom slows down (ease-out) until it stops completely. Atoms keep their current color and are drawn over the grey core. An atom that is close to the ring can drift slightly past it before it stops; it doesn't escape.
+    - 0 → 1.85 s: the core grows (ease-in-out) until it matches the containment ring's size and position, while its fill fades in from transparent to grey (#888888) and its outline turns from white to the same grey, with the same transition. The outline ends on top of the ring. At the same time, every atom slows down (ease-out) until it stops completely. Atoms keep their current color and are drawn over the grey core. An atom that is close to the ring can drift slightly past it before it stops; it doesn't escape.
     - 1.85 → 2 s: the core collapses to radius zero (ease-in) and takes every atom with it: all atoms move to the center while shrinking to radius zero, at the same time as the core.
 
 # Colors
@@ -58,7 +58,7 @@ Note: All color changes use a transition time of 0.5 seconds unless otherwise sp
 * Dark red background (one life left): #660000
 * Yellow (atom at 3 charges): #FFFF00
 * Red (atom at 10 charges): #FF0000
-* Grey (core fill during the level-end core collapse): #888888
+* Grey (core fill and outline during the level-end core collapse): #888888
 
 # Mockups
 

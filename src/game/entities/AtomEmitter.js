@@ -1,8 +1,11 @@
 import { Graphics } from 'pixi.js'
 import { spawnDelay } from '../levelLoader.js'
+import { lerpColor } from '../color.js'
 
 export const CORE_RADIUS = 20
 const LINE_WIDTH = 2
+const OUTLINE_COLOR = 0xffffff
+const VORTEX_COLOR = 0x888888 // core fill and outline during the level-end core collapse
 
 // The core: stays at the centre and schedules one spawn at a random moment inside each spawn interval
 export default class AtomEmitter {
@@ -12,7 +15,7 @@ export default class AtomEmitter {
     this.nextSpawn = spawnDelay(spawnInterval)
     this.view = new Graphics()
       .circle(0, 0, CORE_RADIUS)
-      .stroke({ width: LINE_WIDTH, color: 0xffffff })
+      .stroke({ width: LINE_WIDTH, color: OUTLINE_COLOR })
   }
 
   // Returns how many atoms are due by game time `time` (seconds)
@@ -24,5 +27,17 @@ export default class AtomEmitter {
       this.nextSpawn = this.intervalStart + spawnDelay(this.spawnInterval)
     }
     return due
+  }
+
+  // Core collapse: redrawn (not scaled) so the outline keeps its width at ring size. `fade`
+  // (0 → 1) fades the fill in and turns the outline from white to the same grey.
+  drawCollapse (radius, fade) {
+    this.view.clear()
+    this.view.visible = radius > 0
+    if (!this.view.visible) return
+    this.view
+      .circle(0, 0, radius)
+      .fill({ color: VORTEX_COLOR, alpha: fade })
+      .stroke({ width: LINE_WIDTH, color: lerpColor(OUTLINE_COLOR, VORTEX_COLOR, fade) })
   }
 }

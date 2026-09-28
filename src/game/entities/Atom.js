@@ -100,17 +100,19 @@ export default class Atom {
     return this.escapeTime < ESCAPE_FADE_TIME
   }
 
-  startCollapse () {
+  // Core collapse: the atom keeps its direction and slows to a stop over `settleTime`, starting
+  // at `speed`, which covers half the distance it would at full speed
+  startCollapse (speed, settleTime) {
     this.state = ATOM_STATE.COLLAPSING
     this.collapseFrom = this.distance
+    this.collapseDrift = this.direction * speed * settleTime / 2
   }
 
-  // progress 0 → 1: pulled into the core with increasing speed, spiralling by `spin` and shrinking
-  updateCollapse (progress, spin) {
-    const pull = progress * progress
-    this.distance = this.collapseFrom * (1 - pull)
-    this.angle += spin
-    this.view.scale.set(1 - pull)
+  // `settle` and `collapse` (already eased, 0 → 1): drifts to its resting point, then is pulled
+  // into the core, shrinking with it
+  updateCollapse (settle, collapse) {
+    this.distance = (this.collapseFrom + this.collapseDrift * settle) * (1 - collapse)
+    this.view.scale.set(1 - collapse)
   }
 
   // `dt` advances the charge color transition

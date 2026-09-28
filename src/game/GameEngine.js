@@ -2,6 +2,7 @@ import { Application, Container } from 'pixi.js'
 import * as soundManager from '../audio/soundManager.js'
 import { bouncePoints, capturePoints, containmentPoints, timeBonus } from './scoring.js'
 import { lerpColor } from './color.js'
+import { easeInOutQuad, easeInQuad, easeOutQuad } from './easing.js'
 import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
 import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
 import Atom, { ATOM_RADIUS, ATOM_STATE, CAPTURE_MIN_CHARGE } from './entities/Atom.js'
@@ -24,8 +25,9 @@ const CAPTURE_TAP_RADIUS = 60
 
 const START_DELAY = 3 // seconds before the timer, spawns and music start: the menu music fades out, the player gets ready
 const MAX_ACTIVE_PADDLES = 2
-const CORE_COLLAPSE_TIME = 3
-const CORE_COLLAPSE_SPIN = 2 * Math.PI // radians per second at the end of the core collapse
+// Core collapse: the core grows to the ring while the atoms settle, then it collapses with them
+const CORE_COLLAPSE_SETTLE_TIME = 1.85
+const CORE_COLLAPSE_TIME = 2
 const GAME_OVER_DELAY = 1 // lets the last escaping atom fade out before Game Over
 const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen before the WebGL context is lost
 
@@ -340,30 +342,41 @@ export default class GameEngine {
     }
   }
 
-  // Timer reached 0: no spawns, paddles or input; the core pulls every atom inside the ring in
+  // Timer reached 0: no spawns, paddles or input; the core takes every atom inside the ring
   startCoreCollapse () {
     this.state = STATE.COLLAPSING
     this.stateTime = 0
     this.clearPaddles()
     for (const atom of this.atoms) {
-      if (atom.state === ATOM_STATE.MOVING) atom.startCollapse()
+      if (atom.state === ATOM_STATE.MOVING) atom.startCollapse(this.atomSpeed, CORE_COLLAPSE_SETTLE_TIME)
     }
     soundManager.playSfx('vortex_creation')
   }
 
+  // Settle: the core grows to the ring and turns grey while the atoms slow to a stop (no
+  // collisions, nothing escapes). Collapse: the core shrinks to 0, taking the atoms with it.
   updateCollapsing (dt) {
     this.stateTime += dt
-    const progress = Math.min(1, this.stateTime / CORE_COLLAPSE_TIME)
-    const spin = CORE_COLLAPSE_SPIN * progress * dt
+    const t = this.stateTime
+    const settleProgress = Math.min(1, t / CORE_COLLAPSE_SETTLE_TIME)
+    const grow = easeInOutQuad(settleProgress)
+    const settle = easeOutQuad(settleProgress)
+    const collapse = easeInQuad(Math.min(1, Math.max(0,
+      (t - CORE_COLLAPSE_SETTLE_TIME) / (CORE_COLLAPSE_TIME - CORE_COLLAPSE_SETTLE_TIME))))
+
+    const radius = t < CORE_COLLAPSE_SETTLE_TIME
+      ? CORE_RADIUS + (RING_RADIUS - CORE_RADIUS) * grow
+      : RING_RADIUS * (1 - collapse)
+    this.emitter.drawCollapse(radius, grow)
 
     this.updateEscapingAtoms(dt)
     for (const atom of this.atoms) {
       if (atom.state !== ATOM_STATE.COLLAPSING) continue
-      atom.updateCollapse(progress, spin)
+      atom.updateCollapse(settle, collapse)
       atom.render(dt)
     }
 
-    if (progress === 1) this.win()
+    if (t >= CORE_COLLAPSE_TIME) this.win()
   }
 
   win () {
