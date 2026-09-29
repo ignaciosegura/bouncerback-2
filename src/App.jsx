@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import * as soundManager from './audio/soundManager.js'
 import { levels } from './game/levelLoader.js'
 import { getHiScore, beatHiScore } from './game/highScore.js'
-import EnterScreen from './screens/EnterScreen.jsx'
 import IntroScreen from './screens/IntroScreen.jsx'
 import MainMenuScreen from './screens/MainMenuScreen.jsx'
 import LevelSelectionMenuScreen from './screens/LevelSelectionMenuScreen.jsx'
@@ -13,7 +12,6 @@ import YouWinScreen from './screens/YouWinScreen.jsx'
 import MenuBackground from './components/MenuBackground.jsx'
 
 const SCREENS = {
-  ENTER: 'enter',
   INTRO: 'intro',
   MAIN_MENU: 'mainMenu',
   LEVEL_SELECT: 'levelSelect',
@@ -24,10 +22,10 @@ const SCREENS = {
 }
 
 // Screens drawn over the menu background animation; it plays uninterrupted between them
-const MENU_BACKGROUND_SCREENS = [SCREENS.INTRO, SCREENS.MAIN_MENU, SCREENS.LEVEL_SELECT, SCREENS.SETTINGS]
+const MENU_BACKGROUND_SCREENS = [SCREENS.MAIN_MENU, SCREENS.LEVEL_SELECT, SCREENS.SETTINGS]
 
 export default function App () {
-  const [screen, setScreen] = useState(SCREENS.ENTER)
+  const [screen, setScreen] = useState(SCREENS.INTRO)
   const [level, setLevel] = useState(null)
   const [score, setScore] = useState(0)
   const [hiScore, setHiScore] = useState(getHiScore)
@@ -36,14 +34,12 @@ export default function App () {
 
   // Menus play the menu track; Game Over and You Win! are silent. The game screen fades the music
   // out and the GameEngine starts the level's track when its start delay ends.
-  // Nothing plays before the Enter screen's button unlocks audio. The menu track's first start, on the
-  // Intro, has no fade-in: the menu background animation starts together with it.
+  // Nothing plays before the Intro's button unlocks audio. That button starts the menu track itself
+  // (see enter()), so the Main Menu's request below does nothing then, and only fades the track in
+  // when coming back from Game Over / You Win!.
   useEffect(() => {
     switch (screen) {
-    case SCREENS.ENTER:
-      return
     case SCREENS.INTRO:
-      soundManager.playTrack(soundManager.MENU_TRACK, { fadeIn: false })
       return
     case SCREENS.GAME:
     case SCREENS.GAME_OVER:
@@ -57,9 +53,11 @@ export default function App () {
 
   const goToMainMenu = () => setScreen(SCREENS.MAIN_MENU)
 
+  // The menu track's first start has no fade-in: the menu background animation starts together with it
   const enter = () => {
     soundManager.unlock()
-    setScreen(SCREENS.INTRO)
+    soundManager.playTrack(soundManager.MENU_TRACK, { fadeIn: false })
+    setScreen(SCREENS.MAIN_MENU)
   }
 
   const changeMusicVolume = (value) => {
@@ -88,11 +86,8 @@ export default function App () {
 
   const renderScreen = () => {
     switch (screen) {
-    case SCREENS.ENTER:
-      return <EnterScreen onEnter={enter} />
-
     case SCREENS.INTRO:
-      return <IntroScreen onContinue={goToMainMenu} />
+      return <IntroScreen onEnter={enter} />
 
     case SCREENS.MAIN_MENU:
       return (

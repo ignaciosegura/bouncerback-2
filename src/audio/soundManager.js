@@ -85,7 +85,7 @@ function applySfxVolume () {
 
 /**
  * Plays the near-silent stub. Must be called from the first user interaction
- * (the Enter screen's button) so mobile browsers allow audio from then on.
+ * (the Intro screen's button) so mobile browsers allow audio from then on.
  */
 export function unlock () {
   sfx.silence?.play()
