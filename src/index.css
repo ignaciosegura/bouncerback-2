@@ -6,10 +6,19 @@
   font-display: block;
 }
 
+/* Registered so it blends when animated (screen transitions tint the foreground) */
+@property --fg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #FFFFFF;
+}
+
 :root {
   --color-black: #000000;
   --color-white: #FFFFFF;
   --color-white-bg: #D8D8D8;
+  --color-tint-yellow: #666600;
+  --color-tint-red: #660000;
   --font-game: 'C64 Angled', monospace;
 
   /*
@@ -99,6 +108,65 @@ button {
 
 .screen--transparent {
   background: transparent;
+}
+
+/*
+ * Screen transitions (old TV set): a 1 s screen-out, then a 0.5 s screen-in, on the screen's
+ * elements only. The wrapper holds the menu background and the screen but never animates:
+ * backgrounds, the menu animation and the game canvas stay still. React only switches the
+ * classes and swaps the screen when screen-out ends.
+ */
+
+.screen-transition {
+  position: absolute;
+  inset: 0;
+}
+
+/* Input shield: every tap and click is ignored while a transition runs, the game canvas included */
+.screen-transition--out::after,
+.screen-transition--in::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* The game canvas container acts as the Game Screen's background: it isn't an element */
+.screen-transition--out .screen > :not(.game-screen__canvas) {
+  animation:
+    screen-out 1s linear forwards,
+    screen-shake 125ms linear 0.875s;
+}
+
+.screen-transition--in .screen > :not(.game-screen__canvas) {
+  animation: screen-in 0.5s linear;
+}
+
+/* The tint changes the foreground only; the screen's background stays as it is */
+.screen-transition--out .screen {
+  animation: screen-tint 0.5s linear 0.5s forwards;
+}
+
+@keyframes screen-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* No 0% keyframe: it starts from the screen's own foreground (black or white) */
+@keyframes screen-tint {
+  50% { --fg: var(--color-tint-yellow); }
+  100% { --fg: var(--color-tint-red); }
+}
+
+@keyframes screen-shake {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(calc(-2 * var(--u))); }
+  75% { transform: translateY(calc(2 * var(--u))); }
+}
+
+@keyframes screen-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Menu background animation (Lottie), behind the menu screens */
@@ -229,7 +297,11 @@ button {
    logo's top sits 182px from the top at the reference size (MAIN MENU mockup) */
 .main-menu__logo {
   width: calc(1518 * var(--u));
+  aspect-ratio: 965.894 / 82.105;
   margin-bottom: calc(229 * var(--u));
+  background: currentColor;
+  -webkit-mask: url('../assets/images/game_logo.svg') center / contain no-repeat;
+  mask: url('../assets/images/game_logo.svg') center / contain no-repeat;
   pointer-events: none;
 }
 

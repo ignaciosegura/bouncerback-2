@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as soundManager from './audio/soundManager.js'
 import { levels } from './game/levelLoader.js'
 import { getHiScore, beatHiScore } from './game/highScore.js'
@@ -26,6 +26,12 @@ const MENU_BACKGROUND_SCREENS = [SCREENS.MAIN_MENU, SCREENS.LEVEL_SELECT, SCREEN
 
 export default function App () {
   const [screen, setScreen] = useState(SCREENS.INTRO)
+  // Screen changes play the old-TV transition on the screen's elements (CSS keyframes in index.css):
+  // the current screen stays up during the screen-out, then `nextScreen` replaces it and its
+  // elements play the screen-in. The Intro starts with a screen-in on launch.
+  const [nextScreen, setNextScreen] = useState(null)
+  const [transition, setTransition] = useState('in')
+  const previousScreenRef = useRef(null)
   const [level, setLevel] = useState(null)
   const [score, setScore] = useState(0)
   const [hiScore, setHiScore] = useState(getHiScore)
@@ -34,10 +40,13 @@ export default function App () {
 
   // Menus play the menu track; Game Over and You Win! are silent. The game screen fades the music
   // out and the GameEngine starts the level's track when its start delay ends.
-  // Nothing plays before the Intro's button unlocks audio. That button starts the menu track itself
-  // (see enter()), so the Main Menu's request below does nothing then, and only fades the track in
-  // when coming back from Game Over / You Win!.
+  // The music follows the screen actually shown, so it changes when the new screen appears, not on
+  // the tap. Nothing plays before the Intro's button unlocks audio. Coming from the Intro, the menu
+  // track starts with no fade-in, together with the menu background animation; coming back from
+  // Game Over / You Win! it fades in.
   useEffect(() => {
+    const previousScreen = previousScreenRef.current
+    previousScreenRef.current = screen
     switch (screen) {
     case SCREENS.INTRO:
       return
@@ -47,17 +56,34 @@ export default function App () {
       soundManager.stopTrack()
       return
     default:
-      soundManager.playTrack(soundManager.MENU_TRACK)
+      soundManager.playTrack(soundManager.MENU_TRACK, { fadeIn: previousScreen !== SCREENS.INTRO })
     }
   }, [screen])
 
-  const goToMainMenu = () => setScreen(SCREENS.MAIN_MENU)
+  // Ignored while a transition runs, so a second tap can't navigate twice
+  const navigate = (next) => {
+    if (transition) return
+    setNextScreen(next)
+    setTransition('out')
+  }
 
-  // The menu track's first start has no fade-in: the menu background animation starts together with it
+  // The screen's and its elements' animations end here. The tint (on the screen itself, once)
+  // marks the end of the screen-out; every element ends its screen-in at the same time.
+  const handleTransitionEnd = (event) => {
+    if (event.animationName === 'screen-tint') {
+      setScreen(nextScreen)
+      setTransition('in')
+    } else if (event.animationName === 'screen-in') {
+      setTransition(null)
+    }
+  }
+
+  const goToMainMenu = () => navigate(SCREENS.MAIN_MENU)
+
+  // The unlock must happen inside the button's click; the menu track starts when the Main Menu appears
   const enter = () => {
     soundManager.unlock()
-    soundManager.playTrack(soundManager.MENU_TRACK, { fadeIn: false })
-    setScreen(SCREENS.MAIN_MENU)
+    navigate(SCREENS.MAIN_MENU)
   }
 
   const changeMusicVolume = (value) => {
@@ -70,18 +96,19 @@ export default function App () {
     setSfxVolume(soundManager.getSfxVolume())
   }
 
+  // `score` isn't reset: only the result screens show it and endLevel always sets it first.
+  // Resetting it here would show 0 on Game Over / You Win! while it fades out after Try Again.
   const startLevel = (selectedLevel) => {
     setLevel(selectedLevel)
-    setScore(0)
-    setScreen(SCREENS.GAME)
+    navigate(SCREENS.GAME)
   }
 
   // Saves the high score to localStorage the instant it's beaten, live during gameplay
   const registerScore = (currentScore) => setHiScore(beatHiScore(currentScore))
 
-  const endLevel = (nextScreen) => ({ score: finalScore }) => {
+  const endLevel = (resultScreen) => ({ score: finalScore }) => {
     setScore(finalScore)
-    setScreen(nextScreen)
+    navigate(resultScreen)
   }
 
   const renderScreen = () => {
@@ -92,8 +119,8 @@ export default function App () {
     case SCREENS.MAIN_MENU:
       return (
         <MainMenuScreen
-          onPlay={() => setScreen(SCREENS.LEVEL_SELECT)}
-          onSettings={() => setScreen(SCREENS.SETTINGS)}
+          onPlay={() => navigate(SCREENS.LEVEL_SELECT)}
+          onSettings={() => navigate(SCREENS.SETTINGS)}
         />
       )
 
@@ -147,11 +174,13 @@ export default function App () {
   }
 
   // The background always sits at the same place in the tree, so switching between menu screens
-  // keeps the same instance (and the animation) instead of remounting it
+  // keeps the same instance (and the animation) instead of remounting it. The transition wrapper
+  // never animates itself: only the screen's elements do.
+  const transitionClass = transition ? `screen-transition--${transition}` : ''
   return (
-    <>
+    <div className={`screen-transition ${transitionClass}`} onAnimationEnd={handleTransitionEnd}>
       {MENU_BACKGROUND_SCREENS.includes(screen) ? <MenuBackground /> : null}
       {renderScreen()}
-    </>
+    </div>
   )
 }

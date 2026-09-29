@@ -46,7 +46,8 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * Screen out (1 s):
     * 0 → 1 s: the elements fade out (linear), revealing the screen's background.
     * 0.5 → 0.75 s: their color blends gradually from its own color (black on the light menus, white on the dark screens) to dark yellow (#666600).
-    * 0.75 → 1 s: their color blends gradually from dark yellow to dark red (#660000), with a subtle vertical shake (4px up and down at the 1080px reference, four times).
+    * 0.75 → 1 s: their color blends gradually from dark yellow to dark red (#660000).
+    * 0.875 → 1 s: a slight vertical vibration (2px up, then 2px down, at the 1080px reference, once).
     * The blends are linear and last 0.25 s each (this overrides the 0.5 s default for color changes).
 * Screen in (0.5 s): the new screen's elements fade in (linear). No tint, no shake.
 * The first screen on launch (Intro) only plays the screen in.
