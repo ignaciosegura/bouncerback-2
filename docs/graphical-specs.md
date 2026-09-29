@@ -10,7 +10,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 ## Menu background animation
 
-* The Main Menu, Level Select and Settings screens show the vector animation `assets/motion/intro_animation.json` (Lottie) on top of the white (#DDDDDD) background and behind the text and buttons. Its light-grey and white lines are meant to be subtle, tone on tone. The Intro screen (ENTER BOUNCERBACK) doesn't show it: it's a plain white (#DDDDDD) background.
+* The Main Menu, Level Select and Settings screens show the vector animation `assets/motion/intro_animation.json` (Lottie) on top of the white (#D0D0D0) background and behind the text and buttons. Its light-grey and white lines are meant to be subtle, tone on tone. The Intro screen (ENTER BOUNCERBACK) doesn't show it: it's a plain white (#D0D0D0) background.
 * It starts at the same moment as the menu music (they were made together), and stays still until the music starts.
 * It plays continuously while the player moves between those three screens: changing screens never restarts or pauses it. It starts again from the beginning when the player comes back to the menus after playing a level.
 
@@ -69,7 +69,7 @@ Note: All color changes use a transition time of 0.5 seconds unless otherwise sp
 
 * Black background: #000000
 * White: #FFFFFF
-* White background: #DDDDDD
+* White background: #D0D0D0
 * Dark red background (one life left): #660000
 * Yellow (atom at 3 charges): #FFFF00
 * Red (atom at 10 charges): #FF0000
