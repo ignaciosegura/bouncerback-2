@@ -34,7 +34,7 @@ export default [
     ...reactHooks.configs.flat.recommended
   },
   {
-    files: ['*.config.js'],
+    files: ['*.config.js', 'scripts/**/*.js'],
     languageOptions: {
       globals: {
         ...globals.node

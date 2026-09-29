@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "deploy:ftp": "node --env-file=.env.ftp scripts/deploy-ftp.js",
+    "deploy:ftp:test": "node --env-file=.env.ftp scripts/deploy-ftp.js --test"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
@@ -26,6 +28,7 @@
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "basic-ftp": "^6.2.1",
     "eslint": "^10.11.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.12.0",
