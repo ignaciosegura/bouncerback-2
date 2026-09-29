@@ -43,7 +43,7 @@ The paddle's lifetime (the `paddles.duration` value in the level file) starts co
 
 ## Atom capture
 
-Every time an atom is blocked by a paddle, its direction will be reversed and it will gain a "charge". The reversal is exact: the atom travels straight back through the core and out toward the opposite side of the ring. When the atom has three chargers, the player can destroy it by tapping on it while crossing the core, that is, while the atom overlaps the core. Capturable atoms change color, and while one is crossing the core it emits a pulse on every beat, so the player can see when it can be captured (see "Visual feedback" in `graphical-specs.md`; the pulse and a 25% larger core are planned for the second development cycle).
+Every time an atom is blocked by a paddle, its direction will be reversed and it will gain a "charge". The reversal is exact: the atom travels straight back through the core and out toward the opposite side of the ring. When the atom has three chargers, the player can destroy it by tapping on it while crossing the core, that is, while the atom overlaps the core. Capturable atoms change color, and while one is crossing the core it emits a pulse on every beat, so the player can see when it can be captured (see "Visual feedback" in `graphical-specs.md`. A captured atom is pulled into the center of the core while shrinking, and then disappears.
 
 Destroying atoms is optional, the player can keep bouncing them for extra points and charges, up to a limit of ten charges. At ten charges, the atom will not gain charges, but otherwise it will behave as a normal atom.
 
