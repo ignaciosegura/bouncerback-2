@@ -39,6 +39,18 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * The mockups are drawn at 1920x1080, 1:1 with CSS pixels. All UI sizes (fonts, borders, paddings, gaps) are defined in mockup pixels and scaled with the viewport: one mockup pixel = `min(viewport height / 1080, viewport width / 1920)`, with a floor of 0.4 CSS px so text stays readable on small phones.
 * In CSS this is the `--u` custom property in `src/index.css`; sizes are written as `calc(N * var(--u))`.
 
+## Screen transitions
+
+* Every screen change uses the same transition, inspired by old TV sets: the old screen goes out, then the new screen comes in. It covers the whole picture: the screen, its text and buttons, the HUD, the game canvas and the menu background animation.
+* Screen out (1 s):
+    * 0 → 1 s: fades out to black (linear).
+    * 0.5 → 0.75 s: the tint blends gradually from none to dark yellow (#666600).
+    * 0.75 → 1 s: the tint blends gradually from dark yellow to dark red (#660000), with a subtle vertical shake (4px up and down at the 1080px reference, four times).
+    * The tint multiplies the picture: white becomes exactly the tint color and black stays black. The blends are linear and last 0.25 s each (this overrides the 0.5 s default for color changes).
+* Screen in (0.5 s): fades in from black (linear). No tint, no shake.
+* The first screen on launch (Intro) only plays the screen in.
+* Taps and clicks are ignored while a transition is running.
+
 ## Visual effects
 
 * The game will use 2D vector graphics (Pixi.js).

@@ -21,7 +21,7 @@ Legend: `[x]` done · `[ ]` pending
 
 - [ ] **Phase 8** — Pause functionality
   - Groundwork only: the `P` key toggles pause in `GameEngine` (ticker stop/start + music pause/resume). The Pause button and `PauseOverlay` (Resume / Settings / Main Menu) are still missing.
-- [ ] **Phase 9** — Screen transitions
+- [ ] **Phase 9** — Screen transitions (old-TV effect on every screen change, pure CSS: 1 s screen-out — fade to black, dark yellow then dark red tint, vertical shake at the end — then 0.5 s fade-in)
 - [ ] **Phase 10** — Mobile packaging (Capacitor iOS/Android, orientation lock, icons/splash)
 - [ ] **Phase 11** — Rotate-device overlay
 - [ ] **Phase 12** — Optional visual effects (`palette_invert`, `glow_pulse`, level `vfx` timelines)

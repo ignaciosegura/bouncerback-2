@@ -1,5 +1,7 @@
 # Navigation Flow
 
+Every change from one screen to another plays the screen transition (see "Screen transitions" in `graphical-specs.md`). The Pause Overlay is shown on top of the Game Screen, not as a screen change, so it doesn't use it.
+
 - **Intro Screen** *(first screen on every launch; light layout, no menu background animation, silent)*
   - ENTER BOUNCERBACK Button (unlocks audio) → Main Menu
 - **Main Menu**
