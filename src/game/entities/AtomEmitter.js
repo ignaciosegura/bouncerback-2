@@ -2,7 +2,7 @@ import { Graphics } from 'pixi.js'
 import { spawnDelay } from '../levelLoader.js'
 import { lerpColor } from '../color.js'
 
-export const CORE_RADIUS = 20
+export const CORE_RADIUS = 25
 const LINE_WIDTH = 2
 const OUTLINE_COLOR = 0xffffff
 const VORTEX_COLOR = 0x888888 // core fill and outline during the level-end core collapse

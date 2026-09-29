@@ -1,5 +1,6 @@
 import { Graphics } from 'pixi.js'
 import { lerpColor } from '../color.js'
+import AtomPulse from './AtomPulse.js'
 
 export const ATOM_RADIUS = 20
 export const MAX_CHARGE = 10
@@ -36,6 +37,7 @@ export default class Atom {
       .circle(0, 0, ATOM_RADIUS)
       .fill(ATOM_COLORS.WHITE)
     this.view.visible = false
+    this.pulse = new AtomPulse()
   }
 
   spawn (angle) {
@@ -53,11 +55,20 @@ export default class Atom {
     this.colorTo = ATOM_COLORS.WHITE
     this.colorTime = COLOR_TRANSITION_TIME
     this.view.tint = ATOM_COLORS.WHITE
+    this.pulse.hide()
+    this.pulseCount = 0 // pulses emitted during the current core crossing
     this.render()
   }
 
   hide () {
     this.view.visible = false
+    this.pulse.hide()
+  }
+
+  // (Re)starts the capture window pulse, lasting `duration` seconds
+  startPulse (duration) {
+    this.pulse.start(duration)
+    this.pulse.update(0, this.view.x, this.view.y, this.color)
   }
 
   // Angle of the atom's current position around the core
@@ -122,6 +133,9 @@ export default class Atom {
       this.color = lerpColor(this.colorFrom, this.colorTo, this.colorTime / COLOR_TRANSITION_TIME)
       this.view.tint = this.color
     }
-    this.view.position.set(Math.cos(this.angle) * this.distance, Math.sin(this.angle) * this.distance)
+    const x = Math.cos(this.angle) * this.distance
+    const y = Math.sin(this.angle) * this.distance
+    this.view.position.set(x, y)
+    this.pulse.update(dt, x, y, this.color)
   }
 }

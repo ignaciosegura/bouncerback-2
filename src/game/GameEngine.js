@@ -20,6 +20,9 @@ const ESCAPE_DISTANCE = RING_RADIUS
 const ATOM_ANGULAR_RADIUS = ATOM_RADIUS / (RING_RADIUS - PADDLE_THICKNESS / 2)
 // An atom can be captured while it overlaps the core
 const CORE_CROSSING_DISTANCE = CORE_RADIUS + ATOM_RADIUS
+// Pulses per core crossing: later beats would come as the atom leaves the core, when most of
+// the pulse plays after it can no longer be captured
+const MAX_PULSES_PER_CROSSING = 3
 // Taps this close to the core target the atom crossing it (generous for small touch screens)
 const CAPTURE_TAP_RADIUS = 60
 
@@ -66,6 +69,7 @@ export default class GameEngine {
     this.score = 0
     this.lives = level.lives
     this.timeTenths = level.timerTenths
+    this.lastBeat = -1 // last beat of the music on which capturable atoms pulsed
     this.atomSpeed = CONTACT_DISTANCE * level.atomSpeed
 
     // Starts on its target color: no fade if the level begins with a single life
@@ -136,8 +140,9 @@ export default class GameEngine {
     this.emitter = new AtomEmitter(this.level.spawnInterval)
     this.flashLayer = new Container()
     this.paddleLayer = new Container()
+    this.pulseLayer = new Container() // over the core, behind every atom
     this.atomLayer = new Container()
-    this.playfield.addChild(this.ring.view, this.flashLayer, this.paddleLayer, this.emitter.view, this.atomLayer)
+    this.playfield.addChild(this.ring.view, this.flashLayer, this.paddleLayer, this.emitter.view, this.pulseLayer, this.atomLayer)
     this.app.stage.addChild(this.playfield)
   }
 
@@ -274,6 +279,8 @@ export default class GameEngine {
       atom.render(dt)
     }
 
+    this.pulseCapturableAtoms()
+
     if (this.lives === 0) {
       this.lose()
       return
@@ -315,14 +322,36 @@ export default class GameEngine {
     }
   }
 
+  // A charged atom overlapping the core. Shared by the capture and its pulse, so the cue always
+  // matches what a tap does
+  isCapturable (atom) {
+    return atom.state === ATOM_STATE.MOVING &&
+      atom.charge >= CAPTURE_MIN_CHARGE &&
+      Math.abs(atom.distance) <= CORE_CROSSING_DISTANCE
+  }
+
+  // On each beat of the music, every capturable atom emits one pulse lasting a beat, up to
+  // MAX_PULSES_PER_CROSSING per crossing. An atom takes several beats to come back to the core,
+  // so checking the count on the beat is enough to reset it between crossings
+  pulseCapturableAtoms () {
+    const beat = Math.floor(this.time / this.level.secondsPerBeat)
+    if (beat === this.lastBeat) return
+    this.lastBeat = beat
+    for (const atom of this.atoms) {
+      if (!this.isCapturable(atom)) {
+        atom.pulseCount = 0
+      } else if (atom.pulseCount < MAX_PULSES_PER_CROSSING) {
+        atom.startPulse(this.level.secondsPerBeat)
+        atom.pulseCount++
+      }
+    }
+  }
+
   // Destroys the charged atom crossing the core, if any; returns whether one was captured
   captureAtCore () {
     let target = null
     for (const atom of this.atoms) {
-      const capturable = atom.state === ATOM_STATE.MOVING &&
-        atom.charge >= CAPTURE_MIN_CHARGE &&
-        Math.abs(atom.distance) <= CORE_CROSSING_DISTANCE
-      if (capturable && (!target || Math.abs(atom.distance) < Math.abs(target.distance))) target = atom
+      if (this.isCapturable(atom) && (!target || Math.abs(atom.distance) < Math.abs(target.distance))) target = atom
     }
     if (!target) return false
 
@@ -354,6 +383,7 @@ export default class GameEngine {
     this.stateTime = 0
     this.clearPaddles()
     for (const atom of this.atoms) {
+      atom.pulse.hide()
       if (atom.state === ATOM_STATE.MOVING) atom.startCollapse(this.atomSpeed, CORE_COLLAPSE_SETTLE_TIME)
     }
     soundManager.playSfx('vortex_creation')
@@ -432,13 +462,19 @@ export default class GameEngine {
   // Entity pools
 
   spawnAtom () {
-    const atom = this.atomPool.pop() ?? new Atom()
+    const atom = this.atomPool.pop() ?? this.createAtom()
     // New atoms go behind all the others, so fresh atoms never hide charged ones. Pooled atoms
     // keep their old slot in the layer, so they are moved to the back too
     this.atomLayer.addChildAt(atom.view, 0)
     atom.spawn(Math.random() * 2 * Math.PI)
     this.atoms.push(atom)
     soundManager.playSfx('launch')
+  }
+
+  createAtom () {
+    const atom = new Atom()
+    this.pulseLayer.addChild(atom.pulse.view)
+    return atom
   }
 
   releaseAtom (atom) {
