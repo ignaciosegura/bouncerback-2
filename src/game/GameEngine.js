@@ -274,6 +274,10 @@ export default class GameEngine {
         this.updateEscapingAtom(atom, dt, step)
         continue
       }
+      if (atom.state === ATOM_STATE.CAPTURING) {
+        this.updateCapturingAtom(atom, dt)
+        continue
+      }
       atom.move(step)
       if (atom.movingOutward && Math.abs(atom.distance) >= CONTACT_DISTANCE) this.checkContact(atom)
       atom.render(dt)
@@ -322,6 +326,10 @@ export default class GameEngine {
     }
   }
 
+  updateCapturingAtom (atom, dt) {
+    if (!atom.updateCapture(dt)) this.releaseAtom(atom)
+  }
+
   // A charged atom overlapping the core. Shared by the capture and its pulse, so the cue always
   // matches what a tap does
   isCapturable (atom) {
@@ -356,7 +364,7 @@ export default class GameEngine {
     if (!target) return false
 
     this.addScore(capturePoints(this.level.number, target.charge))
-    this.releaseAtom(target)
+    target.startCapture()
     soundManager.playSfx('capture')
     return true
   }
@@ -370,7 +378,7 @@ export default class GameEngine {
 
   updateLost (dt) {
     this.stateTime += dt
-    this.updateEscapingAtoms(dt)
+    this.updateVanishingAtoms(dt)
     if (this.stateTime >= GAME_OVER_DELAY) {
       this.state = STATE.ENDED
       this.emit('onGameOver', { score: this.score })
@@ -405,7 +413,7 @@ export default class GameEngine {
       : RING_RADIUS * (1 - collapse)
     this.emitter.drawCollapse(radius, grow)
 
-    this.updateEscapingAtoms(dt)
+    this.updateVanishingAtoms(dt)
     for (const atom of this.atoms) {
       if (atom.state !== ATOM_STATE.COLLAPSING) continue
       atom.updateCollapse(settle, collapse)
@@ -426,10 +434,13 @@ export default class GameEngine {
     this.emit('onLevelWin', { score: this.score })
   }
 
-  updateEscapingAtoms (dt) {
+  // Escaping and captured atoms finish their animations after play has stopped
+  updateVanishingAtoms (dt) {
     const step = this.atomSpeed * dt
     for (let i = this.atoms.length - 1; i >= 0; i--) {
-      if (this.atoms[i].state === ATOM_STATE.ESCAPING) this.updateEscapingAtom(this.atoms[i], dt, step)
+      const atom = this.atoms[i]
+      if (atom.state === ATOM_STATE.ESCAPING) this.updateEscapingAtom(atom, dt, step)
+      else if (atom.state === ATOM_STATE.CAPTURING) this.updateCapturingAtom(atom, dt)
     }
   }
 

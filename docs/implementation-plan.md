@@ -205,8 +205,9 @@ Two small, independent phases that make the paddles easier to read. Neither chan
   - `captureAtCore()`: keep the target search, `addScore` and `playSfx('capture')`; replace `releaseAtom(target)` with `target.startCapture()`. The atom stays in `this.atoms` until its animation ends.
   - `isCapturable()` needs no change: it already requires `MOVING`, so a capturing atom can't be captured twice and never pulses.
   - `updatePlaying`: in the per-atom loop, route `CAPTURING` atoms (next to the `ESCAPING` branch) to a new `updateCapturingAtom(atom, dt)`, which calls `atom.updateCapture(dt)` and `releaseAtom(atom)` when it returns `false`. No `move()`, no contact check.
-  - Core collapse: `startCoreCollapse()` only takes `MOVING` atoms, so capturing atoms are left out of the collapse and of the containment score. `updateCollapsing` also runs `updateCapturingAtom` for them, the same way it keeps escaping atoms fading. The animation (0.5 s) always ends before `win()` (2 s).
-- Pause freezes the animation through `app.ticker`. Game Over during an animation and Try Again need nothing extra: the Game Screen unmounts and Try Again builds a new `GameEngine`. No state goes to React.
+  - Core collapse: `startCoreCollapse()` only takes `MOVING` atoms, so capturing atoms are left out of the collapse and of the containment score. The animation (0.5 s) always ends before `win()` (2 s).
+  - `updateEscapingAtoms` becomes `updateVanishingAtoms`, which advances both escaping and capturing atoms. `updateCollapsing` and `updateLost` call it, so a capture animation also finishes during the core collapse and the Game Over delay.
+- Pause freezes the animation through `app.ticker`. Try Again needs nothing extra: it builds a new `GameEngine`. No state goes to React.
 
 ---
 

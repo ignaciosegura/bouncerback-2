@@ -1,5 +1,6 @@
 import { Graphics } from 'pixi.js'
 import { lerpColor } from '../color.js'
+import { easeInQuad } from '../easing.js'
 import AtomPulse from './AtomPulse.js'
 
 export const ATOM_RADIUS = 20
@@ -9,10 +10,12 @@ export const CAPTURE_MIN_CHARGE = 3
 export const ATOM_STATE = {
   MOVING: 'moving',
   ESCAPING: 'escaping',
-  COLLAPSING: 'collapsing'
+  COLLAPSING: 'collapsing',
+  CAPTURING: 'capturing'
 }
 
 const ESCAPE_FADE_TIME = 0.5
+const CAPTURE_TIME = 0.5
 const COLOR_TRANSITION_TIME = 0.5
 
 export const ATOM_COLORS = {
@@ -109,6 +112,24 @@ export default class Atom {
     this.escapeTime += dt
     this.view.alpha = Math.max(0, 1 - this.escapeTime / ESCAPE_FADE_TIME)
     return this.escapeTime < ESCAPE_FADE_TIME
+  }
+
+  // Captured: stops and is pulled into the center of the core, shrinking to 0
+  startCapture () {
+    this.state = ATOM_STATE.CAPTURING
+    this.captureFrom = this.distance
+    this.captureTime = 0
+    this.pulse.hide()
+  }
+
+  // Renders the frame; returns false once it has reached the center
+  updateCapture (dt) {
+    this.captureTime += dt
+    const p = easeInQuad(Math.min(1, this.captureTime / CAPTURE_TIME))
+    this.distance = this.captureFrom * (1 - p)
+    this.view.scale.set(1 - p)
+    this.render(dt)
+    return this.captureTime < CAPTURE_TIME
   }
 
   // Core collapse: the atom keeps its direction and slows to a stop over `settleTime`, starting
