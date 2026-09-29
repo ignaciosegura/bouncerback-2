@@ -177,7 +177,7 @@ export function preloadTrack (name) {
 }
 
 function createTrackHowl (url) {
-  return new Howl({ src: [url], loop: true, volume: 0 })
+  return new Howl({ src: [url], volume: 0 })
 }
 
 // Fades out every playing track except the current one; returns whether any was fading
