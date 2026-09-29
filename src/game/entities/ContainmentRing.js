@@ -7,7 +7,17 @@ const LINE_WIDTH = 2
 export default class ContainmentRing {
   constructor () {
     this.view = new Graphics()
-      .circle(0, 0, RING_RADIUS)
+    // Hidden until the level start animation grows it
+    this.draw(0)
+  }
+
+  // Redrawn (not scaled) so the outline keeps its width at every radius
+  draw (radius) {
+    this.view.clear()
+    this.view.visible = radius > 0
+    if (!this.view.visible) return
+    this.view
+      .circle(0, 0, radius)
       .stroke({ width: LINE_WIDTH, color: 0xffffff })
   }
 }

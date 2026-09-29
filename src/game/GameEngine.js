@@ -27,6 +27,10 @@ const MAX_PULSES_PER_CROSSING = 3
 const CAPTURE_TAP_RADIUS = 60
 
 const START_DELAY = 3 // seconds before the timer, spawns and music start: the menu music fades out, the player gets ready
+// Level start animation, inside the start delay: the ring grows in, then the core
+const RING_GROW_TIME = 0.25
+const CORE_GROW_TIME = 0.5
+const START_ANIMATION_TIME = RING_GROW_TIME + CORE_GROW_TIME // must stay ≤ START_DELAY
 const MAX_ACTIVE_PADDLES = 2
 // Core collapse: the core grows to the ring while the atoms settle, then it collapses with them
 const CORE_COLLAPSE_SETTLE_TIME = 1.85
@@ -244,14 +248,23 @@ export default class GameEngine {
     }
   }
 
-  // Start delay: the ring is shown, but the timer, spawns, music and input wait
+  // Start delay: the ring and core grow in, but the timer, spawns, music and input wait
   updateStarting (dt) {
     this.stateTime += dt
+    // Progress is clamped, so the last call draws both at full size; no redraws after that
+    if (this.stateTime - dt < START_ANIMATION_TIME) this.drawStartAnimation(this.stateTime)
     if (this.stateTime < START_DELAY) return
 
     this.state = STATE.PLAYING
     soundManager.playTrack(this.level.soundTrack)
     this.updatePlaying(this.stateTime - START_DELAY)
+  }
+
+  drawStartAnimation(t) {
+    const ring = easeOutQuad(Math.min(1, t / RING_GROW_TIME))
+    const core = easeOutQuad(Math.min(1, Math.max(0, (t - RING_GROW_TIME) / CORE_GROW_TIME)))
+    this.ring.draw(RING_RADIUS * ring)
+    this.emitter.draw(CORE_RADIUS * core)
   }
 
   updatePlaying (dt) {
@@ -411,7 +424,7 @@ export default class GameEngine {
     const radius = t < CORE_COLLAPSE_SETTLE_TIME
       ? CORE_RADIUS + (RING_RADIUS - CORE_RADIUS) * grow
       : RING_RADIUS * (1 - collapse)
-    this.emitter.drawCollapse(radius, grow)
+    this.emitter.draw(radius, grow)
 
     this.updateVanishingAtoms(dt)
     for (const atom of this.atoms) {

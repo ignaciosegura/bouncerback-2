@@ -45,7 +45,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 Note: All color changes use a transition time of 0.5 seconds unless otherwise specified.
 
-* Level start: the containment ring and the core aren't simply shown, they grow in. First the ring grows from radius zero to its full size in 0.5 seconds (ease-out), then the core grows from radius zero to its full size in 0.5 seconds (ease-out). Their outlines keep their normal width while they grow. It plays at the start of every level, Try Again included, during the first second of the 3-second start delay, so the delay doesn't get longer.
+* Level start: the containment ring and the core aren't simply shown, they grow in. First the ring grows from radius zero to its full size in 0.25 seconds (ease-out), then the core grows from radius zero to its full size in 0.5 seconds (ease-out). Their outlines keep their normal width while they grow. It plays at the start of every level, Try Again included, during the first 0.75 seconds of the 3-second start delay, so the delay doesn't get longer.
 * Every time an atom bounces back, it gets a charged.
     - At 3 charges, the atom should transition to yellow (#FFFF00)
     - For every charge from 3 onwards, the atom should transition its color until the tenth charge, to get closer to red (#FF0000) for every additional charge.

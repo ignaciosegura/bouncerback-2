@@ -14,8 +14,8 @@ export default class AtomEmitter {
     this.intervalStart = 0
     this.nextSpawn = spawnDelay(spawnInterval)
     this.view = new Graphics()
-      .circle(0, 0, CORE_RADIUS)
-      .stroke({ width: LINE_WIDTH, color: OUTLINE_COLOR })
+    // Hidden until the level start animation grows it
+    this.draw(0)
   }
 
   // Returns how many atoms are due by game time `time` (seconds)
@@ -29,9 +29,10 @@ export default class AtomEmitter {
     return due
   }
 
-  // Core collapse: redrawn (not scaled) so the outline keeps its width at ring size. `fade`
-  // (0 → 1) fades the fill in and turns the outline from white to the same grey.
-  drawCollapse (radius, fade) {
+  // Redrawn (not scaled) so the outline keeps its width at every radius, up to ring size in the
+  // core collapse. `fade` (0 → 1) fades the fill in and turns the outline from white to the same
+  // grey; at 0 it's the normal core.
+  draw (radius, fade = 0) {
     this.view.clear()
     this.view.visible = radius > 0
     if (!this.view.visible) return
