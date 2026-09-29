@@ -16,6 +16,7 @@
     "@capacitor/ios": "^8.5.2",
     "@capacitor/screen-orientation": "^8.0.1",
     "howler": "^2.2.4",
+    "lottie-web": "^5.13.0",
     "pixi.js": "^8.21.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"

@@ -7,10 +7,18 @@ export default defineConfig({
   base: './',
   build: {
     rolldownOptions: {
+      // lottie-web runs the animation's expressions (loopOut) through eval by design
+      onLog (level, log, handler) {
+        if (log.code === 'EVAL' && log.id?.includes('lottie-web')) return
+        handler(level, log)
+      },
       output: {
         codeSplitting: {
-          // PixiJS in its own chunk keeps the main bundle under the 500 kB warning
-          groups: [{ name: 'pixi', test: /node_modules[\\/](pixi\.js|@pixi)[\\/]/ }]
+          // PixiJS and lottie-web in their own chunks keep the main bundle under the 500 kB warning
+          groups: [
+            { name: 'pixi', test: /node_modules[\\/](pixi\.js|@pixi)[\\/]/ },
+            { name: 'lottie', test: /node_modules[\\/]lottie-web[\\/]/ }
+          ]
         }
       }
     }
