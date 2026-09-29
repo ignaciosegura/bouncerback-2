@@ -9,6 +9,7 @@ root/
 └── assets/                         # Static assets
     ├── audio/                      # Sound effects & music files for Howler.js
     ├── images/                     # SVG vector assets and mobile app icon
+    ├── motion/                     # Lottie animations (menu background)
     └── fonts/                      # Font files for the game (TTF and OTF formats).
 └── docs/                           # Documentation for the implementation
     ├── mockups/                    # Reference images for layout and style
@@ -27,6 +28,7 @@ root/
     │   ├── Button.jsx              # Reusable button component
     │   ├── HUD.jsx                 # Heads-Up Display for in-game information
     │   ├── Menu.jsx                # Generic menu container component
+    │   ├── MenuBackground.jsx      # Lottie animation behind the menu screens (mounted in App.jsx, persists across them)
     │   ├── Screen.jsx              # Base screen wrapper component (handles transitions, safe areas, etc.)
     │   ├── Overlay.jsx             # Generic overlay component to be placed on top of current screen content
     │   └── TextBox.jsx             # Floating text box component.

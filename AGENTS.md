@@ -56,7 +56,7 @@ Mobile browsers block audio until an explicit user interaction. Ensure Howler.js
 
 - Forced **landscape** orientation.
 - **Black background** (`#000000`) during gameplay, except dark red (`#660000`) when the player has only one life left (see "Visual feedback" in `docs/graphical-specs.md`); white (`#DDDDDD`) background only for inverted menu layouts.
-- All graphics: **2D vector only**, no textures, no images. White lines and filled circles on black; the only color exceptions are the gameplay feedback colors in "Visual feedback" (`docs/graphical-specs.md`).
+- All graphics: **2D vector only**, no textures, no images. White lines and filled circles on black; the only color exceptions are the gameplay feedback colors in "Visual feedback" (`docs/graphical-specs.md`). The menu screens' Lottie background animation (`assets/motion/`) is vector too and is allowed (see "Menu background animation" in `docs/graphical-specs.md`).
 - Font: **"C64 Angled"** monospaced — `assets/fonts/c64_angled.ttf`. Weight normal, line height 1, always uppercase.
 - Font sizes (per `docs/graphical-specs.md`): **24px** for HUD text, **32px** for menu buttons, **64px** for the "GAME OVER" and "YOU WIN!" titles — at the 1080px-tall reference; the whole UI scales with the viewport (see `docs/graphical-specs.md`).
 - All text/menus wrapped in a **thin-border transparent rectangle** with 0.5em padding.

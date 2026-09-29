@@ -8,6 +8,12 @@ The screen will be used in forced landscape mode. The visual style is based on e
     * During the game, black background, white lines and full circles only (except for the color changes in "Visual feedback" below). No textures. The vector assets provided will also be in black and white.
     * During the menus, the same font and visual style will be used. The background will be black, with white text. In some cases, the layout will be inverted, white background, black texts and outlines.
 
+## Menu background animation
+
+* The Intro, Main Menu, Level Select and Settings screens show the vector animation `assets/motion/intro_animation.json` (Lottie) on top of the white (#DDDDDD) background and behind the text and buttons. Its light-grey and white lines are meant to be subtle, tone on tone.
+* It plays continuously while the player moves between those four screens: changing screens never restarts or pauses it. It starts again from the beginning when the player comes back to the menus after playing a level.
+* It covers the whole screen (cropped at the top and bottom on screens wider than 16:9) and loops: the content (about 125 s) plus 5 seconds of empty background, then back to the start.
+
 ## Text and menus
 
 * All menus and texts will be wrapped in a transparent rectangle with a thin border, the same color as the text.
