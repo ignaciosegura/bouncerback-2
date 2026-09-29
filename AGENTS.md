@@ -15,6 +15,7 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 | `docs/navigation.md` | Screen flow and navigation hierarchy |
 | `docs/graphical-specs.md` | Visual style, colors, fonts, layout rules |
 | `docs/game-rules.md` | Game mechanics, scoring, win/loss conditions |
+| `docs/audio-map.md` | Which sound effect each game event triggers |
 | `docs/implementation-guidelines.md` | Summary of architectural and implementation rules |
 | `docs/implementation-plan.md` | Design decisions and the phase-by-phase implementation plan |
 | `docs/implementation-status.md` | Which implementation phases are completed and which are pending |
