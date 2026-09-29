@@ -212,7 +212,7 @@ Two small, independent phases that make the paddles easier to read. Neither chan
 
 ### Phase 23 — Menu background animation
 - Plays the Lottie animation behind the menu screens (see "Menu background animation" in Decisions and graphical-specs "Menu background animation"). DOM layer, React domain: PixiJS isn't involved and no animation state goes to React (lottie-web runs its own `requestAnimationFrame` loop).
-- Dependency: `lottie-web`, imported as `lottie-web/build/player/lottie_svg` (SVG renderer with expressions). The JSON is imported through Vite like the other assets.
+- Dependency: `lottie-web`, imported as `lottie-web/build/player/lottie_svg` (SVG renderer with expressions). The JSON is imported through Vite like the other assets. `vite.config.js` puts lottie-web in its own chunk (like PixiJS) to keep the main bundle under the 500 kB warning, and silences the build's direct-`eval` warning for lottie-web only: lottie-web runs expressions through `eval` by design.
 - `src/components/MenuBackground.jsx`:
   - A full-viewport `div.menu-background` (`position: absolute; inset: 0; pointer-events: none; background: var(--color-white-bg)`), used as the Lottie container.
   - `useEffect`: `lottie.loadAnimation({ container, renderer: 'svg', animationData, loop: true, autoplay: false, rendererSettings: { preserveAspectRatio: 'xMidYMid slice' } })`, then `anim.playSegments([0, LOOP_END_FRAME], true)` with `LOOP_END_FRAME = 7785` (content ends at 7485, plus 300 frames = 5 s of the empty tail). Cleanup calls `anim.destroy()`, the same way the Game Screen destroys the PixiJS app.

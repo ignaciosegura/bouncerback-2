@@ -36,4 +36,4 @@ Legend: `[x]` done · `[ ]` pending
 - [x] **Phase 20** — Capture window feedback (core 25% larger; charged atoms crossing the core pulse once per beat in their color, 50% → 0% opacity)
 - [x] **Phase 21** — Core collapse animation (2 s: core grows to ring size with grey fill while atoms ease to a stop, then everything collapses into the center)
 - [x] **Phase 22** — Capture animation (a captured atom moves to the center of the core while shrinking to 0 over 0.5 s, ease-in)
-- [ ] **Phase 23** — Menu background animation (Lottie `intro_animation.json` plays uninterrupted behind Intro, Main Menu, Level Select and Settings; loops frames 0–7785)
+- [x] **Phase 23** — Menu background animation (Lottie `intro_animation.json` plays uninterrupted behind Intro, Main Menu, Level Select and Settings; loops frames 0–7785)

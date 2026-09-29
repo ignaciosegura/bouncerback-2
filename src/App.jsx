@@ -9,6 +9,7 @@ import SettingsMenuScreen from './screens/SettingsMenuScreen.jsx'
 import GameScreen from './screens/GameScreen.jsx'
 import GameOverScreen from './screens/GameOverScreen.jsx'
 import YouWinScreen from './screens/YouWinScreen.jsx'
+import MenuBackground from './components/MenuBackground.jsx'
 
 const SCREENS = {
   INTRO: 'intro',
@@ -19,6 +20,9 @@ const SCREENS = {
   GAME_OVER: 'gameOver',
   YOU_WIN: 'youWin'
 }
+
+// Screens drawn over the menu background animation; it plays uninterrupted between them
+const MENU_BACKGROUND_SCREENS = [SCREENS.INTRO, SCREENS.MAIN_MENU, SCREENS.LEVEL_SELECT, SCREENS.SETTINGS]
 
 export default function App () {
   const [screen, setScreen] = useState(SCREENS.INTRO)
@@ -76,63 +80,74 @@ export default function App () {
     setScreen(nextScreen)
   }
 
-  switch (screen) {
-  case SCREENS.INTRO:
-    return <IntroScreen onContinue={leaveIntro} />
+  const renderScreen = () => {
+    switch (screen) {
+    case SCREENS.INTRO:
+      return <IntroScreen onContinue={leaveIntro} />
 
-  case SCREENS.MAIN_MENU:
-    return (
-      <MainMenuScreen
-        onPlay={() => setScreen(SCREENS.LEVEL_SELECT)}
-        onSettings={() => setScreen(SCREENS.SETTINGS)}
-      />
-    )
+    case SCREENS.MAIN_MENU:
+      return (
+        <MainMenuScreen
+          onPlay={() => setScreen(SCREENS.LEVEL_SELECT)}
+          onSettings={() => setScreen(SCREENS.SETTINGS)}
+        />
+      )
 
-  case SCREENS.LEVEL_SELECT:
-    return (
-      <LevelSelectionMenuScreen
-        levels={levels}
-        onSelectLevel={startLevel}
-        onBack={goToMainMenu}
-      />
-    )
+    case SCREENS.LEVEL_SELECT:
+      return (
+        <LevelSelectionMenuScreen
+          levels={levels}
+          onSelectLevel={startLevel}
+          onBack={goToMainMenu}
+        />
+      )
 
-  case SCREENS.SETTINGS:
-    return (
-      <SettingsMenuScreen
-        musicVolume={musicVolume}
-        sfxVolume={sfxVolume}
-        onMusicVolumeChange={changeMusicVolume}
-        onSfxVolumeChange={changeSfxVolume}
-        onBack={goToMainMenu}
-      />
-    )
+    case SCREENS.SETTINGS:
+      return (
+        <SettingsMenuScreen
+          musicVolume={musicVolume}
+          sfxVolume={sfxVolume}
+          onMusicVolumeChange={changeMusicVolume}
+          onSfxVolumeChange={changeSfxVolume}
+          onBack={goToMainMenu}
+        />
+      )
 
-  case SCREENS.GAME:
-    return (
-      <GameScreen
-        level={level}
-        hiScore={hiScore}
-        onScoreChange={registerScore}
-        onGameOver={endLevel(SCREENS.GAME_OVER)}
-        onLevelWin={endLevel(SCREENS.YOU_WIN)}
-      />
-    )
+    case SCREENS.GAME:
+      return (
+        <GameScreen
+          level={level}
+          hiScore={hiScore}
+          onScoreChange={registerScore}
+          onGameOver={endLevel(SCREENS.GAME_OVER)}
+          onLevelWin={endLevel(SCREENS.YOU_WIN)}
+        />
+      )
 
-  case SCREENS.GAME_OVER:
-  case SCREENS.YOU_WIN: {
-    const ResultScreen = screen === SCREENS.GAME_OVER ? GameOverScreen : YouWinScreen
-    return (
-      <ResultScreen
-        score={score}
-        hiScore={hiScore}
-        onTryAgain={() => startLevel(level)}
-        onMainMenu={goToMainMenu}
-      />
-    )
+    case SCREENS.GAME_OVER:
+    case SCREENS.YOU_WIN: {
+      const ResultScreen = screen === SCREENS.GAME_OVER ? GameOverScreen : YouWinScreen
+      return (
+        <ResultScreen
+          score={score}
+          hiScore={hiScore}
+          onTryAgain={() => startLevel(level)}
+          onMainMenu={goToMainMenu}
+        />
+      )
+    }
+
+    default:
+      return null
+    }
   }
 
-  default:
-    return null
-  }
+  // The background always sits at the same place in the tree, so switching between menu screens
+  // keeps the same instance (and the animation) instead of remounting it
+  return (
+    <>
+      {MENU_BACKGROUND_SCREENS.includes(screen) ? <MenuBackground /> : null}
+      {renderScreen()}
+    </>
+  )
 }

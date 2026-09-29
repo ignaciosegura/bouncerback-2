@@ -97,6 +97,24 @@ button {
   --bg: var(--color-white-bg);
 }
 
+.screen--transparent {
+  background: transparent;
+}
+
+/* Menu background animation (Lottie), behind the menu screens */
+
+.menu-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--color-white-bg);
+}
+
+.menu-background svg {
+  display: block;
+}
+
 /* Button */
 
 .button {

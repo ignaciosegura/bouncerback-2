@@ -4,7 +4,7 @@ import Button from '../components/Button.jsx'
 
 export default function LevelSelectionMenuScreen ({ levels, onSelectLevel, onBack }) {
   return (
-    <Screen variant="light">
+    <Screen variant="light" transparent>
       <Menu footer={<Button onClick={onBack}>&lt;&lt;&lt; BACK</Button>}>
         {levels.map((level) => (
           <Button key={level.number} onClick={() => onSelectLevel(level)}>

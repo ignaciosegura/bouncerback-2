@@ -38,7 +38,7 @@ export default function SettingsMenuScreen ({
   onBack
 }) {
   return (
-    <Screen variant="light">
+    <Screen variant="light" transparent>
       <Menu footer={<Button onClick={onBack}>&lt;&lt;&lt; BACK</Button>}>
         <VolumeControl label="MUSIC" value={musicVolume} onChange={onMusicVolumeChange} />
         <VolumeControl label="SFX" value={sfxVolume} onChange={onSfxVolumeChange} />
