@@ -1,19 +1,19 @@
 {
-  "name": "NEUTRONIKA",
-  "duration": 66,
+  "name": "FEMTOCOSMOS",
+  "duration": 30,
   "timeSignature": {
-    "bpm": 120,
+    "bpm": 130,
     "signature": 4
   },
-  "soundTrack": "neutronika.mp3",
+  "soundTrack": "femtocosmos.mp3",
   "vfx": [],
   "atoms": {
-    "travelTime": 8,
-    "barsInterval": 2
+    "travelTime": 12,
+    "barsInterval": 6
   },
   "paddles": {
     "angle": 30,
     "duration": 3
   },
-  "lives": 4
+  "lives": 5
 }

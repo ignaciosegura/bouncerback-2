@@ -1,19 +1,19 @@
 {
-  "name": "FEMTOCOSMOS",
-  "duration": 30,
+  "name": "CHRONOSAEDR0N",
+  "duration": 24,
   "timeSignature": {
     "bpm": 130,
     "signature": 4
   },
-  "soundTrack": "femtocosmos.mp3",
+  "soundTrack": "chronosaedron.mp3",
   "vfx": [],
   "atoms": {
-    "travelTime": 12,
-    "barsInterval": 6
+    "travelTime": 8,
+    "barsInterval": 2
   },
   "paddles": {
     "angle": 30,
     "duration": 3
   },
-  "lives": 5
+  "lives": 4
 }

@@ -28,10 +28,10 @@ Tracks are assigned to screens or levels. Each level's track is declared in its 
 | `main_title.mp3` | Intro, Main Menu, Settings, Level Selection (the Enter screen is silent) |
 | *(none)* | Game Over, You Win! — the music fades out and the screen is silent. A dedicated ambience track is planned for the second development cycle. |
 | `learn.mp3` | Level 1 |
-| `neutronika.mp3` | Level 2 |
-| `femtocosmos.mp3` | Level 3 |
-| `chronosaedron.mp3` | Level 4 |
-| `mekanomancer.mp3` | Level 5 |
+| `femtocosmos.mp3` | Level 2 |
+| `chronosaedron.mp3` | Level 3 |
+| `mekanomancer.mp3` | Level 4 |
+| `neutronika.mp3` | Level 5 |
 
 > [!NOTE]
 > The track assignment for levels 2–5 above is a suggested default. Adjust the `soundTrack` field in each level file to change the mapping without touching code.

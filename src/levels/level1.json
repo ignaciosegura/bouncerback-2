@@ -9,11 +9,11 @@
   "vfx": [],
   "atoms": {
     "travelTime": 16,
-    "barsInterval": 2
+    "barsInterval": 8
   },
   "paddles": {
     "angle": 30,
-    "duration": 3
+    "duration": 5
   },
   "lives": 8
 }

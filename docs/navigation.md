@@ -9,7 +9,7 @@
   - Settings Button
   - Start Game Button
 - **Level Selection Screen**
-  - One button per level, labeled with the level file's `name` (LEARN, NEUTRONIKA, FEMTOCOSMOS, CHRONOSAEDR0N, MEKANOMANCER). All levels are unlocked from the start.
+  - One button per level, labeled with the level file's `name` (LEARN, FEMTOCOSMOS, CHRONOSAEDR0N, MEKANOMANCER, NEUTRONIKA). All levels are unlocked from the start.
   - Back Button
 - **Settings Screen**
   - Sound FX Volume dual-button
