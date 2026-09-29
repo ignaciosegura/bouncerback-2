@@ -38,3 +38,4 @@ Legend: `[x]` done · `[ ]` pending
 - [x] **Phase 22** — Capture animation (a captured atom moves to the center of the core while shrinking to 0 over 0.5 s, ease-in)
 - [x] **Phase 23** — Menu background animation (Lottie `intro_animation.json` plays uninterrupted behind Intro, Main Menu, Level Select and Settings; loops frames 0–7785)
 - [x] **Phase 24** — Enter screen & menu music start (`ENTER BOUNCERBACK` screen before the Intro unlocks audio; the menu track starts on the Intro with no fade-in, and the menu animation starts with it)
+- [ ] **Phase 25** — Level start animation (the ring grows from radius 0 in 0.5 s, then the core grows from radius 0 in 0.5 s, both ease-out, inside the 3 s start delay)
