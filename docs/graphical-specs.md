@@ -10,9 +10,14 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 ## Menu background animation
 
-* The Intro, Main Menu, Level Select and Settings screens show the vector animation `assets/motion/intro_animation.json` (Lottie) on top of the white (#DDDDDD) background and behind the text and buttons. Its light-grey and white lines are meant to be subtle, tone on tone.
+* The Main Menu, Level Select and Settings screens show the vector animation `assets/motion/intro_animation.json` (Lottie) on top of the white (#DDDDDD) background and behind the text and buttons. Its light-grey and white lines are meant to be subtle, tone on tone. The Intro screen (ENTER BOUNCERBACK) doesn't show it: it's a plain white (#DDDDDD) background.
 * It starts at the same moment as the menu music (they were made together), and stays still until the music starts.
-* It plays continuously while the player moves between those four screens: changing screens never restarts or pauses it. It starts again from the beginning when the player comes back to the menus after playing a level.
+* It plays continuously while the player moves between those three screens: changing screens never restarts or pauses it. It starts again from the beginning when the player comes back to the menus after playing a level.
+
+## Game logo
+
+* The game logo (`assets/images/game_logo.svg`, vector, black) is shown at the top of the Main Menu, above the PLAY and SETTINGS buttons (see the MAIN MENU mockup). It isn't shown on any other screen.
+* At the 1920x1080 reference size it's 1518px wide, horizontally centered, with its top edge 182px from the top of the screen. The PLAY button's top edge is 229px below the logo's bottom edge, and the buttons keep the usual 64px gap between them.
 * It covers the whole screen (cropped at the top and bottom on screens wider than 16:9) and loops: the content (about 125 s) plus 5 seconds of empty background, then back to the start.
 
 ## Text and menus

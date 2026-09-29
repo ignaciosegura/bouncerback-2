@@ -49,7 +49,7 @@ Apply `touchAction: 'none'` via CSS or inline style on the PixiJS canvas contain
 
 ### 5. Howler.js must be unlocked on first user interaction
 
-Mobile browsers block audio until an explicit user interaction. Ensure Howler.js is initialized or unlocked when the player first interacts (the ENTER BOUNCERBACK button on the Enter screen). The audio manager must be available across all screens, not only during gameplay.
+Mobile browsers block audio until an explicit user interaction. Ensure Howler.js is initialized or unlocked when the player first interacts (the ENTER BOUNCERBACK button on the Intro screen). The audio manager must be available across all screens, not only during gameplay.
 
 ---
 

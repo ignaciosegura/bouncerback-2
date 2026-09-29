@@ -1,13 +1,12 @@
 # Navigation Flow
 
-- **Enter Screen** *(second development cycle; first screen on every launch. No mockup: light layout like the menus)*
-  - ENTER BOUNCERBACK Button (unlocks audio) → Intro Screen
-- **Intro Screen**
-  - The menu music and the menu background animation start together
-  - Tap anywhere to continue → Main Menu
+- **Intro Screen** *(first screen on every launch; light layout, no menu background animation, silent)*
+  - ENTER BOUNCERBACK Button (unlocks audio) → Main Menu
 - **Main Menu**
+  - Game logo at the top
+  - The first time it's reached from the Intro, the menu music and the menu background animation start together
+  - Play Button
   - Settings Button
-  - Start Game Button
 - **Level Selection Screen**
   - One button per level, labeled with the level file's `name` (LEARN, FEMTOCOSMOS, CHRONOSAEDR0N, MEKANOMANCER, NEUTRONIKA). All levels are unlocked from the start.
   - Back Button

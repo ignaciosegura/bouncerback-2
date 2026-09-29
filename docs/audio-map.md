@@ -25,7 +25,7 @@ Tracks are assigned to screens or levels. Each level's track is declared in its 
 
 | File | Screen / Level |
 | :--- | :--- |
-| `main_title.mp3` | Intro, Main Menu, Settings, Level Selection (the Enter screen is silent) |
+| `main_title.mp3` | Main Menu, Settings, Level Selection (the Intro screen is silent) |
 | *(none)* | Game Over, You Win! — the music fades out and the screen is silent. A dedicated ambience track is planned for the second development cycle. |
 | `learn.mp3` | Level 1 |
 | `femtocosmos.mp3` | Level 2 |
@@ -40,8 +40,8 @@ Tracks are assigned to screens or levels. Each level's track is declared in its 
 
 ## Audio Lifecycle Rules
 
-1. **Unlock on first interaction** — Play `silence.mp3` immediately when the player first interacts with any screen pressing ENTER BOUNCERBACK on the Enter screen. This satisfies the mobile browser audio policy and ensures all subsequent sounds play without delay.
-2. **Music crossfade** — When transitioning between screens, fade out the current track before fading in the new one. When the destination screen has no track (Game Over, You Win!), just fade out. Exception: the menu track's first start, on the Intro, has no fade-in (it starts together with the menu background animation).
+1. **Unlock on first interaction** — Play `silence.mp3` immediately when the player presses ENTER BOUNCERBACK on the Intro screen. This satisfies the mobile browser audio policy and ensures all subsequent sounds play without delay.
+2. **Music crossfade** — When transitioning between screens, fade out the current track before fading in the new one. When the destination screen has no track (Game Over, You Win!), just fade out. Exception: the menu track's first start, when ENTER BOUNCERBACK takes the player to the Main Menu, has no fade-in (it starts together with the menu background animation).
 3. **Level start** — Entering the Game Screen fades the music out. The level's track starts when the level's 3-second start delay ends, at the same moment as the timer (see `game-rules.md`); it is preloaded during the delay so it starts on time.
 4. **Music continuity** — If the destination screen uses the same track as the origin (e.g., navigating Settings → Main Menu), do **not** restart or crossfade the track; let it continue playing seamlessly.
 5. **SFX volume and music volume** — Controlled independently via the Settings screen buttons and persisted in `soundManager.js`. Both are capped at -6 dB (setting 9), so music and SFX at full volume sum to at most 0 dB instead of clipping.

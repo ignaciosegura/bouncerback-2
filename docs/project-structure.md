@@ -52,9 +52,8 @@ root/
     │   ├── level4.json             # Level 4 data
     │   └── level5.json             # Level 5 data
     ├── screens/                    # React screens, built from the generic components above
-    │   ├── EnterScreen.jsx         # First screen: ENTER BOUNCERBACK button (unlocks audio)
-    │   ├── IntroScreen.jsx         # Intro screen (menu music and background animation start here)
-    │   ├── MainMenuScreen.jsx      # Main menu screen
+    │   ├── IntroScreen.jsx         # First screen: ENTER BOUNCERBACK button (unlocks audio)
+    │   ├── MainMenuScreen.jsx      # Main menu screen with the game logo (menu music and background animation start here)
     │   ├── SettingsMenuScreen.jsx  # Settings menu screen
     │   ├── LevelSelectionMenuScreen.jsx  # Level selection menu screen
     │   ├── GameScreen.jsx          # Houses the PixiCanvas component & HUD overlay
