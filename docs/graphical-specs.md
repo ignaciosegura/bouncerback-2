@@ -41,13 +41,14 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 ## Screen transitions
 
-* Every screen change uses the same transition, inspired by old TV sets: the old screen goes out, then the new screen comes in. It covers the whole picture: the screen, its text and buttons, the HUD, the game canvas and the menu background animation.
+* Every screen change uses the same transition, inspired by old TV sets: the elements of the old screen go out, then the elements of the new screen come in.
+* Only the elements animate: text, buttons, borders, the Main Menu logo and the HUD. The screens themselves don't: their background (black, white #D8D8D8, the menu background animation) stays still and changes at once when the new screen replaces the old one, and the menu background animation keeps playing. On the Game Screen only the HUD animates; the game canvas (ring, core, atoms and its black or dark red background) stays as it is until the Game Screen is replaced.
 * Screen out (1 s):
-    * 0 → 1 s: fades out to black (linear).
-    * 0.5 → 0.75 s: the tint blends gradually from none to dark yellow (#666600).
-    * 0.75 → 1 s: the tint blends gradually from dark yellow to dark red (#660000), with a subtle vertical shake (4px up and down at the 1080px reference, four times).
-    * The tint multiplies the picture: white becomes exactly the tint color and black stays black. The blends are linear and last 0.25 s each (this overrides the 0.5 s default for color changes).
-* Screen in (0.5 s): fades in from black (linear). No tint, no shake.
+    * 0 → 1 s: the elements fade out (linear), revealing the screen's background.
+    * 0.5 → 0.75 s: their color blends gradually from its own color (black on the light menus, white on the dark screens) to dark yellow (#666600).
+    * 0.75 → 1 s: their color blends gradually from dark yellow to dark red (#660000), with a subtle vertical shake (4px up and down at the 1080px reference, four times).
+    * The blends are linear and last 0.25 s each (this overrides the 0.5 s default for color changes).
+* Screen in (0.5 s): the new screen's elements fade in (linear). No tint, no shake.
 * The first screen on launch (Intro) only plays the screen in.
 * Taps and clicks are ignored while a transition is running.
 
