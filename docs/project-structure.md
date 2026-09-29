@@ -52,7 +52,8 @@ root/
     │   ├── level4.json             # Level 4 data
     │   └── level5.json             # Level 5 data
     ├── screens/                    # React screens, built from the generic components above
-    │   ├── IntroScreen.jsx         # Intro screen (first tap unlocks audio)
+    │   ├── EnterScreen.jsx         # First screen: ENTER BOUNCERBACK button (unlocks audio)
+    │   ├── IntroScreen.jsx         # Intro screen (menu music and background animation start here)
     │   ├── MainMenuScreen.jsx      # Main menu screen
     │   ├── SettingsMenuScreen.jsx  # Settings menu screen
     │   ├── LevelSelectionMenuScreen.jsx  # Level selection menu screen

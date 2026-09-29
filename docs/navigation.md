@@ -1,7 +1,10 @@
 # Navigation Flow
 
+- **Enter Screen** *(second development cycle; first screen on every launch. No mockup: light layout like the menus)*
+  - ENTER BOUNCERBACK Button (unlocks audio) → Intro Screen
 - **Intro Screen**
-  - Tap anywhere to continue (unlocks audio) → Main Menu
+  - The menu music and the menu background animation start together
+  - Tap anywhere to continue → Main Menu
 - **Main Menu**
   - Settings Button
   - Start Game Button

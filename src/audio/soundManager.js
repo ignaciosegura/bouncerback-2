@@ -44,6 +44,11 @@ let sfxVolume = readVolume(STORAGE_KEYS.sfx)
 let currentTrack = null
 let fadeInTimer = null
 let musicPaused = false
+// Whether the current track fades in when it starts (see playTrack)
+let currentFadeIn = true
+
+// Callbacks for onTrackStart, keyed like `tracks`
+const trackStartListeners = {}
 
 applySfxVolume()
 
@@ -80,7 +85,7 @@ function applySfxVolume () {
 
 /**
  * Plays the near-silent stub. Must be called from the first user interaction
- * (the Intro screen tap) so mobile browsers allow audio from then on.
+ * (the Enter screen's button) so mobile browsers allow audio from then on.
  */
 export function unlock () {
   sfx.silence?.play()
@@ -112,10 +117,11 @@ function stealVoice (howl, id) {
 }
 
 /**
- * Switches the music: the current track fades out, then the new one fades in.
+ * Switches the music: the current track fades out, then the new one fades in
+ * (or starts straight at the music volume with `fadeIn: false`).
  * Requesting the track that is already playing does nothing, so it continues seamlessly.
  */
-export function playTrack (name) {
+export function playTrack (name, { fadeIn = true } = {}) {
   if (name === currentTrack) return
   if (!tracks[name]) {
     console.warn(`soundManager: unknown track "${name}"`)
@@ -123,6 +129,7 @@ export function playTrack (name) {
   }
 
   currentTrack = name
+  currentFadeIn = fadeIn
   musicPaused = false
   clearTimeout(fadeInTimer)
   const fadingOut = fadeOutOtherTracks()
@@ -173,11 +180,27 @@ export function preloadTrack (name) {
     console.warn(`soundManager: unknown track "${name}"`)
     return
   }
-  if (!track.howl) track.howl = createTrackHowl(track.url)
+  if (!track.howl) track.howl = createTrackHowl(name)
 }
 
-function createTrackHowl (url) {
-  return new Howl({ src: [url], volume: 0 })
+/**
+ * Calls `callback` every time the track actually starts playing (after loading, not when requested).
+ * Returns a function that removes the callback.
+ */
+export function onTrackStart (name, callback) {
+  const listeners = trackStartListeners[name] ??= new Set()
+  listeners.add(callback)
+  return () => listeners.delete(callback)
+}
+
+export function isTrackPlaying (name) {
+  return tracks[name]?.howl?.playing() ?? false
+}
+
+function createTrackHowl (name) {
+  const howl = new Howl({ src: [tracks[name].url], volume: 0 })
+  howl.on('play', () => trackStartListeners[name]?.forEach((callback) => callback()))
+  return howl
 }
 
 // Fades out every playing track except the current one; returns whether any was fading
@@ -207,13 +230,15 @@ function startCurrentTrack () {
   unloadOtherTracks(true)
 
   const track = tracks[currentTrack]
-  if (!track.howl) track.howl = createTrackHowl(track.url)
+  if (!track.howl) track.howl = createTrackHowl(currentTrack)
+  // Without a fade-in, the track starts straight at the music volume
+  if (!currentFadeIn) track.howl.volume(gain(musicVolume))
   if (!track.started) {
     if (!musicPaused) track.howl.play()
     track.started = true
   }
   // Also fades a track back in if it was requested again while fading out
-  track.howl.fade(track.howl.volume(), gain(musicVolume), FADE_MS)
+  if (currentFadeIn) track.howl.fade(track.howl.volume(), gain(musicVolume), FADE_MS)
 }
 
 export function getMusicVolume () {
