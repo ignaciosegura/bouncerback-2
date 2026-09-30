@@ -13,12 +13,13 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * The Main Menu, Level Select and Settings screens show the vector animation `assets/motion/intro_animation.json` (Lottie) on top of the white (#D8D8D8) background and behind the text and buttons. Its light-grey and white lines are meant to be subtle, tone on tone. The Intro screen (ENTER BOUNCERBACK) doesn't show it: it's a plain white (#D8D8D8) background.
 * It starts at the same moment as the menu music (they were made together), and stays still until the music starts.
 * It plays continuously while the player moves between those three screens: changing screens never restarts or pauses it. It starts again from the beginning when the player comes back to the menus after playing a level.
+* It covers the whole screen (cropped at the top and bottom on screens wider than 16:9) and loops: the content (about 125 s) plus 5 seconds of empty background, then back to the start.
 
 ## Game logo
 
 * The game logo (source art: `assets/images/game_logo.svg`, vector, black) is shown at the top of the Main Menu, above the PLAY and SETTINGS buttons (see the MAIN MENU mockup). It isn't shown on any other screen. It's rendered as inline SVG (`src/components/Logo.jsx`, one `<path>`/`<rect>` per letterform), not as an `<img>` or CSS mask, so its segments can be targeted individually for animation.
 * At the 1920x1080 reference size it's 1518px wide, horizontally centered, with its top edge 182px from the top of the screen. The PLAY button's top edge is 229px below the logo's bottom edge, and the buttons keep the usual 64px gap between them.
-* It covers the whole screen (cropped at the top and bottom on screens wider than 16:9) and loops: the content (about 125 s) plus 5 seconds of empty background, then back to the start.
+* The logo's pieces blink at random. About once per second, at irregular moments (0.5 to 1.5 s apart), one piece turns white (#FFFFFF) at once, then fades back to the logo's color in 0.25 s. A piece is a letter or one of the E's three bars; the O's ring and dot blink together. The same piece never blinks twice in a row, and two pieces never blink at once. Blinking continues during screen transitions; a piece blinking during the screen-out fades to the tint color instead of black.
 
 ## Text and menus
 
