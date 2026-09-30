@@ -28,17 +28,29 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * At the 1920x1080 reference size it's 1518px wide, horizontally centered, with its top edge 182px from the top of the screen. The PLAY button's top edge is 229px below the logo's bottom edge, and the buttons keep the usual 64px gap between them.
 * The logo's pieces blink at random. About once every 2 seconds, at irregular moments (0.5 to 3.5 s apart), one piece turns white (#FFFFFF) at once, then fades back to the logo's color in 0.15 s. A piece is a letter or one of the E's three bars; the O's ring and dot blink together. The same piece never blinks twice in a row, and two pieces never blink at once. Blinking continues during screen transitions; a piece blinking during the screen-out fades to the tint color instead of black.
 
+## Main Menu credits
+
+* The Main Menu shows two lines of credits at the bottom of the screen (see the MAIN MENU mockup):
+    * "A game by NIK NAK STUDIO"
+    * "Music and sfx by MAN FROM SPACE"
+* They're written in mixed case exactly as above: the only text in the game that isn't all uppercase.
+* They're 24px, in the screen's foreground color (black on the white #D8D8D8 background), with no border. Each line is horizontally centered on its own.
+* At the 1920x1080 reference size, there are 23px between the two lines, and the bottom of the second line is 109px above the bottom of the screen. The logo and the buttons don't move to make room for them.
+* The names are links that open in a new tab: NIK NAK STUDIO → https://niknak.es, MAN FROM SPACE → https://manfromspace.com. The rest of each line isn't a link.
+* The links look exactly like the text around them: same color, no underline, no change once visited. They give no feedback on hover, press, tap or focus.
+* They're one of the screen's elements, so they take part in the screen transitions together with the logo and the buttons (see "Screen transitions").
+
 ## Text and menus
 
 * All menus and texts will be wrapped in a transparent rectangle with a thin border, the same color as the text.
 * The distance between the text and the border will always be 0.5 em, meaning that it will scale with the font size (matches the mockups).
 * Font size should always be (at the 1920x1080 reference size of the mockups; see "Scaling" below):
-    * 24px for HUD text during gameplay
+    * 24px for HUD text during gameplay, and for the Main Menu credits (see "Main Menu credits")
     * 32px for all menu buttons, and for the Intro screen's note (see "Intro screen note")
     * 64px for the texts "GAME OVER" and "YOU WIN!" texts in those screens.
 * Line height will be exactly 1.
 * Font weight normal/regular in all cases (no bold or italic).
-* All texts will be uppercase.
+* All texts will be uppercase, except the Main Menu credits (see "Main Menu credits").
 * The font used will be "C64 Angled", a monospaced font: `assets/fonts/c64_angled.ttf`.
 * All text boxes should put all the text in one line (no line-breaks).
 

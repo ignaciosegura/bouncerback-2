@@ -10,6 +10,7 @@ Every change from one screen to another plays the screen transition (see "Screen
   - The first time it's reached from the Intro, the menu music and the menu background animation start together
   - Play Button
   - Settings Button
+  - Credits at the bottom: "A game by NIK NAK STUDIO" and "Music and sfx by MAN FROM SPACE". The names are links that open in a new tab: https://niknak.es and https://manfromspace.com
 - **Level Selection Screen**
   - One button per level, labeled with the level file's `name` (LEARN, FEMTOCOSMOS, CHRONOSAEDR0N, MEKANOMANCER, NEUTRONIKA). All levels are unlocked from the start.
   - Back Button
