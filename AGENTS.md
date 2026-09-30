@@ -25,6 +25,12 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 
 ---
 
+## Workflow Rules
+
+- **Planning and implementation are separate steps.** When asked to plan, stop once the plan is delivered. Never go on to implementation without first asking for and getting explicit approval.
+
+---
+
 ## Non-Negotiable Architectural Rules
 
 Violating these rules will break the game or cause hard-to-debug issues.
