@@ -17,8 +17,8 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 ## Intro screen note
 
-* The Intro screen shows one line of text above the ENTER BOUNCERBACK button: "Grab your best headphones first ;)" (see the INTRO mockup for its layout).
-* It's written in mixed case exactly as above, not all uppercase (the INTRO mockup still shows it in capitals; this text wins).
+* The Intro screen shows one line of text above the ENTER BOUNCERBACK button: "Grab your best headphones first ;)" (see the INTRO mockup).
+* It's written in mixed case exactly as above, not all uppercase.
 * It's 32px, the same size as the button's text, in the screen's foreground color (black on the white #D8D8D8 background), with no border: it's a note, not a button, like the scores on the Game Over and You Win! screens.
 * At the 1920x1080 reference size, the bottom of its text line is 59px above the button's top edge, and it's horizontally centered. The button doesn't move: it stays centered on the screen.
 * It's one of the screen's elements, so it takes part in the screen transitions together with the button (see "Screen transitions").
