@@ -296,12 +296,10 @@ button {
 /* Logo + buttons are centered as a group; the menu's bottom margin lifts it so the
    logo's top sits 182px from the top at the reference size (MAIN MENU mockup) */
 .main-menu__logo {
+  display: block;
   width: calc(1518 * var(--u));
   aspect-ratio: 965.894 / 82.105;
   margin-bottom: calc(229 * var(--u));
-  background: currentColor;
-  -webkit-mask: url('../assets/images/game_logo.svg') center / contain no-repeat;
-  mask: url('../assets/images/game_logo.svg') center / contain no-repeat;
   pointer-events: none;
 }
 

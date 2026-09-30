@@ -16,7 +16,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 ## Game logo
 
-* The game logo (`assets/images/game_logo.svg`, vector, black) is shown at the top of the Main Menu, above the PLAY and SETTINGS buttons (see the MAIN MENU mockup). It isn't shown on any other screen.
+* The game logo (source art: `assets/images/game_logo.svg`, vector, black) is shown at the top of the Main Menu, above the PLAY and SETTINGS buttons (see the MAIN MENU mockup). It isn't shown on any other screen. It's rendered as inline SVG (`src/components/Logo.jsx`, one `<path>`/`<rect>` per letterform), not as an `<img>` or CSS mask, so its segments can be targeted individually for animation.
 * At the 1920x1080 reference size it's 1518px wide, horizontally centered, with its top edge 182px from the top of the screen. The PLAY button's top edge is 229px below the logo's bottom edge, and the buttons keep the usual 64px gap between them.
 * It covers the whole screen (cropped at the top and bottom on screens wider than 16:9) and loops: the content (about 125 s) plus 5 seconds of empty background, then back to the start.
 

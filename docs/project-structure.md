@@ -27,6 +27,7 @@ root/
     ├── components/                 # React UI components (HUD, Menus, Modals)
     │   ├── Button.jsx              # Reusable button component
     │   ├── HUD.jsx                 # Heads-Up Display for in-game information
+    │   ├── Logo.jsx                # Inline SVG game logo (Main Menu), paths inlined for segment animation
     │   ├── Menu.jsx                # Generic menu container component
     │   ├── MenuBackground.jsx      # Lottie animation behind the menu screens (mounted in App.jsx, persists across them)
     │   ├── Screen.jsx              # Base screen wrapper component (handles transitions, safe areas, etc.)
