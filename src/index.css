@@ -317,11 +317,37 @@ button {
   margin-bottom: calc(159 * var(--u));
 }
 
+/* Pinned 109px from the bottom (MAIN MENU mockup). Centered with inset + flex, not a translate:
+   the screen-out's shake animates transform on the screen's children and would wipe it out */
+.main-menu__credits {
+  position: absolute;
+  inset-inline: 0;
+  bottom: max(calc(109 * var(--u)), env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(23 * var(--u));
+  text-transform: none;
+}
+
+/* The links look like the text around them and give no feedback */
+.main-menu__credits a,
+.main-menu__credits a:visited,
+.main-menu__credits a:hover,
+.main-menu__credits a:active,
+.main-menu__credits a:focus,
+.main-menu__credits a:focus-visible {
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+}
+
 /* Intro */
 
 /* The menu's bottom margin matches the note and its gap, so the button stays centered (INTRO mockup) */
 .intro-screen__note {
   margin-bottom: calc(96 * var(--u));
+  text-transform: none;
 }
 
 .intro-screen .menu {

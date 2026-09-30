@@ -42,3 +42,4 @@ Legend: `[x]` done · `[ ]` pending
 - [x] **Phase 26** — Intro & Main Menu merge (the `ENTER BOUNCERBACK` screen becomes the Intro; the old logo-only Intro is removed; the logo moves to the top of the Main Menu, where the menu track and animation now start)
 - [x] **Phase 27** — Logo blink (about once every 2 seconds, at random moments, a random logo piece turns white and fades back to black in 0.15 s)
 - [x] **Phase 28** — Intro headphones note ("GRAB YOUR BEST HEADPHONES FIRST ;)" above the `ENTER BOUNCERBACK` button, 32px, no border; the button stays centered)
+- [x] **Phase 29** — Main Menu credits & mixed-case text ("A game by NIK NAK STUDIO" / "Music and sfx by MAN FROM SPACE" at the bottom of the Main Menu, 24px, mixed case, the names link to niknak.es / manfromspace.com in a new tab with no link styling or feedback; the Intro note becomes "Grab your best headphones first ;)")

@@ -15,7 +15,7 @@ export default function IntroScreen ({ onEnter }) {
   return (
     <Screen variant="light" className="intro-screen">
       {/* Outside the Menu: it's wider than the button, which the menu would stretch to match */}
-      <TextBox size="menu" className="intro-screen__note">GRAB YOUR BEST HEADPHONES FIRST ;)</TextBox>
+      <TextBox size="menu" className="intro-screen__note">Grab your best headphones first ;)</TextBox>
       <Menu>
         <Button onClick={onEnter}>ENTER BOUNCERBACK</Button>
       </Menu>
