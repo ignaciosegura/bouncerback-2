@@ -17,7 +17,8 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 ## Intro screen note
 
-* The Intro screen shows one line of text above the ENTER BOUNCERBACK button: "GRAB YOUR BEST HEADPHONES FIRST ;)" (see the INTRO mockup).
+* The Intro screen shows one line of text above the ENTER BOUNCERBACK button: "Grab your best headphones first ;)" (see the INTRO mockup for its layout).
+* It's written in mixed case exactly as above, not all uppercase (the INTRO mockup still shows it in capitals; this text wins).
 * It's 32px, the same size as the button's text, in the screen's foreground color (black on the white #D8D8D8 background), with no border: it's a note, not a button, like the scores on the Game Over and You Win! screens.
 * At the 1920x1080 reference size, the bottom of its text line is 59px above the button's top edge, and it's horizontally centered. The button doesn't move: it stays centered on the screen.
 * It's one of the screen's elements, so it takes part in the screen transitions together with the button (see "Screen transitions").
@@ -33,7 +34,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * The Main Menu shows two lines of credits at the bottom of the screen (see the MAIN MENU mockup):
     * "A game by NIK NAK STUDIO"
     * "Music and sfx by MAN FROM SPACE"
-* They're written in mixed case exactly as above: the only text in the game that isn't all uppercase.
+* They're written in mixed case exactly as above, not all uppercase, like the Intro screen note.
 * They're 24px, in the screen's foreground color (black on the white #D8D8D8 background), with no border. Each line is horizontally centered on its own.
 * At the 1920x1080 reference size, there are 23px between the two lines, and the bottom of the second line is 109px above the bottom of the screen. The logo and the buttons don't move to make room for them.
 * The names are links that open in a new tab: NIK NAK STUDIO → https://niknak.es, MAN FROM SPACE → https://manfromspace.com. The rest of each line isn't a link.
@@ -50,7 +51,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
     * 64px for the texts "GAME OVER" and "YOU WIN!" texts in those screens.
 * Line height will be exactly 1.
 * Font weight normal/regular in all cases (no bold or italic).
-* All texts will be uppercase, except the Main Menu credits (see "Main Menu credits").
+* All texts will be uppercase, except the Intro screen note and the Main Menu credits, which are written in mixed case (see "Intro screen note" and "Main Menu credits").
 * The font used will be "C64 Angled", a monospaced font: `assets/fonts/c64_angled.ttf`.
 * All text boxes should put all the text in one line (no line-breaks).
 

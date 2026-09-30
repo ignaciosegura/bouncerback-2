@@ -3,7 +3,7 @@
 Every change from one screen to another plays the screen transition (see "Screen transitions" in `graphical-specs.md`). The Pause Overlay is shown on top of the Game Screen, not as a screen change, so it doesn't use it.
 
 - **Intro Screen** *(first screen on every launch; light layout, no menu background animation, silent)*
-  - "GRAB YOUR BEST HEADPHONES FIRST ;)" note above the button (text only, not interactive)
+  - "Grab your best headphones first ;)" note (mixed case) above the button (text only, not interactive)
   - ENTER BOUNCERBACK Button (unlocks audio) → Main Menu
 - **Main Menu**
   - Game logo at the top
