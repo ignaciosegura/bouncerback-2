@@ -40,3 +40,4 @@ Legend: `[x]` done · `[ ]` pending
 - [x] **Phase 24** — Enter screen & menu music start (`ENTER BOUNCERBACK` screen before the Intro unlocks audio; the menu track starts on the Intro with no fade-in, and the menu animation starts with it)
 - [x] **Phase 25** — Level start animation (the ring grows from radius 0 in 0.25 s, then the core grows from radius 0 in 0.5 s, both ease-out, inside the 3 s start delay)
 - [x] **Phase 26** — Intro & Main Menu merge (the `ENTER BOUNCERBACK` screen becomes the Intro; the old logo-only Intro is removed; the logo moves to the top of the Main Menu, where the menu track and animation now start)
+- [x] **Phase 27** — Logo blink (about once every 2 seconds, at random moments, a random logo piece turns white and fades back to black in 0.15 s)

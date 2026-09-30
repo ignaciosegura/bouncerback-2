@@ -303,6 +303,16 @@ button {
   pointer-events: none;
 }
 
+.logo__piece--blink {
+  animation: logo-blink 0.15s linear;
+}
+
+/* No 100% keyframe: it ends on the inherited fill (--fg), so it follows the screen-out tint too */
+@keyframes logo-blink {
+  from {
+    fill: var(--color-white);
+  }
+}
 .main-menu-screen .menu {
   margin-bottom: calc(159 * var(--u));
 }

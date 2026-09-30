@@ -1,7 +1,38 @@
+import { useEffect, useRef } from 'react'
+
+// Must stay longer than the 0.15 s blink in index.css, so only one piece blinks at a time
+const BLINK_MIN_WAIT = 500
+const BLINK_MAX_WAIT = 3500
+const BLINK_CLASS = 'logo__piece--blink'
+
 // Inline SVG (not a CSS mask) so individual segments can be targeted for animation.
 export default function Logo (props) {
+  const svgRef = useRef(null)
+
+  useEffect(() => {
+    const pieces = svgRef.current.children
+    let previous = -1
+    let timeout
+
+    const scheduleBlink = () => {
+      timeout = setTimeout(() => {
+        pieces[previous]?.classList.remove(BLINK_CLASS)
+        // Never the same piece twice in a row, so re-adding the class always restarts the animation
+        const choices = previous === -1 ? pieces.length : pieces.length - 1
+        let next = Math.floor(Math.random() * choices)
+        if (previous !== -1 && next >= previous) next++
+        pieces[next].classList.add(BLINK_CLASS)
+        previous = next
+        scheduleBlink()
+      }, BLINK_MIN_WAIT + Math.random() * (BLINK_MAX_WAIT - BLINK_MIN_WAIT))
+    }
+
+    scheduleBlink()
+    return () => clearTimeout(timeout)
+  }, [])
+
   return (
-    <svg viewBox="0 0 965.894 82.105" fill="currentColor" role="img" aria-label="BOUNCERBACK" {...props}>
+    <svg ref={svgRef} viewBox="0 0 965.894 82.105" fill="currentColor" role="img" aria-label="BOUNCERBACK" {...props}>
       <path d="M0,3.601h9.201c14.201,0,27.602,3.7,27.602,20.701c0,5.5-3,11.9-8.101,14.301v0.2c8.901,1.6,15.101,10.301,15.101,19.101
         c0,15.102-12.901,21.102-26.202,21.102H0V3.601z M9.4,37.002h2.4c8.9,0,16.201-1.8,16.201-12.601c0-10.601-7.201-12.4-16.001-12.4
         H9.4V37.002z M9.4,70.604h7.201c8.701,0,17.801-2.601,17.801-13.301c0-10.601-10.801-12.801-19.201-12.801H9.4V70.604z" />
