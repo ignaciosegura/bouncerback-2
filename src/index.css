@@ -317,6 +317,16 @@ button {
   margin-bottom: calc(159 * var(--u));
 }
 
+/* Intro */
+
+/* The menu's bottom margin matches the note and its gap, so the button stays centered (INTRO mockup) */
+.intro-screen__note {
+  margin-bottom: calc(96 * var(--u));
+}
+
+.intro-screen .menu {
+  margin-bottom: calc(145 * var(--u));
+}
 /* Game Over / You Win! */
 
 .result-screen__scores {
