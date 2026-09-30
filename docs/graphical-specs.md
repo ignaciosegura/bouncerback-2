@@ -15,6 +15,13 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * It plays continuously while the player moves between those three screens: changing screens never restarts or pauses it. It starts again from the beginning when the player comes back to the menus after playing a level.
 * It covers the whole screen (cropped at the top and bottom on screens wider than 16:9) and loops: the content (about 125 s) plus 5 seconds of empty background, then back to the start.
 
+## Intro screen note
+
+* The Intro screen shows one line of text above the ENTER BOUNCERBACK button: "GRAB YOUR BEST HEADPHONES FIRST ;)" (see the INTRO mockup).
+* It's 32px, the same size as the button's text, in the screen's foreground color (black on the white #D8D8D8 background), with no border: it's a note, not a button, like the scores on the Game Over and You Win! screens.
+* At the 1920x1080 reference size, the bottom of its text line is 59px above the button's top edge, and it's horizontally centered. The button doesn't move: it stays centered on the screen.
+* It's one of the screen's elements, so it takes part in the screen transitions together with the button (see "Screen transitions").
+
 ## Game logo
 
 * The game logo (source art: `assets/images/game_logo.svg`, vector, black) is shown at the top of the Main Menu, above the PLAY and SETTINGS buttons (see the MAIN MENU mockup). It isn't shown on any other screen. It's rendered as inline SVG (`src/components/Logo.jsx`, one `<path>`/`<rect>` per letterform), not as an `<img>` or CSS mask, so its segments can be targeted individually for animation.
@@ -27,7 +34,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * The distance between the text and the border will always be 0.5 em, meaning that it will scale with the font size (matches the mockups).
 * Font size should always be (at the 1920x1080 reference size of the mockups; see "Scaling" below):
     * 24px for HUD text during gameplay
-    * 32px for all menu buttons
+    * 32px for all menu buttons, and for the Intro screen's note (see "Intro screen note")
     * 64px for the texts "GAME OVER" and "YOU WIN!" texts in those screens.
 * Line height will be exactly 1.
 * Font weight normal/regular in all cases (no bold or italic).
