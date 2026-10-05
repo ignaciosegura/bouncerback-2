@@ -39,13 +39,13 @@ const CAPTURE_BUTTONS = [BUTTONS.A, BUTTONS.LT, BUTTONS.RT, BUTTONS.L3, BUTTONS.
 // Core collapse: the core grows to the ring while the atoms settle, then it collapses with them
 const CORE_COLLAPSE_SETTLE_TIME = 1.85
 const CORE_COLLAPSE_TIME = 2
-// Last life zoom: the other atoms freeze and the view zooms on the point where the last atom crossed
-// the ring, moving it to the screen center, while that atom escapes in slow motion
-const ZOOM_SCALE = 10
+// Last life zoom: the other atoms freeze at once; the last atom keeps escaping (without fading),
+// then freezes too, and the view zooms on the point midway between it and where it crossed the ring
+const LAST_ESCAPE_TIME = 0.5
+const ZOOM_SCALE = 8
 const ZOOM_TIME = 0.5
 const ZOOM_HOLD = 1
-const SLOW_MOTION = 1 / 3 // its 0.5 s fade lasts 1.5 s, ending with the Game Over delay
-const GAME_OVER_DELAY = ZOOM_TIME + ZOOM_HOLD // the zoom and its hold play before Game Over
+const GAME_OVER_DELAY = LAST_ESCAPE_TIME + ZOOM_TIME + ZOOM_HOLD
 const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen before the WebGL context is lost
 
 // The background turns dark red while the player has only one life left
@@ -393,7 +393,7 @@ export default class GameEngine {
       atom.escape()
       this.lives = Math.max(0, this.lives - 1)
       this.emit('onLivesChange', this.lives)
-      if (this.lives === 0 && !this.lastAtom) this.focusLastAtom(atom)
+      if (this.lives === 0 && !this.lastAtom) this.lastAtom = atom
       this.fadeBackgroundTo(this.backgroundTarget())
       soundManager.playSfx('destroy')
     }
@@ -450,16 +450,16 @@ export default class GameEngine {
     return true
   }
 
-  // The zoom focuses on the exact point where the atom's center crossed the ring (it can already
-  // be up to one frame's movement past it)
-  focusLastAtom (atom) {
-    this.lastAtom = atom
-    this.zoom.focusX = Math.cos(atom.positionAngle) * RING_RADIUS
-    this.zoom.focusY = Math.sin(atom.positionAngle) * RING_RADIUS
+  // The zoom frames both the frozen atom and the exact point where its center crossed the ring
+  focusLastAtom () {
+    const atom = this.lastAtom
+    const distance = (RING_RADIUS + Math.abs(atom.distance)) / 2
+    this.zoom.focusX = Math.cos(atom.positionAngle) * distance
+    this.zoom.focusY = Math.sin(atom.positionAngle) * distance
   }
 
-  // Lives reached 0: every other atom freezes, the view zooms on the last atom as it escapes in
-  // slow motion, then Game Over
+  // Lives reached 0: every other atom freezes, the last one keeps escaping for a moment, then it
+  // freezes too and the view zooms on it; then Game Over
   lose () {
     this.state = STATE.LOST
     this.stateTime = 0
@@ -467,17 +467,17 @@ export default class GameEngine {
   }
 
   updateLost (dt) {
+    const escapeLeft = Math.max(0, LAST_ESCAPE_TIME - this.stateTime)
     this.stateTime += dt
-    if (this.lastAtom) {
-      const slowDt = dt * SLOW_MOTION
-      if (this.lastAtom.updateEscape(slowDt, this.atomSpeed * slowDt)) {
-        this.lastAtom.render(slowDt)
-      } else {
-        this.releaseAtom(this.lastAtom)
-        this.lastAtom = null
-      }
+    if (escapeLeft > 0) {
+      // Full speed and opacity, cut at exactly LAST_ESCAPE_TIME
+      const escapeDt = Math.min(dt, escapeLeft)
+      this.lastAtom.move(this.atomSpeed * escapeDt)
+      this.lastAtom.render(escapeDt)
+      if (this.stateTime >= LAST_ESCAPE_TIME) this.focusLastAtom()
+      return
     }
-    const e = easeOutQuad(Math.min(1, this.stateTime / ZOOM_TIME))
+    const e = easeOutQuad(Math.min(1, (this.stateTime - LAST_ESCAPE_TIME) / ZOOM_TIME))
     this.zoom.scale = ZOOM_SCALE ** e
     this.zoom.offset = 1 - e
     this.layout()
