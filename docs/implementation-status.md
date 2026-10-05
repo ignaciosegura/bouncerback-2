@@ -50,5 +50,5 @@ Legend: `[x]` done · `[ ]` pending
   - [x] **Phase 30** — Gamepad API fundamentals (`src/input/gamepad.js`: polled reader, one active controller, press detection, stick engage/release thresholds against drift)
   - [x] **Phase 31** — Menu navigation (d-pad / left stick move, bottom face button or RT activate, right face button back; selected item gets a double border via `outline`; not on the Intro, which must unlock audio)
   - [x] **Phase 32** — Gameplay (each stick drags and sets its own paddle; bottom face button, LT, RT, L3 or R3 captures; no pause action yet)
-  - [ ] **Phase 33** — Shared paddles for both sticks (either stick places the next paddle; the two-paddle FIFO decides which one goes, replacing one paddle per stick)
+  - [x] **Phase 33** — Shared paddles for both sticks (either stick places the next paddle; the two-paddle FIFO decides which one goes, replacing one paddle per stick)
 - [ ] **Phase 34** — Paddle replacement warning (while a new paddle is being dragged, the set paddle its release will push out turns red `#FF0000` at once; mouse, touch and sticks; the one-life-left background darkens to `#550000` so the red stands out)

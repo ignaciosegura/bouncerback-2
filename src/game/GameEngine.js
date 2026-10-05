@@ -33,7 +33,7 @@ const RING_GROW_TIME = 0.25
 const CORE_GROW_TIME = 0.5
 const START_ANIMATION_TIME = RING_GROW_TIME + CORE_GROW_TIME // must stay ≤ START_DELAY
 const MAX_ACTIVE_PADDLES = 2
-// Controller: each stick drags and sets its own paddle; any of these buttons captures
+// Controller: each stick drags and sets a paddle, like a finger; any of these buttons captures
 const STICKS = ['left', 'right']
 const CAPTURE_BUTTONS = [BUTTONS.A, BUTTONS.LT, BUTTONS.RT, BUTTONS.L3, BUTTONS.R3]
 // Core collapse: the core grows to the ring while the atoms settle, then it collapses with them
@@ -215,7 +215,7 @@ export default class GameEngine {
     this.setPaddle(event.pointerId)
   }
 
-  // Controller: a stick pushed past its engage threshold drags its paddle, released it sets it
+  // Controller: a stick pushed past its engage threshold drags a paddle, released it sets it
   // (the angle maps straight to the paddle: both have y pointing down). A capture button captures
   // like a tap at the core, but a press with nothing to capture does nothing.
   handleGamepad () {
@@ -227,7 +227,7 @@ export default class GameEngine {
         if (this.draggedPaddles.has(stick)) this.dragPaddle(stick, angle)
         else this.startPaddleDrag(stick, angle)
       } else {
-        this.setPaddle(stick, stick)
+        this.setPaddle(stick)
       }
     }
   }
@@ -247,21 +247,13 @@ export default class GameEngine {
     this.draggedPaddles.get(input)?.setAngle(angle)
   }
 
-  // Release: the paddle is set and its lifetime starts. A stick's paddle replaces the one that
-  // stick set before; a third paddle removes the oldest
-  setPaddle (input, stick = null) {
+  // Release: the paddle is set and its lifetime starts; a third one removes the oldest, whatever
+  // input set it
+  setPaddle (input) {
     const paddle = this.draggedPaddles.get(input)
     if (!paddle) return
 
     this.draggedPaddles.delete(input)
-    if (stick) {
-      const previous = this.activePaddles.find((p) => p.stick === stick)
-      if (previous) {
-        this.activePaddles.splice(this.activePaddles.indexOf(previous), 1)
-        this.releasePaddle(previous)
-      }
-      paddle.stick = stick
-    }
     paddle.activate()
     this.activePaddles.push(paddle)
     while (this.activePaddles.length > MAX_ACTIVE_PADDLES) {
