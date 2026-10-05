@@ -45,7 +45,7 @@ const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen 
 // The background turns dark red while the player has only one life left
 const BACKGROUND_COLORS = {
   DEFAULT: 0x000000,
-  ONE_LIFE_LEFT: 0x660000
+  ONE_LIFE_LEFT: 0x550000 // dark enough for the red paddle replacement warning to stand out
 }
 const BACKGROUND_TRANSITION_TIME = 0.5
 
@@ -261,6 +261,13 @@ export default class GameEngine {
     }
   }
 
+  // Set paddles that the paddles being dragged will push out when released turn red: the oldest
+  // ones beyond MAX_ACTIVE_PADDLES (activePaddles is ordered oldest first)
+  updatePaddleWarnings () {
+    const pushedOut = this.activePaddles.length + this.draggedPaddles.size - MAX_ACTIVE_PADDLES
+    this.activePaddles.forEach((paddle, i) => paddle.setWarning(i < pushedOut))
+  }
+
   // Game loop
 
   update = (ticker) => {
@@ -321,6 +328,7 @@ export default class GameEngine {
         this.releasePaddle(paddle)
       }
     }
+    this.updatePaddleWarnings()
 
     const step = this.atomSpeed * dt
     for (let i = this.atoms.length - 1; i >= 0; i--) {

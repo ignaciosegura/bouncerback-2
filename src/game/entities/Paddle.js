@@ -7,6 +7,9 @@ const OUTLINE_WIDTH = 2
 // Lifetime fade: full opacity until FADE_START of the lifetime, then linear down to FADE_MIN_ALPHA
 const FADE_START = 0.5
 const FADE_MIN_ALPHA = 0.2
+// A set paddle that the paddle being dragged will push out (first in, first out) turns red at once
+const WARNING_COLOR = 0xff0000
+const NO_TINT = 0xffffff
 
 // Signed smallest difference between two angles, in (-π, π]
 function angleDifference (a, b) {
@@ -15,7 +18,7 @@ function angleDifference (a, b) {
 
 // An arc on the ring centred on `angle`. Drawn as an outline while the player drags it (inactive),
 // filled once set (active). Expires `duration` seconds after being set, fading out over the end
-// of its lifetime. Owns the flash shown when it bounces an atom.
+// of its lifetime. Owns the flash shown when it bounces an atom. Turns red while it's about to be pushed out.
 export default class Paddle {
   constructor (arc, duration) {
     this.arc = arc
@@ -23,11 +26,13 @@ export default class Paddle {
     this.view = new Graphics()
     this.view.visible = false
     this.flash = new PaddleFlash()
+    this.warning = false
   }
 
   start (angle) {
     this.active = false
     this.age = 0
+    this.setWarning(false)
     this.setAngle(angle)
     this.draw()
     this.view.alpha = 1
@@ -43,6 +48,14 @@ export default class Paddle {
     this.active = true
     this.view.alpha = 1
     this.draw()
+  }
+
+  // Drawn white, so the tint turns it red without a redraw; the lifetime fade keeps working
+  // through alpha. The flash is a separate Graphics and stays white.
+  setWarning (on) {
+    if (on === this.warning) return
+    this.warning = on
+    this.view.tint = on ? WARNING_COLOR : NO_TINT
   }
 
   hide () {
