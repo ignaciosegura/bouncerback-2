@@ -18,7 +18,7 @@ If an atom escapes the containment ring, the player will lose one life immediate
 
 ## Game over condition
 
-If the player runs out of lives (it reaches zero), the game will end in a "Game over" screen.
+If the player runs out of lives (it reaches zero), the game will end in a "Game over" screen. Before it, the game freezes and zooms in on the atom that took the last life as it escapes (see "Last life lost" in `docs/graphical-specs.md`); the "Game over" screen comes 1.5 seconds after the loss.
 
 ## Level end condition
 
