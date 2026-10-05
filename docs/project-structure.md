@@ -39,6 +39,7 @@ root/
     │   ├── scoring.js              # Pure score formulas and high-score persistence
     │   ├── color.js                # Color helpers (interpolation for the gameplay color transitions)
     │   ├── easing.js               # Easing curves for the gameplay animations (quadratic in / out / in-out)
+    │   ├── types.js                # Shared JSDoc types (level, engine callbacks); see docs/type-checking-plan.md
     │   └── entities/               # Game objects
     │   │   ├── AtomEmitter.js      # The central element that stays in place and spawns atoms.
     │   │   ├── ContainmentRing.js  # The ring where the atoms are escaping from

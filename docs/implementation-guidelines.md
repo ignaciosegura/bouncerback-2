@@ -6,6 +6,7 @@
 * Animations: PixiJS Ticker (app.ticker) drives continuous game-loop movements, physics ticks, and frame-by-frame updates.
 * Audio: Howler.js manages cross-platform sound effects and background music playback.
 * Mobile Packaging: Capacitor bundles the web app into a native mobile build (iOS and Android).
+* Type Checking: the TypeScript compiler checks the plain JS/JSX through JSDoc annotations (npm run typecheck). Exported functions and classes, React component props and enum-like objects are typed; see docs/type-checking-plan.md.
 
 2. Architectural Division of Labor
 

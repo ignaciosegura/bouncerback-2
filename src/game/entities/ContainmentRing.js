@@ -11,7 +11,10 @@ export default class ContainmentRing {
     this.draw(0)
   }
 
-  // Redrawn (not scaled) so the outline keeps its width at every radius
+  /**
+   * Redrawn (not scaled) so the outline keeps its width at every radius
+   * @param {number} radius
+   */
   draw (radius) {
     this.view.clear()
     this.view.visible = radius > 0

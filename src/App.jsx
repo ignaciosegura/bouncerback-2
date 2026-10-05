@@ -11,7 +11,10 @@ import GameOverScreen from './screens/GameOverScreen.jsx'
 import YouWinScreen from './screens/YouWinScreen.jsx'
 import MenuBackground from './components/MenuBackground.jsx'
 
-const SCREENS = {
+/** @import { AnimationEvent } from 'react' */
+/** @import { GameResult, LoadedLevel } from './game/types.js' */
+
+const SCREENS = /** @type {const} */ ({
   INTRO: 'intro',
   MAIN_MENU: 'mainMenu',
   LEVEL_SELECT: 'levelSelect',
@@ -19,20 +22,23 @@ const SCREENS = {
   GAME: 'game',
   GAME_OVER: 'gameOver',
   YOU_WIN: 'youWin'
-}
+})
+
+/** @typedef {typeof SCREENS[keyof typeof SCREENS]} ScreenName */
 
 // Screens drawn over the menu background animation; it plays uninterrupted between them
+/** @type {ScreenName[]} */
 const MENU_BACKGROUND_SCREENS = [SCREENS.MAIN_MENU, SCREENS.LEVEL_SELECT, SCREENS.SETTINGS]
 
 export default function App () {
-  const [screen, setScreen] = useState(SCREENS.INTRO)
+  const [screen, setScreen] = useState(/** @type {ScreenName} */ (SCREENS.INTRO))
   // Screen changes play the old-TV transition on the screen's elements (CSS keyframes in index.css):
   // the current screen stays up during the screen-out, then `nextScreen` replaces it and its
   // elements play the screen-in. The Intro starts with a screen-in on launch.
-  const [nextScreen, setNextScreen] = useState(null)
-  const [transition, setTransition] = useState('in')
-  const previousScreenRef = useRef(null)
-  const [level, setLevel] = useState(null)
+  const [nextScreen, setNextScreen] = useState(/** @type {ScreenName | null} */ (null))
+  const [transition, setTransition] = useState(/** @type {'in' | 'out' | null} */ ('in'))
+  const previousScreenRef = useRef(/** @type {ScreenName | null} */ (null))
+  const [level, setLevel] = useState(/** @type {LoadedLevel | null} */ (null))
   const [score, setScore] = useState(0)
   const [hiScore, setHiScore] = useState(getHiScore)
   const [musicVolume, setMusicVolume] = useState(soundManager.getMusicVolume)
@@ -61,6 +67,7 @@ export default function App () {
   }, [screen])
 
   // Ignored while a transition runs, so a second tap can't navigate twice
+  /** @param {ScreenName} next */
   const navigate = (next) => {
     if (transition) return
     setNextScreen(next)
@@ -69,6 +76,7 @@ export default function App () {
 
   // The screen's and its elements' animations end here. The tint (on the screen itself, once)
   // marks the end of the screen-out; every element ends its screen-in at the same time.
+  /** @param {AnimationEvent<HTMLDivElement>} event */
   const handleTransitionEnd = (event) => {
     if (event.animationName === 'screen-tint') {
       setScreen(nextScreen)
@@ -86,11 +94,13 @@ export default function App () {
     navigate(SCREENS.MAIN_MENU)
   }
 
+  /** @param {number} value */
   const changeMusicVolume = (value) => {
     soundManager.setMusicVolume(value)
     setMusicVolume(soundManager.getMusicVolume())
   }
 
+  /** @param {number} value */
   const changeSfxVolume = (value) => {
     soundManager.setSfxVolume(value)
     setSfxVolume(soundManager.getSfxVolume())
@@ -98,14 +108,20 @@ export default function App () {
 
   // `score` isn't reset: only the result screens show it and endLevel always sets it first.
   // Resetting it here would show 0 on Game Over / You Win! while it fades out after Try Again.
+  /** @param {LoadedLevel} selectedLevel */
   const startLevel = (selectedLevel) => {
     setLevel(selectedLevel)
     navigate(SCREENS.GAME)
   }
 
   // Saves the high score to localStorage the instant it's beaten, live during gameplay
+  /** @param {number} currentScore */
   const registerScore = (currentScore) => setHiScore(beatHiScore(currentScore))
 
+  /**
+   * @param {ScreenName} resultScreen
+   * @returns {(result: GameResult) => void}
+   */
   const endLevel = (resultScreen) => ({ score: finalScore }) => {
     setScore(finalScore)
     navigate(resultScreen)

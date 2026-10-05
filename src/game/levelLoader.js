@@ -1,5 +1,7 @@
 import schema from '../../docs/level-file-schema.json'
 
+/** @import { LevelFile, LoadedLevel } from './types.js' */
+
 /**
  * Checks a value against the subset of JSON Schema used by docs/level-file-schema.json
  * (type, required, properties, additionalProperties, items). Returns a list of problems.
@@ -56,6 +58,11 @@ function checkRanges (level) {
   return problems
 }
 
+/**
+ * Returns the problems found in a level file (empty if it's valid).
+ * @param {any} level Untrusted JSON
+ * @returns {string[]}
+ */
 export function validateLevel (level) {
   const problems = checkSchema(level, schema, 'level')
   return problems.length > 0 ? problems : checkRanges(level)
@@ -65,6 +72,9 @@ export function validateLevel (level) {
  * Validates a level file and derives the runtime values the game engine uses (times in seconds).
  * `number` is the level's number (1–5), used by the score formulas.
  * Throws if the file doesn't match docs/level-file-schema.json.
+ * @param {any} data Untrusted JSON
+ * @param {number} number
+ * @returns {LoadedLevel}
  */
 export function loadLevel (data, number) {
   const problems = validateLevel(data)
@@ -72,30 +82,36 @@ export function loadLevel (data, number) {
     throw new Error(`Invalid level ${number}:\n  ${problems.join('\n  ')}`)
   }
 
-  const { bpm, signature } = data.timeSignature
+  /** @type {LevelFile} */
+  const level = data
+
+  const { bpm, signature } = level.timeSignature
   const secondsPerBeat = 60 / bpm
   const secondsPerBar = signature * secondsPerBeat
 
   return {
     number,
-    name: data.name,
-    soundTrack: data.soundTrack,
-    lives: data.lives,
+    name: level.name,
+    soundTrack: level.soundTrack,
+    lives: level.lives,
     secondsPerBeat,
     // Initial timer value, in tenths of a second
-    timerTenths: Math.round(data.duration * secondsPerBar * 10),
+    timerTenths: Math.round(level.duration * secondsPerBar * 10),
     // Atom speed in core-to-ring trips per second (multiply by that distance in px to get px/s)
-    atomSpeed: 1 / (data.atoms.travelTime * secondsPerBeat),
+    atomSpeed: 1 / (level.atoms.travelTime * secondsPerBeat),
     // One atom spawns at a random moment inside each interval (see spawnDelay)
-    spawnInterval: data.atoms.barsInterval * secondsPerBar,
-    paddleArc: data.paddles.angle * Math.PI / 180,
-    paddleDuration: data.paddles.duration,
-    vfx: (data.vfx ?? []).map(({ name, time }) => ({ name, time: time * secondsPerBar }))
+    spawnInterval: level.atoms.barsInterval * secondsPerBar,
+    paddleArc: level.paddles.angle * Math.PI / 180,
+    paddleDuration: level.paddles.duration,
+    vfx: (level.vfx ?? []).map(({ name, time }) => ({ name, time: time * secondsPerBar }))
   }
 }
 
 /**
  * Seconds from the start of a spawn interval to its spawn: a random moment inside the interval.
+ * @param {number} spawnInterval
+ * @param {() => number} [random]
+ * @returns {number}
  */
 export function spawnDelay (spawnInterval, random = Math.random) {
   return random() * spawnInterval
@@ -104,7 +120,8 @@ export function spawnDelay (spawnInterval, random = Math.random) {
 // levelN.json → loaded level N, ordered by N
 const levelFiles = import.meta.glob('../levels/level*.json', { eager: true, import: 'default' })
 
+/** @type {LoadedLevel[]} */
 export const levels = Object.entries(levelFiles)
-  .map(([path, data]) => [Number(path.match(/level(\d+)\.json$/)[1]), data])
+  .map(([path, data]) => /** @type {[number, unknown]} */ ([Number(path.match(/level(\d+)\.json$/)[1]), data]))
   .sort(([a], [b]) => a - b)
   .map(([number, data]) => loadLevel(data, number))

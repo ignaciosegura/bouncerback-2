@@ -18,6 +18,10 @@ export default class PaddleFlash {
     this.playing = false
   }
 
+  /**
+   * @param {number} angle
+   * @param {number} arc
+   */
   start (angle, arc) {
     this.arc = arc
     this.time = 0
@@ -32,6 +36,7 @@ export default class PaddleFlash {
     this.view.visible = false
   }
 
+  /** @param {number} dt */
   update (dt) {
     if (!this.playing) return
     this.time += dt

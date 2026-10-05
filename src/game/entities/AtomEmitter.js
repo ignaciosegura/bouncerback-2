@@ -9,6 +9,7 @@ const VORTEX_COLOR = 0x888888 // core fill and outline during the level-end core
 
 // The core: stays at the centre and schedules one spawn at a random moment inside each spawn interval
 export default class AtomEmitter {
+  /** @param {number} spawnInterval Seconds */
   constructor (spawnInterval) {
     this.spawnInterval = spawnInterval
     this.intervalStart = 0
@@ -18,7 +19,11 @@ export default class AtomEmitter {
     this.draw(0)
   }
 
-  // Returns how many atoms are due by game time `time` (seconds)
+  /**
+   * Returns how many atoms are due by game time `time` (seconds)
+   * @param {number} time
+   * @returns {number}
+   */
   update (time) {
     let due = 0
     while (time >= this.nextSpawn) {
@@ -29,9 +34,13 @@ export default class AtomEmitter {
     return due
   }
 
-  // Redrawn (not scaled) so the outline keeps its width at every radius, up to ring size in the
-  // core collapse. `fade` (0 → 1) fades the fill in and turns the outline from white to the same
-  // grey; at 0 it's the normal core.
+  /**
+   * Redrawn (not scaled) so the outline keeps its width at every radius, up to ring size in the
+   * core collapse. `fade` (0 → 1) fades the fill in and turns the outline from white to the same
+   * grey; at 0 it's the normal core.
+   * @param {number} radius
+   * @param {number} [fade]
+   */
   draw (radius, fade = 0) {
     this.view.clear()
     this.view.visible = radius > 0

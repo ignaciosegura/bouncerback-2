@@ -1,6 +1,9 @@
 // High score persistence (docs/game-rules.md): common to all levels, saved the moment it's beaten.
 const STORAGE_KEY = 'bouncerback.hiScore'
 
+/**
+ * @returns {number}
+ */
 export function getHiScore () {
   try {
     const stored = Number.parseInt(localStorage.getItem(STORAGE_KEY), 10)
@@ -11,6 +14,9 @@ export function getHiScore () {
   return 0
 }
 
+/**
+ * @param {number} value
+ */
 function setHiScore (value) {
   try {
     localStorage.setItem(STORAGE_KEY, String(value))
@@ -22,6 +28,8 @@ function setHiScore (value) {
 /**
  * Saves `score` as the high score if it beats the current one. Returns the resulting high score,
  * so callers can update their state with `setHiScore(beatHiScore(score))` in one step.
+ * @param {number} score
+ * @returns {number}
  */
 export function beatHiScore (score) {
   const current = getHiScore()

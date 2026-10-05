@@ -19,6 +19,7 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 | `docs/implementation-guidelines.md` | Summary of architectural and implementation rules |
 | `docs/implementation-plan.md` | Design decisions and the phase-by-phase implementation plan |
 | `docs/implementation-status.md` | Which implementation phases are completed and which are pending |
+| `docs/type-checking-plan.md` | JSDoc type checking (`checkJs`): conventions, phases and their status |
 | `docs/level-file-schema.json` | JSON Schema for all level files |
 | `docs/mockups/` | Reference mockups — filenames indicate which screen they represent |
 | `docs/react-pixi-example.jsx` | Reference example of a React + PixiJS component integration |
@@ -28,6 +29,7 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 ## Workflow Rules
 
 - **Planning and implementation are separate steps.** When asked to plan, stop once the plan is delivered. Never go on to implementation without first asking for and getting explicit approval.
+- **Run `npm run typecheck` and `npm run lint` after every change to `src/`; both must pass.** The code is plain JS type-checked through JSDoc: annotate exports, component props and enum-like objects as described in "Annotation conventions" in `docs/type-checking-plan.md`. Never add `.ts` or `.d.ts` files.
 
 ---
 

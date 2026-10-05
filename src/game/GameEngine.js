@@ -8,6 +8,9 @@ import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
 import Atom, { ATOM_RADIUS, ATOM_STATE, CAPTURE_MIN_CHARGE } from './entities/Atom.js'
 import Paddle, { PADDLE_THICKNESS } from './entities/Paddle.js'
 
+/** @import { FederatedPointerEvent, Ticker } from 'pixi.js' */
+/** @import { GameCallbacks, LoadedLevel } from './types.js' */
+
 // The playfield is laid out in mockup pixels for a 1080px-tall screen, then scaled to fit
 const REFERENCE_SIZE = 1080
 
@@ -39,19 +42,21 @@ const GAME_OVER_DELAY = 1 // lets the last escaping atom fade out before Game Ov
 const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen before the WebGL context is lost
 
 // The background turns dark red while the player has only one life left
-const BACKGROUND_COLORS = {
+const BACKGROUND_COLORS = /** @type {const} */ ({
   DEFAULT: 0x000000,
   ONE_LIFE_LEFT: 0x660000
-}
+})
 const BACKGROUND_TRANSITION_TIME = 0.5
 
-const STATE = {
+const STATE = /** @type {const} */ ({
   STARTING: 'starting',
   PLAYING: 'playing',
   COLLAPSING: 'collapsing',
   LOST: 'lost',
   ENDED: 'ended'
-}
+})
+
+/** @typedef {typeof STATE[keyof typeof STATE]} GameState */
 
 /**
  * Owns the PixiJS application and the game loop. Only low-frequency events reach React,
@@ -59,6 +64,10 @@ const STATE = {
  * onGameOver({ score }) and onLevelWin({ score }).
  */
 export default class GameEngine {
+  /**
+   * @param {LoadedLevel} level
+   * @param {GameCallbacks} callbacks
+   */
   constructor (level, callbacks) {
     this.level = level
     this.callbacks = callbacks
@@ -67,6 +76,7 @@ export default class GameEngine {
     this.destroyed = false
     this.paused = false
 
+    /** @type {GameState} */
     this.state = STATE.STARTING
     this.time = 0
     this.stateTime = 0
@@ -77,19 +87,30 @@ export default class GameEngine {
     this.atomSpeed = CONTACT_DISTANCE * level.atomSpeed
 
     // Starts on its target color: no fade if the level begins with a single life
+    /** @type {number} */
     this.backgroundColor = this.backgroundTarget()
     this.backgroundFrom = this.backgroundColor
     this.backgroundTo = this.backgroundColor
     this.backgroundTime = BACKGROUND_TRANSITION_TIME
 
+    /** @type {Atom[]} */
     this.atoms = []
+    /** @type {Atom[]} */
     this.atomPool = []
+    /** @type {Paddle[]} */
     this.activePaddles = []
+    /** @type {Map<number, Paddle>} */
     this.draggedPaddles = new Map() // pointerId → inactive paddle
+    /** @type {Paddle[]} */
     this.paddlePool = []
+    /** @type {Paddle[]} */
     this.paddles = [] // every paddle instance, active or pooled, to update their flashes
   }
 
+  /**
+   * @param {HTMLElement} container
+   * @returns {Promise<void>}
+   */
   async mount (container) {
     // Ready to start the moment the start delay ends
     soundManager.preloadTrack(this.level.soundTrack)
@@ -134,8 +155,15 @@ export default class GameEngine {
     }, TEARDOWN_DELAY)))
   }
 
+  /**
+   * @template {keyof GameCallbacks} K
+   * @param {K} name
+   * @param {Parameters<GameCallbacks[K]>} args
+   */
   emit (name, ...args) {
-    this.callbacks[name]?.(...args)
+    // The checker can't match a generic key's callback to its spread arguments: `args` is already typed above
+    const callback = /** @type {(...args: Parameters<GameCallbacks[K]>) => void} */ (this.callbacks[name])
+    callback?.(...args)
   }
 
   buildScene () {
@@ -170,6 +198,7 @@ export default class GameEngine {
     window.addEventListener('keydown', this.onKeyDown)
   }
 
+  /** @param {KeyboardEvent} event */
   onKeyDown = (event) => {
     if (event.code === 'KeyP' && !event.repeat) this.togglePause()
   }
@@ -188,6 +217,7 @@ export default class GameEngine {
     }
   }
 
+  /** @param {FederatedPointerEvent} event */
   onPointerDown = (event) => {
     if (this.state !== STATE.PLAYING || this.paused) return
 
@@ -201,6 +231,7 @@ export default class GameEngine {
     this.draggedPaddles.set(event.pointerId, paddle)
   }
 
+  /** @param {FederatedPointerEvent} event */
   onPointerMove = (event) => {
     const paddle = this.draggedPaddles.get(event.pointerId)
     if (!paddle || this.paused) return
@@ -209,6 +240,7 @@ export default class GameEngine {
     paddle.setAngle(Math.atan2(y, x))
   }
 
+  /** @param {FederatedPointerEvent} event */
   onPointerUp = (event) => {
     const paddle = this.draggedPaddles.get(event.pointerId)
     if (!paddle) return
@@ -224,6 +256,7 @@ export default class GameEngine {
 
   // Game loop
 
+  /** @param {Ticker} ticker */
   update = (ticker) => {
     const dt = ticker.deltaMS / 1000
     this.updateBackground(dt)
@@ -260,7 +293,7 @@ export default class GameEngine {
     this.updatePlaying(this.stateTime - START_DELAY)
   }
 
-  drawStartAnimation(t) {
+  drawStartAnimation (t) {
     const ring = easeOutQuad(Math.min(1, t / RING_GROW_TIME))
     const core = easeOutQuad(Math.min(1, Math.max(0, (t - RING_GROW_TIME) / CORE_GROW_TIME)))
     this.ring.draw(RING_RADIUS * ring)
@@ -460,6 +493,7 @@ export default class GameEngine {
   // Background
 
   // Stays dark red at 0 lives, through the Game Over delay
+  /** @returns {number} */
   backgroundTarget () {
     return this.lives <= 1 ? BACKGROUND_COLORS.ONE_LIFE_LEFT : BACKGROUND_COLORS.DEFAULT
   }

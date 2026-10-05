@@ -18,7 +18,10 @@ export default class AtomPulse {
     this.playing = false
   }
 
-  // Restarts from time 0; update() places it on the atom
+  /**
+   * Restarts from time 0; update() places it on the atom
+   * @param {number} duration
+   */
   start (duration) {
     this.duration = duration
     this.time = 0
@@ -31,7 +34,13 @@ export default class AtomPulse {
     this.view.visible = false
   }
 
-  // Follows the atom at (`x`, `y`) and keeps its `color`
+  /**
+   * Follows the atom at (`x`, `y`) and keeps its `color`
+   * @param {number} dt
+   * @param {number} x
+   * @param {number} y
+   * @param {number} color
+   */
   update (dt, x, y, color) {
     if (!this.playing) return
     this.time += dt

@@ -3,8 +3,19 @@ import Menu from '../components/Menu.jsx'
 import Button from '../components/Button.jsx'
 import { MIN_VOLUME, MAX_VOLUME } from '../audio/soundManager.js'
 
-// "Dual button": [-] LABEL VALUE [+]
+/**
+ * @typedef {Object} VolumeControlProps
+ * @property {string} label
+ * @property {number} value
+ * @property {(value: number) => void} onChange
+ */
+
+/**
+ * "Dual button": [-] LABEL VALUE [+]
+ * @param {VolumeControlProps} props
+ */
 function VolumeControl ({ label, value, onChange }) {
+  /** @param {number} v */
   const clamp = (v) => Math.min(MAX_VOLUME, Math.max(MIN_VOLUME, v))
 
   return (
@@ -30,6 +41,16 @@ function VolumeControl ({ label, value, onChange }) {
   )
 }
 
+/**
+ * @typedef {Object} SettingsMenuScreenProps
+ * @property {number} musicVolume
+ * @property {number} sfxVolume
+ * @property {(value: number) => void} onMusicVolumeChange
+ * @property {(value: number) => void} onSfxVolumeChange
+ * @property {() => void} onBack
+ */
+
+/** @param {SettingsMenuScreenProps} props */
 export default function SettingsMenuScreen ({
   musicVolume,
   sfxVolume,

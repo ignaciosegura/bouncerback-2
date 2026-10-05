@@ -8,7 +8,12 @@ const OUTLINE_WIDTH = 2
 const FADE_START = 0.5
 const FADE_MIN_ALPHA = 0.2
 
-// Signed smallest difference between two angles, in (-π, π]
+/**
+ * Signed smallest difference between two angles, in (-π, π]
+ * @param {number} a
+ * @param {number} b
+ * @returns {number}
+ */
 function angleDifference (a, b) {
   return Math.atan2(Math.sin(a - b), Math.cos(a - b))
 }
@@ -17,6 +22,10 @@ function angleDifference (a, b) {
 // filled once set (active). Expires `duration` seconds after being set, fading out over the end
 // of its lifetime. Owns the flash shown when it bounces an atom.
 export default class Paddle {
+  /**
+   * @param {number} arc Radians
+   * @param {number} duration Seconds
+   */
   constructor (arc, duration) {
     this.arc = arc
     this.duration = duration
@@ -25,6 +34,7 @@ export default class Paddle {
     this.flash = new PaddleFlash()
   }
 
+  /** @param {number} angle */
   start (angle) {
     this.active = false
     this.age = 0
@@ -34,6 +44,7 @@ export default class Paddle {
     this.view.visible = true
   }
 
+  /** @param {number} angle */
   setAngle (angle) {
     this.angle = angle
     this.view.rotation = angle
@@ -53,7 +64,11 @@ export default class Paddle {
     this.flash.start(this.angle, this.arc)
   }
 
-  // Returns false once the paddle has expired
+  /**
+   * Returns false once the paddle has expired
+   * @param {number} dt
+   * @returns {boolean}
+   */
   update (dt) {
     this.age += dt
     const fadeStart = this.duration * FADE_START
@@ -62,7 +77,12 @@ export default class Paddle {
     return this.age < this.duration
   }
 
-  // Whether the paddle blocks something at `angle` whose angular half-size is `tolerance`
+  /**
+   * Whether the paddle blocks something at `angle` whose angular half-size is `tolerance`
+   * @param {number} angle
+   * @param {number} tolerance
+   * @returns {boolean}
+   */
   covers (angle, tolerance) {
     return Math.abs(angleDifference(angle, this.angle)) <= this.arc / 2 + tolerance
   }

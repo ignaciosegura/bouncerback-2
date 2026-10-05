@@ -1,6 +1,13 @@
 import Overlay from './Overlay.jsx'
 import TextBox from './TextBox.jsx'
 
+/**
+ * @typedef {Object} StatProps
+ * @property {string} label
+ * @property {number} value
+ */
+
+/** @param {StatProps} props */
 function Stat ({ label, value }) {
   return (
     <div className="hud__stat">
@@ -10,7 +17,18 @@ function Stat ({ label, value }) {
   )
 }
 
-// Heads-up display over the game canvas: taps pass through to the game
+/**
+ * @typedef {Object} HUDProps
+ * @property {number} score
+ * @property {number} timeTenths
+ * @property {number} hiScore
+ * @property {number} lives
+ */
+
+/**
+ * Heads-up display over the game canvas: taps pass through to the game
+ * @param {HUDProps} props
+ */
 export default function HUD ({ score, timeTenths, hiScore, lives }) {
   return (
     <Overlay className="hud">

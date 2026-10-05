@@ -1,5 +1,10 @@
 import { Howl } from 'howler'
 
+/**
+ * Sound effects, by file name in assets/audio/ without extension
+ * @typedef {'bounce' | 'capture' | 'destroy' | 'launch' | 'silence' | 'vortex_creation'} SfxName
+ */
+
 export const MIN_VOLUME = 0
 export const MAX_VOLUME = 9
 
@@ -11,6 +16,7 @@ const MAX_GAIN = 10 ** (-6 / 20)
 
 const FADE_MS = 500
 // Max simultaneous voices per sound effect; when full, the oldest voice is faded out (voice stealing)
+/** @type {Partial<Record<SfxName, number>>} */
 const SFX_VOICE_LIMITS = { bounce: 1, destroy: 1 }
 const STEAL_FADE_MS = 15
 const STORAGE_KEYS = {
@@ -18,22 +24,26 @@ const STORAGE_KEYS = {
   sfx: 'bouncerback.sfxVolume'
 }
 
+/** @param {string} path */
 const baseName = (path) => path.split('/').pop()
 
 const sfxUrls = import.meta.glob('../../assets/audio/*.mp3', { eager: true, query: '?url', import: 'default' })
 const trackUrls = import.meta.glob('../../assets/audio/tracks/*.mp3', { eager: true, query: '?url', import: 'default' })
 
 // Sound effects are small: load them all up front, keyed by name without extension ('bounce')
+/** @type {Partial<Record<SfxName, Howl>>} */
 const sfx = {}
 for (const [path, url] of Object.entries(sfxUrls)) {
   sfx[baseName(path).replace(/\.mp3$/, '')] = new Howl({ src: [url] })
 }
 
 // Voice IDs of the voice-limited effects, oldest first, keyed like `sfx`
+/** @type {Partial<Record<SfxName, number[]>>} */
 const activeVoices = {}
 
 // Tracks are large once decoded: each one is loaded when it starts (or is preloaded) and unloaded
 // when it stops. Keyed by file name ('learn.mp3'), as referenced by the level files' soundTrack field.
+/** @type {Record<string, { url: string, howl: Howl | null, started: boolean }>} */
 const tracks = {}
 for (const [path, url] of Object.entries(trackUrls)) {
   tracks[baseName(path)] = { url, howl: null, started: false }
@@ -41,13 +51,16 @@ for (const [path, url] of Object.entries(trackUrls)) {
 
 let musicVolume = readVolume(STORAGE_KEYS.music)
 let sfxVolume = readVolume(STORAGE_KEYS.sfx)
+/** @type {string | null} */
 let currentTrack = null
+/** @type {ReturnType<typeof setTimeout> | null} */
 let fadeInTimer = null
 let musicPaused = false
 // Whether the current track fades in when it starts (see playTrack)
 let currentFadeIn = true
 
 // Callbacks for onTrackStart, keyed like `tracks`
+/** @type {Record<string, Set<() => void>>} */
 const trackStartListeners = {}
 
 applySfxVolume()
@@ -91,6 +104,9 @@ export function unlock () {
   sfx.silence?.play()
 }
 
+/**
+ * @param {SfxName} name
+ */
 export function playSfx (name) {
   const howl = sfx[name]
   if (!howl) {
@@ -111,6 +127,10 @@ export function playSfx (name) {
 }
 
 // Quick fade before stopping, so cutting a voice short doesn't click
+/**
+ * @param {Howl} howl
+ * @param {number} id
+ */
 function stealVoice (howl, id) {
   howl.fade(howl.volume(), 0, STEAL_FADE_MS, id)
   setTimeout(() => howl.stop(id), STEAL_FADE_MS)
@@ -120,6 +140,8 @@ function stealVoice (howl, id) {
  * Switches the music: the current track fades out, then the new one fades in
  * (or starts straight at the music volume with `fadeIn: false`).
  * Requesting the track that is already playing does nothing, so it continues seamlessly.
+ * @param {string} name Track file name ('learn.mp3')
+ * @param {{ fadeIn?: boolean }} [options]
  */
 export function playTrack (name, { fadeIn = true } = {}) {
   if (name === currentTrack) return
@@ -173,6 +195,7 @@ export function resumeTrack () {
 
 /**
  * Loads a track without playing it, so a later playTrack starts it without a loading delay.
+ * @param {string} name
  */
 export function preloadTrack (name) {
   const track = tracks[name]
@@ -186,6 +209,9 @@ export function preloadTrack (name) {
 /**
  * Calls `callback` every time the track actually starts playing (after loading, not when requested).
  * Returns a function that removes the callback.
+ * @param {string} name
+ * @param {() => void} callback
+ * @returns {() => void}
  */
 export function onTrackStart (name, callback) {
   const listeners = trackStartListeners[name] ??= new Set()
@@ -193,10 +219,18 @@ export function onTrackStart (name, callback) {
   return () => listeners.delete(callback)
 }
 
+/**
+ * @param {string} name
+ * @returns {boolean}
+ */
 export function isTrackPlaying (name) {
   return tracks[name]?.howl?.playing() ?? false
 }
 
+/**
+ * @param {string} name
+ * @returns {Howl}
+ */
 function createTrackHowl (name) {
   const howl = new Howl({ src: [tracks[name].url], volume: 0 })
   howl.on('play', () => trackStartListeners[name]?.forEach((callback) => callback()))
@@ -241,20 +275,24 @@ function startCurrentTrack () {
   if (currentFadeIn) track.howl.fade(track.howl.volume(), gain(musicVolume), FADE_MS)
 }
 
+/** @returns {number} */
 export function getMusicVolume () {
   return musicVolume
 }
 
+/** @returns {number} */
 export function getSfxVolume () {
   return sfxVolume
 }
 
+/** @param {number} value 0–9, clamped */
 export function setMusicVolume (value) {
   musicVolume = clampVolume(value)
   writeVolume(STORAGE_KEYS.music, musicVolume)
   tracks[currentTrack]?.howl?.volume(gain(musicVolume))
 }
 
+/** @param {number} value 0–9, clamped */
 export function setSfxVolume (value) {
   sfxVolume = clampVolume(value)
   writeVolume(STORAGE_KEYS.sfx, sfxVolume)

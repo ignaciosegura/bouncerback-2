@@ -12,7 +12,7 @@ Every doc, all seven mockups and the level schema were reviewed against each oth
 
 ### Tooling & architecture
 - **Bundler:** Vite (fast ESM dev server, pairs well with PixiJS v8's async `app.init()` and with Capacitor).
-- **Language:** plain JavaScript/JSX — matches `eslint.config.js` (no TS parser) and `project-structure.md` (all `.jsx`/`.js` files).
+- **Language:** plain JavaScript/JSX — matches `eslint.config.js` (no TS parser) and `project-structure.md` (all `.jsx`/`.js` files). Type-checked with JSDoc + `checkJs` (no `.ts` files): see `docs/type-checking-plan.md`.
 - **PixiJS v8**, matching the async `app.init()` pattern in `docs/react-pixi-example.jsx`.
 - **No routing library** — `App.jsx` is a simple state-based screen switcher, per `project-structure.md` ("router / screen switcher").
 - **Screens only:** every screen lives in `src/screens/` and is built from the generic components in `src/components/` (`Button`, `Menu`, `TextBox`, `Overlay`, `HUD`, `Screen`). There are no separate `components/*Menu.jsx` files.

@@ -1,13 +1,18 @@
 import { useEffect, useRef } from 'react'
 
+/** @import { ComponentProps } from 'react' */
+
 // Must stay longer than the 0.15 s blink in index.css, so only one piece blinks at a time
 const BLINK_MIN_WAIT = 500
 const BLINK_MAX_WAIT = 3500
 const BLINK_CLASS = 'logo__piece--blink'
 
-// Inline SVG (not a CSS mask) so individual segments can be targeted for animation.
+/**
+ * Inline SVG (not a CSS mask) so individual segments can be targeted for animation.
+ * @param {ComponentProps<'svg'>} props
+ */
 export default function Logo (props) {
-  const svgRef = useRef(null)
+  const svgRef = useRef(/** @type {SVGSVGElement | null} */ (null))
 
   useEffect(() => {
     const pieces = svgRef.current.children

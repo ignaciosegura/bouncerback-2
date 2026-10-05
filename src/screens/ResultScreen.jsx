@@ -3,7 +3,19 @@ import Menu from '../components/Menu.jsx'
 import Button from '../components/Button.jsx'
 import TextBox from '../components/TextBox.jsx'
 
-// Shared layout of the Game Over and You Win! screens
+/**
+ * @typedef {Object} ResultScreenProps
+ * @property {string} title
+ * @property {number} score
+ * @property {number} hiScore
+ * @property {() => void} onTryAgain
+ * @property {() => void} onMainMenu
+ */
+
+/**
+ * Shared layout of the Game Over and You Win! screens
+ * @param {ResultScreenProps} props
+ */
 export default function ResultScreen ({ title, score, hiScore, onTryAgain, onMainMenu }) {
   return (
     <Screen variant="dark" className="result-screen">

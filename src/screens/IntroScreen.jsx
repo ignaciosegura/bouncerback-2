@@ -5,7 +5,10 @@ import Button from '../components/Button.jsx'
 import TextBox from '../components/TextBox.jsx'
 import { MENU_TRACK, preloadTrack } from '../audio/soundManager.js'
 
-// First screen: its button is the user interaction that unlocks audio before the Main Menu
+/**
+ * First screen: its button is the user interaction that unlocks audio before the Main Menu
+ * @param {{ onEnter: () => void }} props
+ */
 export default function IntroScreen ({ onEnter }) {
   // Loading and decoding need no user interaction, so the menu track is ready when the Main Menu starts it
   useEffect(() => {

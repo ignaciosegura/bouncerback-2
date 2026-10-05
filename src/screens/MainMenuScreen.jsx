@@ -4,6 +4,8 @@ import Button from '../components/Button.jsx'
 import Logo from '../components/Logo.jsx'
 import TextBox from '../components/TextBox.jsx'
 
+/** @param {{ onPlay: () => void, onSettings: () => void }} props */
+
 export default function MainMenuScreen ({ onPlay, onSettings }) {
   return (
     <Screen variant="light" transparent className="main-menu-screen">

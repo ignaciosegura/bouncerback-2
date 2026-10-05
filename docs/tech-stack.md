@@ -15,6 +15,7 @@ This document defines the core technology stack, architectural boundaries, proje
 | **Menu Background Animation** | **lottie-web** (SVG player) | Plays the Lottie vector animation behind the menu screens (DOM layer, React domain). |
 | **Audio** | Manages cross-platform sound effects and background music playback. |
 | **Mobile Packaging** | **Capacitor** | Wraps the web application into native iOS and Android packages. |
+| **Type Checking** | **TypeScript compiler over JSDoc** (`checkJs`) | Checks the plain JS/JSX in `src/` with `npm run typecheck` (`tsc --noEmit`); no build step, Vite doesn't type-check. See `docs/type-checking-plan.md`. |
 
 ---
 
