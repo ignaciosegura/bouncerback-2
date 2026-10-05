@@ -39,7 +39,13 @@ const CAPTURE_BUTTONS = [BUTTONS.A, BUTTONS.LT, BUTTONS.RT, BUTTONS.L3, BUTTONS.
 // Core collapse: the core grows to the ring while the atoms settle, then it collapses with them
 const CORE_COLLAPSE_SETTLE_TIME = 1.85
 const CORE_COLLAPSE_TIME = 2
-const GAME_OVER_DELAY = 1 // lets the last escaping atom fade out before Game Over
+// Last life zoom: the other atoms freeze and the view zooms on the point where the last atom crossed
+// the ring, moving it to the screen center, while that atom escapes in slow motion
+const ZOOM_SCALE = 10
+const ZOOM_TIME = 0.5
+const ZOOM_HOLD = 1
+const SLOW_MOTION = 1 / 3 // its 0.5 s fade lasts 1.5 s, ending with the Game Over delay
+const GAME_OVER_DELAY = ZOOM_TIME + ZOOM_HOLD // the zoom and its hold play before Game Over
 const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen before the WebGL context is lost
 
 // The background turns dark red while the player has only one life left
@@ -79,6 +85,10 @@ export default class GameEngine {
     this.timeTenths = level.timerTenths
     this.lastBeat = -1 // last beat of the music on which capturable atoms pulsed
     this.atomSpeed = CONTACT_DISTANCE * level.atomSpeed
+    // Camera for the last life zoom. `offset` is the share of the focus point's normal offset from
+    // the screen center still left (1: centered layout, 0: the focus is at the center)
+    this.zoom = { scale: 1, focusX: 0, focusY: 0, offset: 1 }
+    this.lastAtom = null // the atom that took the last life
 
     // Starts on its target color: no fade if the level begins with a single life
     this.backgroundColor = this.backgroundTarget()
@@ -155,11 +165,18 @@ export default class GameEngine {
     this.app.stage.addChild(this.playfield)
   }
 
-  // Centres the playfield and scales it with the screen; game state is unaffected
+  // Centres the playfield and scales it with the screen, applying the last life zoom; game state
+  // is unaffected
   layout = () => {
     const { width, height } = this.app.screen
-    this.playfield.position.set(width / 2, height / 2)
-    this.playfield.scale.set(Math.min(width, height) / REFERENCE_SIZE)
+    const { scale, focusX, focusY, offset } = this.zoom
+    const base = Math.min(width, height) / REFERENCE_SIZE
+    const s = base * scale
+    this.playfield.position.set(
+      width / 2 + focusX * (base * offset - s),
+      height / 2 + focusY * (base * offset - s)
+    )
+    this.playfield.scale.set(s)
   }
 
   // Input
@@ -376,6 +393,7 @@ export default class GameEngine {
       atom.escape()
       this.lives = Math.max(0, this.lives - 1)
       this.emit('onLivesChange', this.lives)
+      if (this.lives === 0 && !this.lastAtom) this.focusLastAtom(atom)
       this.fadeBackgroundTo(this.backgroundTarget())
       soundManager.playSfx('destroy')
     }
@@ -432,7 +450,16 @@ export default class GameEngine {
     return true
   }
 
-  // Lives reached 0: freeze, let escaping atoms fade out, then Game Over
+  // The zoom focuses on the exact point where the atom's center crossed the ring (it can already
+  // be up to one frame's movement past it)
+  focusLastAtom (atom) {
+    this.lastAtom = atom
+    this.zoom.focusX = Math.cos(atom.positionAngle) * RING_RADIUS
+    this.zoom.focusY = Math.sin(atom.positionAngle) * RING_RADIUS
+  }
+
+  // Lives reached 0: every other atom freezes, the view zooms on the last atom as it escapes in
+  // slow motion, then Game Over
   lose () {
     this.state = STATE.LOST
     this.stateTime = 0
@@ -441,7 +468,19 @@ export default class GameEngine {
 
   updateLost (dt) {
     this.stateTime += dt
-    this.updateVanishingAtoms(dt)
+    if (this.lastAtom) {
+      const slowDt = dt * SLOW_MOTION
+      if (this.lastAtom.updateEscape(slowDt, this.atomSpeed * slowDt)) {
+        this.lastAtom.render(slowDt)
+      } else {
+        this.releaseAtom(this.lastAtom)
+        this.lastAtom = null
+      }
+    }
+    const e = easeOutQuad(Math.min(1, this.stateTime / ZOOM_TIME))
+    this.zoom.scale = ZOOM_SCALE ** e
+    this.zoom.offset = 1 - e
+    this.layout()
     if (this.stateTime >= GAME_OVER_DELAY) {
       this.state = STATE.ENDED
       this.emit('onGameOver', { score: this.score })

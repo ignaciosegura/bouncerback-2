@@ -1,4 +1,5 @@
 import { Graphics } from 'pixi.js'
+import { circlePoints } from '../geometry.js'
 
 // Playfield sizes are in mockup pixels (1080px-tall reference); the engine scales the playfield to the screen
 export const RING_RADIUS = 335
@@ -17,7 +18,7 @@ export default class ContainmentRing {
     this.view.visible = radius > 0
     if (!this.view.visible) return
     this.view
-      .circle(0, 0, radius)
+      .poly(circlePoints(radius), true)
       .stroke({ width: LINE_WIDTH, color: 0xffffff })
   }
 }

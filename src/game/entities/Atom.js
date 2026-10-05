@@ -1,6 +1,7 @@
 import { Graphics } from 'pixi.js'
 import { lerpColor } from '../color.js'
 import { easeInQuad } from '../easing.js'
+import { circlePoints } from '../geometry.js'
 import AtomPulse from './AtomPulse.js'
 
 export const ATOM_RADIUS = 20
@@ -37,7 +38,7 @@ function chargeColor (charge) {
 export default class Atom {
   constructor () {
     this.view = new Graphics()
-      .circle(0, 0, ATOM_RADIUS)
+      .poly(circlePoints(ATOM_RADIUS))
       .fill(ATOM_COLORS.WHITE)
     this.view.visible = false
     this.pulse = new AtomPulse()
