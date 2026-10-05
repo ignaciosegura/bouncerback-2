@@ -15,7 +15,8 @@ function angleDifference (a, b) {
 
 // An arc on the ring centred on `angle`. Drawn as an outline while the player drags it (inactive),
 // filled once set (active). Expires `duration` seconds after being set, fading out over the end
-// of its lifetime. Owns the flash shown when it bounces an atom.
+// of its lifetime. Owns the flash shown when it bounces an atom. `stick` is the controller stick
+// that set it ('left' / 'right'), or null: each stick owns one paddle.
 export default class Paddle {
   constructor (arc, duration) {
     this.arc = arc
@@ -23,10 +24,12 @@ export default class Paddle {
     this.view = new Graphics()
     this.view.visible = false
     this.flash = new PaddleFlash()
+    this.stick = null
   }
 
   start (angle) {
     this.active = false
+    this.stick = null
     this.age = 0
     this.setAngle(angle)
     this.draw()

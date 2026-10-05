@@ -418,9 +418,9 @@ Three phases that add controller support (see "Game controller" in Decisions, ga
 - `src/game/GameEngine.js`:
   - Import `GamepadReader` and `BUTTONS`. The constructor creates `this.gamepad = new GamepadReader()`.
   - Pull the paddle logic out of the pointer handlers into methods keyed by an input id (the `pointerId`, or `'left'` / `'right'` for the sticks), so both inputs share it; `draggedPaddles` holds both kinds:
-    - `startPaddleDrag(inputId, angle)`: today's `onPointerDown` paddle part (release any paddle already dragged by that input, take one from the pool, `start(angle)`).
-    - `dragPaddle(inputId, angle)`: `setAngle`.
-    - `setPaddle(inputId, stick = null)`: today's `onPointerUp`. With a `stick`, it first releases the active paddle with the same `stick` (each stick owns one paddle), then tags the new one, activates it and pushes it; the `MAX_ACTIVE_PADDLES` FIFO stays as it is.
+    - `startPaddleDrag(input, angle)`: today's `onPointerDown` paddle part (release any paddle already dragged by that input, take one from the pool, `start(angle)`).
+    - `dragPaddle(input, angle)`: `setAngle`.
+    - `setPaddle(input, stick = null)`: today's `onPointerUp`. With a `stick`, it first releases the active paddle with the same `stick` (each stick owns one paddle), then tags the new one, activates it and pushes it; the `MAX_ACTIVE_PADDLES` FIFO stays as it is.
     - The pointer handlers call these; their behavior doesn't change.
   - `update()`: `this.gamepad.poll()` every frame, before the state switch (so press detection stays up to date during the start delay and the core collapse), then `this.handleGamepad()` only in `STATE.PLAYING`.
   - `handleGamepad()`:

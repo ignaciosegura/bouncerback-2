@@ -7,6 +7,7 @@ import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
 import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
 import Atom, { ATOM_RADIUS, ATOM_STATE, CAPTURE_MIN_CHARGE } from './entities/Atom.js'
 import Paddle, { PADDLE_THICKNESS } from './entities/Paddle.js'
+import { BUTTONS, GamepadReader } from '../input/gamepad.js'
 
 // The playfield is laid out in mockup pixels for a 1080px-tall screen, then scaled to fit
 const REFERENCE_SIZE = 1080
@@ -32,6 +33,9 @@ const RING_GROW_TIME = 0.25
 const CORE_GROW_TIME = 0.5
 const START_ANIMATION_TIME = RING_GROW_TIME + CORE_GROW_TIME // must stay ≤ START_DELAY
 const MAX_ACTIVE_PADDLES = 2
+// Controller: each stick drags and sets its own paddle; any of these buttons captures
+const STICKS = ['left', 'right']
+const CAPTURE_BUTTONS = [BUTTONS.A, BUTTONS.LT, BUTTONS.RT, BUTTONS.L3, BUTTONS.R3]
 // Core collapse: the core grows to the ring while the atoms settle, then it collapses with them
 const CORE_COLLAPSE_SETTLE_TIME = 1.85
 const CORE_COLLAPSE_TIME = 2
@@ -85,9 +89,10 @@ export default class GameEngine {
     this.atoms = []
     this.atomPool = []
     this.activePaddles = []
-    this.draggedPaddles = new Map() // pointerId → inactive paddle
+    this.draggedPaddles = new Map() // input (pointerId, or a controller stick: 'left' / 'right') → inactive paddle
     this.paddlePool = []
     this.paddles = [] // every paddle instance, active or pooled, to update their flashes
+    this.gamepad = new GamepadReader()
   }
 
   async mount (container) {
@@ -183,6 +188,8 @@ export default class GameEngine {
       this.app.ticker.stop()
       soundManager.pauseTrack()
     } else {
+      // A controller button pressed during the pause doesn't fire on resume
+      this.gamepad.reset()
       this.app.ticker.start()
       soundManager.resumeTrack()
     }
@@ -194,27 +201,67 @@ export default class GameEngine {
     const { x, y } = this.playfield.toLocal(event.global)
     if (Math.hypot(x, y) <= CAPTURE_TAP_RADIUS && this.captureAtCore()) return
 
-    // Press: an inactive paddle appears at the pointer's angle
-    this.releaseDraggedPaddle(event.pointerId)
-    const paddle = this.paddlePool.pop() ?? this.createPaddle()
-    paddle.start(Math.atan2(y, x))
-    this.draggedPaddles.set(event.pointerId, paddle)
+    this.startPaddleDrag(event.pointerId, Math.atan2(y, x))
   }
 
   onPointerMove = (event) => {
-    const paddle = this.draggedPaddles.get(event.pointerId)
-    if (!paddle || this.paused) return
+    if (!this.draggedPaddles.has(event.pointerId) || this.paused) return
 
     const { x, y } = this.playfield.toLocal(event.global)
-    paddle.setAngle(Math.atan2(y, x))
+    this.dragPaddle(event.pointerId, Math.atan2(y, x))
   }
 
   onPointerUp = (event) => {
-    const paddle = this.draggedPaddles.get(event.pointerId)
+    this.setPaddle(event.pointerId)
+  }
+
+  // Controller: a stick pushed past its engage threshold drags its paddle, released it sets it
+  // (the angle maps straight to the paddle: both have y pointing down). A capture button captures
+  // like a tap at the core, but a press with nothing to capture does nothing.
+  handleGamepad () {
+    if (CAPTURE_BUTTONS.some((button) => this.gamepad.wasPressed(button))) this.captureAtCore()
+
+    for (const stick of STICKS) {
+      const { engaged, angle } = this.gamepad.stick(stick)
+      if (engaged) {
+        if (this.draggedPaddles.has(stick)) this.dragPaddle(stick, angle)
+        else this.startPaddleDrag(stick, angle)
+      } else {
+        this.setPaddle(stick, stick)
+      }
+    }
+  }
+
+  // Paddle input, shared by the pointer and the controller's sticks. `input` is the pointerId or
+  // the stick's name.
+
+  // Press: an inactive paddle appears at `angle`
+  startPaddleDrag (input, angle) {
+    this.releaseDraggedPaddle(input)
+    const paddle = this.paddlePool.pop() ?? this.createPaddle()
+    paddle.start(angle)
+    this.draggedPaddles.set(input, paddle)
+  }
+
+  dragPaddle (input, angle) {
+    this.draggedPaddles.get(input)?.setAngle(angle)
+  }
+
+  // Release: the paddle is set and its lifetime starts. A stick's paddle replaces the one that
+  // stick set before; a third paddle removes the oldest
+  setPaddle (input, stick = null) {
+    const paddle = this.draggedPaddles.get(input)
     if (!paddle) return
 
-    // Release: the paddle is set and its lifetime starts; a third one removes the oldest
-    this.draggedPaddles.delete(event.pointerId)
+    this.draggedPaddles.delete(input)
+    if (stick) {
+      const previous = this.activePaddles.find((p) => p.stick === stick)
+      if (previous) {
+        this.activePaddles.splice(this.activePaddles.indexOf(previous), 1)
+        this.releasePaddle(previous)
+      }
+      paddle.stick = stick
+    }
     paddle.activate()
     this.activePaddles.push(paddle)
     while (this.activePaddles.length > MAX_ACTIVE_PADDLES) {
@@ -226,6 +273,9 @@ export default class GameEngine {
 
   update = (ticker) => {
     const dt = ticker.deltaMS / 1000
+    // Polled every frame, so a button held through the start delay doesn't count as a press later
+    this.gamepad.poll()
+    if (this.state === STATE.PLAYING) this.handleGamepad()
     this.updateBackground(dt)
     // Flashes outlive their paddles and finish during the core collapse
     for (const paddle of this.paddles) paddle.flash.update(dt)
