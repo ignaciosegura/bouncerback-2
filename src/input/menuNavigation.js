@@ -1,10 +1,13 @@
 import { BUTTONS, GamepadReader, hasGamepad, watchGamepads } from './gamepad.js'
 
 // Game controller navigation of the menu screens. DOM only: it marks the selected button with a
-// class and activates it with click(), so the screens' own onClick handlers run unchanged.
+// class and activates it with click(), so the screens' own onClick handlers run unchanged. Like a
+// mouse click, a button shows pressed while the control is held and activates on release.
 // No React state.
 
 const SELECTED_CLASS = 'gamepad-selected'
+const PRESSED_CLASS = 'gamepad-pressed'
+const ACTIVATE_BUTTONS = [BUTTONS.A, BUTTONS.RT]
 // Every button of the current screen, except the ones opted out (the Intro's: controller input
 // can't unlock audio)
 const ITEMS_SELECTOR = '.screen button:not([data-gamepad="ignore"])'
@@ -60,6 +63,7 @@ export function startMenuNavigation (root) {
   const reader = new GamepadReader()
   let frame = null
   let selected = null
+  let press = null // { element, button }: a button held down on a menu button
   // On from the first controller use; a mouse click or touch turns it off
   let controllerMode = false
 
@@ -69,8 +73,32 @@ export function startMenuNavigation (root) {
     selected?.classList.add(SELECTED_CLASS)
   }
 
+  const startPress = (element, button) => {
+    press = { element, button }
+    element.classList.add(PRESSED_CLASS)
+  }
+
+  const cancelPress = () => {
+    press?.element.classList.remove(PRESSED_CLASS)
+    press = null
+  }
+
+  // The held button activates on release, like a mouse click. It's cancelled if the control stops
+  // being down any other way (controller switched or disconnected) or the button left the screen
+  const updatePress = () => {
+    if (!press) return
+    const { element, button } = press
+    if (reader.wasReleased(button) && element.isConnected) {
+      cancelPress()
+      element.click()
+    } else if (!reader.isDown(button) || !element.isConnected) {
+      cancelPress()
+    }
+  }
+
   const leaveControllerMode = () => {
     controllerMode = false
+    cancelPress()
     select(null)
   }
 
@@ -98,27 +126,36 @@ export function startMenuNavigation (root) {
     if (controllerMode && !selected && items.length > 0) select(items[0])
 
     // Ignored during screen transitions, like taps and clicks
-    if (TRANSITION_CLASSES.some((name) => root.classList.contains(name))) return
+    if (TRANSITION_CLASSES.some((name) => root.classList.contains(name))) {
+      cancelPress()
+      return
+    }
 
+    updatePress()
+
+    // Back presses the screen's BACK button. While a press is held, other presses are ignored
     if (reader.wasPressed(BUTTONS.B)) {
       controllerMode = true
-      root.querySelector(BACK_SELECTOR)?.click()
+      const back = root.querySelector(BACK_SELECTOR)
+      if (back && !press) startPress(back, BUTTONS.B)
       return
     }
 
     const direction = readDirection()
-    const activate = reader.wasPressed(BUTTONS.A) || reader.wasPressed(BUTTONS.RT)
-    if (!direction && !activate) return
+    const activateButton = ACTIVATE_BUTTONS.find((button) => reader.wasPressed(button))
+    if (!direction && activateButton === undefined) return
 
     controllerMode = true
     // The first press only shows the selection
     if (!selected) {
       select(items[0] ?? null)
-    } else if (activate) {
-      selected.click()
-    } else {
+    } else if (direction) {
+      // Moving cancels a held press, like dragging the mouse off a button
+      cancelPress()
       const next = nearestItem(selected, direction, items.filter((item) => item !== selected))
       if (next) select(next)
+    } else if (!press) {
+      startPress(selected, activateButton)
     }
   }
 

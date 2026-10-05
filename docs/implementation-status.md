@@ -52,4 +52,4 @@ Legend: `[x]` done · `[ ]` pending
   - [x] **Phase 32** — Gameplay (each stick drags and sets its own paddle; bottom face button, LT, RT, L3 or R3 captures; no pause action yet)
   - [x] **Phase 33** — Shared paddles for both sticks (either stick places the next paddle; the two-paddle FIFO decides which one goes, replacing one paddle per stick)
 - [x] **Phase 34** — Paddle replacement warning (while a new paddle is being dragged, the set paddle its release will push out turns red `#FF0000` at once; mouse, touch and sticks; the one-life-left background darkens to `#550000` so the red stands out)
-- [ ] **Phase 35** — Controller press feedback (a menu button activated with the controller shows the mouse's pressed look while held and activates on release; a press can be cancelled)
+- [x] **Phase 35** — Controller press feedback (a menu button activated with the controller shows the mouse's pressed look while held and activates on release; a press can be cancelled)

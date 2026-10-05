@@ -132,6 +132,11 @@ export class GamepadReader {
     return this.isDown(button) && this.previousButtons[button] !== true
   }
 
+  // Up now, down on the previous poll. Never reported on a record-only poll or with no controller.
+  wasReleased (button) {
+    return !this.isDown(button) && this.previousButtons[button] === true
+  }
+
   // { engaged, justEngaged, angle } of 'left' or 'right'. The angle (radians, y down) only follows
   // the stick while it's past the engage threshold, so the spring-back to the center doesn't skew it.
   stick (name) {

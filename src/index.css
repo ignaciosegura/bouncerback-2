@@ -197,8 +197,10 @@ button {
 
 .button:active,
 .button:focus-visible,
+.button.gamepad-pressed,
 .volume-control__step:active,
-.volume-control__step:focus-visible {
+.volume-control__step:focus-visible,
+.volume-control__step.gamepad-pressed {
   outline: none;
   background: var(--fg);
   color: var(--bg);
