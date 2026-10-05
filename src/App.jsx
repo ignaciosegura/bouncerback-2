@@ -10,6 +10,7 @@ import GameScreen from './screens/GameScreen.jsx'
 import GameOverScreen from './screens/GameOverScreen.jsx'
 import YouWinScreen from './screens/YouWinScreen.jsx'
 import MenuBackground from './components/MenuBackground.jsx'
+import { startMenuNavigation } from './input/menuNavigation.js'
 
 const SCREENS = {
   INTRO: 'intro',
@@ -32,6 +33,7 @@ export default function App () {
   const [nextScreen, setNextScreen] = useState(null)
   const [transition, setTransition] = useState('in')
   const previousScreenRef = useRef(null)
+  const transitionRootRef = useRef(null)
   const [level, setLevel] = useState(null)
   const [score, setScore] = useState(0)
   const [hiScore, setHiScore] = useState(getHiScore)
@@ -59,6 +61,9 @@ export default function App () {
       soundManager.playTrack(soundManager.MENU_TRACK, { fadeIn: previousScreen !== SCREENS.INTRO })
     }
   }, [screen])
+
+  // Game controller navigation of the menus: it clicks the screens' buttons, so they need no wiring
+  useEffect(() => startMenuNavigation(transitionRootRef.current), [])
 
   // Ignored while a transition runs, so a second tap can't navigate twice
   const navigate = (next) => {
@@ -178,7 +183,7 @@ export default function App () {
   // never animates itself: only the screen's elements do.
   const transitionClass = transition ? `screen-transition--${transition}` : ''
   return (
-    <div className={`screen-transition ${transitionClass}`} onAnimationEnd={handleTransitionEnd}>
+    <div ref={transitionRootRef} className={`screen-transition ${transitionClass}`} onAnimationEnd={handleTransitionEnd}>
       {MENU_BACKGROUND_SCREENS.includes(screen) ? <MenuBackground /> : null}
       {renderScreen()}
     </div>

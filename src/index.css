@@ -291,6 +291,21 @@ button {
   text-align: center;
 }
 
+/* Game controller selection: a double border (border, gap, outline), all as thick as the border.
+   Two classes, so it wins over :focus-visible's outline: none; --fg, not currentColor, which is
+   the background color on a focused (inverted) button */
+
+.button.gamepad-selected,
+.volume-control__step.gamepad-selected {
+  outline: var(--border-width) solid var(--fg);
+  outline-offset: var(--border-width);
+}
+
+/* The steps share their borders with the volume control: drawn inside, with a gap to them */
+.volume-control__step.gamepad-selected {
+  outline-offset: calc(-2 * var(--border-width));
+}
+
 /* Main Menu */
 
 /* Logo + buttons are centered as a group; the menu's bottom margin lifts it so the

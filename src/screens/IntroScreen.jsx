@@ -17,7 +17,8 @@ export default function IntroScreen ({ onEnter }) {
       {/* Outside the Menu: it's wider than the button, which the menu would stretch to match */}
       <TextBox size="menu" className="intro-screen__note">Grab your best headphones first ;)</TextBox>
       <Menu>
-        <Button onClick={onEnter}>ENTER BOUNCERBACK</Button>
+        {/* Not selectable with the game controller: browsers don't unlock audio on controller input */}
+        <Button data-gamepad="ignore" onClick={onEnter}>ENTER BOUNCERBACK</Button>
       </Menu>
     </Screen>
   )
