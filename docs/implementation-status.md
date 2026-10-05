@@ -21,14 +21,14 @@ Legend: `[x]` done · `[ ]` pending
 
 - [ ] **Phase 8** — Pause functionality
   - Groundwork only: the `P` key toggles pause in `GameEngine` (ticker stop/start + music pause/resume). The Pause button and `PauseOverlay` (Resume / Settings / Main Menu) are still missing.
-- [x] **Phase 9** — Screen transitions (old-TV effect on every screen change, pure CSS, on the screen's elements only — backgrounds, the menu animation and the game canvas stay still: 1 s screen-out — fade out, color blends to dark yellow then dark red, vertical shake at the end — then 0.5 s fade-in)
+- [x] **Phase 9** — Screen transitions (old-TV effect on every screen change, pure CSS, on the screen's elements only — backgrounds, the menu animation and the game canvas stay still: 1 s screen-out — fade out, color blends to transition dark yellow `#666600` then transition dark red `#660000`, vertical shake at the end — then 0.5 s fade-in)
 - [ ] **Phase 10** — Mobile packaging (Capacitor iOS/Android, orientation lock, icons/splash)
 - [ ] **Phase 11** — Rotate-device overlay
 - [ ] **Phase 12** — Optional visual effects (`palette_invert`, `glow_pulse`, level `vfx` timelines)
 - [ ] **Phase 13** — Level unlocking
 - [ ] **Phase 14** — Results ambience track
 - [x] **Phase 15** — Capturable atom cue (charge ≥ 3 yellow → red)
-- [x] **Phase 16** — One-life-left background (fade to dark red `#660000`)
+- [x] **Phase 16** — One-life-left background (fade to dark red `#660000`; `#550000` from Phase 34)
 - [x] **Phase 17** — Late-paddle grace window (atoms escape only once their center crosses the ring)
 - Paddle visual feedback:
   - [x] **Phase 18** — Paddle lifetime fade (set paddles fade 100% → 20% opacity over the second half of their lifetime)
@@ -50,3 +50,5 @@ Legend: `[x]` done · `[ ]` pending
   - [x] **Phase 30** — Gamepad API fundamentals (`src/input/gamepad.js`: polled reader, one active controller, press detection, stick engage/release thresholds against drift)
   - [x] **Phase 31** — Menu navigation (d-pad / left stick move, bottom face button or RT activate, right face button back; selected item gets a double border via `outline`; not on the Intro, which must unlock audio)
   - [x] **Phase 32** — Gameplay (each stick drags and sets its own paddle; bottom face button, LT, RT, L3 or R3 captures; no pause action yet)
+  - [ ] **Phase 33** — Shared paddles for both sticks (either stick places the next paddle; the two-paddle FIFO decides which one goes, replacing one paddle per stick)
+- [ ] **Phase 34** — Paddle replacement warning (while a new paddle is being dragged, the set paddle its release will push out turns red `#FF0000` at once; mouse, touch and sticks; the one-life-left background darkens to `#550000` so the red stands out)

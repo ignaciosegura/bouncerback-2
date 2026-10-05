@@ -73,8 +73,8 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * Only the elements animate: text, buttons, borders, the Main Menu logo and the HUD. The screens themselves don't: their background (black, white #D8D8D8, the menu background animation) stays still and changes at once when the new screen replaces the old one, and the menu background animation keeps playing. On the Game Screen only the HUD animates; the game canvas (ring, core, atoms and its black or dark red background) stays as it is until the Game Screen is replaced.
 * Screen out (1 s):
     * 0 → 1 s: the elements fade out (linear), revealing the screen's background.
-    * 0.5 → 0.75 s: their color blends gradually from its own color (black on the light menus, white on the dark screens) to dark yellow (#666600).
-    * 0.75 → 1 s: their color blends gradually from dark yellow to dark red (#660000).
+    * 0.5 → 0.75 s: their color blends gradually from its own color (black on the light menus, white on the dark screens) to transition dark yellow (#666600, see "Colors").
+    * 0.75 → 1 s: their color blends gradually from transition dark yellow to transition dark red (#660000, see "Colors"; not the #550000 one-life-left background).
     * 0.875 → 1 s: a slight vertical vibration (2px up, then 2px down, at the 1080px reference, once).
     * The blends are linear and last 0.25 s each (this overrides the 0.5 s default for color changes).
 * Screen in (0.5 s): the new screen's elements fade in (linear). No tint, no shake.
@@ -100,9 +100,10 @@ Note: All color changes use a transition time of 0.5 seconds unless otherwise sp
 * Capture window: while an atom that can be captured (3 or more charges) is crossing the core, it emits a pulse on every beat of the music, up to 3 pulses per crossing (later beats would come as the atom is leaving the core, so most of the pulse would play after it can no longer be captured): a filled circle of the atom's current color that grows outward from the atom while fading from 50% to 0% opacity over one beat. The pulse follows the atom and is drawn behind it. Pulses only start while the atom overlaps the core (the moment a tap captures it); a pulse that has already started finishes its fade even if the atom leaves the core. Atoms with fewer than 3 charges never pulse.
 * Capture: when the player captures an atom, it stops and is pulled into the center of the core while shrinking to radius zero, in 0.5 seconds with an ease-in curve (slow at first, fast at the end). It keeps its current color. Any pulse it was emitting stops at the moment of capture.
 * The core (atom emitter) is 25% larger than in the first cycle (radius 20 → 25 at the reference size, now slightly bigger than the atoms), so the moment an atom crosses it is easier to see.
-* When the player has only one life, turn the background dark red (#660000)
+* When the player has only one life, turn the background dark red (#550000)
 * Paddle lifetime: once set, a paddle stays at full opacity for the first half of its lifetime, then fades steadily to 20% opacity over the second half, and disappears when it expires. This fade lasts half the paddle's lifetime and doesn't follow the 0.5 s default above. While the player is still dragging it, the paddle is shown at full opacity.
 * Paddle bounce: every time a paddle bounces an atom back, a subtle, semi-transparent white arc as thick as the paddle (an "echo" of that paddle) appears on top of the paddle and drifts outward (about half a paddle thickness) while fading out, in 0.2 s, like a slight recoil. It only ever reaches half a paddle thickness inside the ring, where the paddle itself sits, so the playable area stays clean. If the same paddle bounces another atom while its echo is still visible, the echo restarts from the beginning. This is cosmetic only.
+* Paddle replacement warning: while the player is dragging a new paddle (mouse, touch or a controller stick) and two paddles are already set, the paddle that will disappear when the new one is set (the oldest: first in, first out) turns red (#FF0000). With two new paddles being dragged at once, both set paddles turn red. The change is instant (it doesn't follow the 0.5 s default above: a drag can be very short). The red paddle keeps fading with its lifetime and stays red until it disappears. Its bounce echo stays white, and the paddle being dragged keeps its white outline.
 * Level end (core collapse): a 2-second animation that starts together with the `vortex_creation` sound effect when the timer reaches zero. It doesn't follow the 0.5 s default above.
     - 0 → 1.85 s: the core grows (ease-in-out) until it matches the containment ring's size and position, while its fill fades in from transparent to grey (#888888) and its outline turns from white to the same grey, with the same transition. The outline ends on top of the ring. At the same time, every atom slows down (ease-out) until it stops completely. Atoms keep their current color and are drawn over the grey core. An atom that is close to the ring can drift slightly past it before it stops; it doesn't escape.
     - 1.85 → 2 s: the core collapses to radius zero (ease-in) and takes every atom with it: all atoms move to the center while shrinking to radius zero, at the same time as the core.
@@ -112,10 +113,12 @@ Note: All color changes use a transition time of 0.5 seconds unless otherwise sp
 * Black background: #000000
 * White: #FFFFFF
 * White background: #D8D8D8
-* Dark red background (one life left): #660000
+* Dark red background (one life left): #550000
 * Yellow (atom at 3 charges): #FFFF00
-* Red (atom at 10 charges): #FF0000
+* Red (atom at 10 charges, paddle replacement warning): #FF0000
 * Grey (core fill and outline during the level-end core collapse): #888888
+* Transition dark yellow (screen-out tint, halfway): #666600
+* Transition dark red (screen-out tint, end): #660000. It's slightly lighter than the dark red background (#550000) on purpose: they're separate colors, so changing one doesn't change the other.
 
 # Mockups
 

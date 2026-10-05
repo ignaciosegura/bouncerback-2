@@ -41,7 +41,7 @@ Other terms:
 ### Gameplay
 
 * **Left and right stick:** each stick places a paddle the same way the mouse does. Pushed → an inactive paddle appears on the ring at the angle the stick points to; moved → it follows; released → it's set and its lifetime starts. It's set at the angle where the stick was last fully pushed, not where it lands while springing back.
-* **Each stick owns one paddle:** setting a new paddle with a stick removes the previous paddle set with that same stick (if it's still on the ring), never the other stick's. As with the mouse, the old paddle stays until the new one is set. The two-paddle limit (first in, first out) still applies when mixing the controller with mouse or touch.
+* **The sticks share the paddles:** either stick places the next paddle, like a finger on a touch screen. With two paddles set, setting a third one removes the oldest (first in, first out), whichever stick, mouse or touch set it. Until then, the paddle that will be removed is shown in red (see "Paddles" in `game-rules.md`).
 * **bottom face button, LT, RT, L3 or R3:** captures the charged atom crossing the core, like a tap at the core. One capture per press. A press with nothing to capture does nothing (unlike a tap, it never places a paddle).
 * **When it's ignored:** during the 3-second start delay, the core collapse and the Game Over delay. A stick held through the start delay places its paddle as soon as play starts.
 * **Pause:** no controller button yet (`P` on the keyboard). Pausing also freezes controller input, and a button pressed during the pause doesn't fire on resume.

@@ -41,6 +41,8 @@ the mouse while holding the left-click button (or doing the equivalent gesture w
 
 The paddle's lifetime (the `paddles.duration` value in the level file) starts counting when the paddle is set (on release), not when the button is pressed. While the player is dragging, the paddle is inactive and doesn't expire. Once set, the paddle fades out gradually during the second half of its lifetime so the player can see how much time it has left, and it flashes every time it bounces an atom (see "Visual feedback" in `graphical-specs.md`; planned for the second development cycle).
 
+While the player is placing a new paddle and the two-paddle limit means an existing paddle will disappear when the new one is set ("first in, first out"), that paddle turns red, so its removal doesn't come as a surprise (see "Visual feedback" in `graphical-specs.md`).
+
 ## Atom capture
 
 Every time an atom is blocked by a paddle, its direction will be reversed and it will gain a "charge". The reversal is exact: the atom travels straight back through the core and out toward the opposite side of the ring. When the atom has three chargers, the player can destroy it by tapping on it while crossing the core, that is, while the atom overlaps the core. Capturable atoms change color, and while one is crossing the core it emits a pulse on every beat, so the player can see when it can be captured (see "Visual feedback" in `graphical-specs.md`. A captured atom is pulled into the center of the core while shrinking, and then disappears.
@@ -49,7 +51,7 @@ Destroying atoms is optional, the player can keep bouncing them for extra points
 
 ## Game controller
 
-The game can also be played with a game controller, alongside mouse and touch: each stick places its own paddle, and buttons capture atoms. The controls are in `docs/game-controller.md`.
+The game can also be played with a game controller, alongside mouse and touch: either stick places a paddle, and buttons capture atoms. The controls are in `docs/game-controller.md`.
 
 # Lives
 
