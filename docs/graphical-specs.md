@@ -60,7 +60,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * When the menus are navigated with a game controller, the selected item is marked with a double border: its own border, a gap, and a second line outside it, all three as thick as the border (like CSS's `double` border style). The second line is drawn with `outline`, so nothing moves.
 * It's drawn in the screen's foreground color, so it follows the screen transitions' tint and fades with its button.
 * The Settings `-` / `+` steps share their borders with the volume control, so on them the double line is drawn inside the step instead (line, gap, line).
-* Nothing is marked until the controller is used, and a mouse click or tap hides the mark.
+* When the mark is shown and hidden: see "Menus" in `docs/game-controller.md`.
 
 ## Scaling
 

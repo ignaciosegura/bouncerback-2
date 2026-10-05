@@ -49,12 +49,7 @@ Destroying atoms is optional, the player can keep bouncing them for extra points
 
 ## Game controller
 
-The game can also be played with a game controller with an Xbox-style layout (see "Game controller" in `docs/implementation-plan.md`). Mouse and touch keep working at the same time.
-
-* **Left stick → one paddle, right stick → another.** Pushing a stick fully in any direction shows an inactive paddle on the ring at the angle the stick points to; moving the stick rotates it. Letting the stick go back to the center sets the paddle and starts its lifetime, like releasing the mouse button. A stick only counts as pushed near full deflection and as released near the center, so a worn stick that rests slightly off-center never places a paddle.
-* **Each stick owns its paddle.** Setting a new paddle with a stick removes the previous paddle set with that same stick (if it's still on the ring), never the other stick's. The two-paddle limit ("first in, first out") still applies when mixing the controller with the mouse or touch.
-* **Capture:** pressing A, either trigger (LT / RT) or either stick (pressing it down) captures the charged atom crossing the core, one per press. A press when no atom can be captured does nothing.
-* Pause has no controller button yet.
+The game can also be played with a game controller, alongside mouse and touch: each stick places its own paddle, and buttons capture atoms. The controls are in `docs/game-controller.md`.
 
 # Lives
 

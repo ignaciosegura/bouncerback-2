@@ -15,6 +15,7 @@ root/
     ├── mockups/                    # Reference images for layout and style
     ├── tech-stack.md               # Tech stack & architectural boundaries
     ├── navigation.md               # Navigation flow
+    ├── game-controller.md          # Game controller terms, controls and input reading
     ├── graphical-specs.md          # Graphical specifications
     ├── project-structure.md        # Project structure
     ├── implementation-guidelines.md  # Implementation guidelines

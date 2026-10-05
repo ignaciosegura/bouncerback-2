@@ -12,7 +12,7 @@ This document defines the core technology stack, architectural boundaries, proje
 | **Rendering & Graphics** | **PixiJS** | High-performance WebGL 2D rendering engine utilizing `PIXI.Graphics` for real-time vector graphics and shape drawing. |
 | **Animations** | **PixiJS Ticker (`app.ticker`)** | Drives the 60 FPS game loop, physics steps, frame-by-frame updates, and continuous animations. |
 | **Input Management** | **PixiJS Event System / Vanilla JS** | Handles touch and mouse interactions seamlessly across desktop browsers and mobile webviews (`touchAction: 'none'`). |
-| **Game Controller** | **Gamepad API** (browser, no library) | Polled once per frame: by the `GameEngine` in `app.ticker` during gameplay, and by a small DOM module (`src/input/`) for menu navigation. Only controllers with the `standard` (Xbox-style) mapping. |
+| **Game Controller** | **Gamepad API** (browser, no library) | Polled once per frame: by the `GameEngine` in `app.ticker` during gameplay, and by a small DOM module (`src/input/`) for menu navigation. Only controllers with the `standard` mapping. See `docs/game-controller.md`. |
 | **Menu Background Animation** | **lottie-web** (SVG player) | Plays the Lottie vector animation behind the menu screens (DOM layer, React domain). |
 | **Audio** | Manages cross-platform sound effects and background music playback. |
 | **Mobile Packaging** | **Capacitor** | Wraps the web application into native iOS and Android packages. |

@@ -46,7 +46,7 @@ Legend: `[x]` done · `[ ]` pending
 
 ## Third Development Cycle — ⏳ Pending
 
-- Game controller support (Xbox-style layout, Gamepad API):
+- Game controller support (see `docs/game-controller.md`):
   - [x] **Phase 30** — Gamepad API fundamentals (`src/input/gamepad.js`: polled reader, one active controller, press detection, stick engage/release thresholds against drift)
-  - [x] **Phase 31** — Menu navigation (d-pad / left stick move, A or RT activate, B back; selected item gets a double border via `outline`; not on the Intro, which must unlock audio)
-  - [x] **Phase 32** — Gameplay (each stick drags and sets its own paddle; A, LT, RT, L3 or R3 captures; no pause action yet)
+  - [x] **Phase 31** — Menu navigation (d-pad / left stick move, bottom face button or RT activate, right face button back; selected item gets a double border via `outline`; not on the Intro, which must unlock audio)
+  - [x] **Phase 32** — Gameplay (each stick drags and sets its own paddle; bottom face button, LT, RT, L3 or R3 captures; no pause action yet)
