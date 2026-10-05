@@ -32,8 +32,9 @@ Other terms:
 ### Menus
 
 * **d-pad or left stick:** moves the selection to the nearest button in that direction. One step per push: holding doesn't repeat, and there's no wrap-around. Only buttons can be selected (menu buttons and the Settings `-` / `+` steps); the Main Menu credit links are skipped.
-* **bottom face button or RT:** activates the selected button, exactly like a click.
-* **right face button:** goes back, by activating the screen's `<<< BACK` button (Level Select and Settings). It does nothing on the other screens.
+* **bottom face button or RT:** activates the selected button, exactly like a click: the button shows pressed (inverted, as under a held mouse button) while the control is held, and it activates on release.
+* **right face button:** goes back, by activating the screen's `<<< BACK` button (Level Select and Settings), with the same press and release: BACK shows pressed while it's held. It does nothing on the other screens.
+* **Cancelling a press:** like dragging the mouse off a button before releasing it, a held press is cancelled without activating anything if the selection moves, a mouse click or touch happens, the button leaves the screen, or the controller is disconnected or another one takes over.
 * **Selection:** nothing is selected until the controller is used. Connecting a controller counts as using it: browsers only expose a controller after one of its buttons has been pressed. The first push or press on a screen with nothing selected only selects its first button. In controller mode, every new screen arrives with its first button selected. A mouse click, a touch or disconnecting the last controller leaves controller mode and hides the selection.
 * **Screen transitions:** controller input is ignored while a transition runs, like taps and clicks.
 * **Intro:** the controller doesn't work there. Browsers don't count controller input as a user interaction for unlocking audio (only keyboard, mouse and touch count), so pressing `ENTER BOUNCERBACK` with the controller would leave the game silent. The Intro needs a click, tap or key press.
