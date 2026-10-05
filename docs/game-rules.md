@@ -47,6 +47,15 @@ Every time an atom is blocked by a paddle, its direction will be reversed and it
 
 Destroying atoms is optional, the player can keep bouncing them for extra points and charges, up to a limit of ten charges. At ten charges, the atom will not gain charges, but otherwise it will behave as a normal atom.
 
+## Game controller
+
+The game can also be played with a game controller with an Xbox-style layout (see "Game controller" in `docs/implementation-plan.md`). Mouse and touch keep working at the same time.
+
+* **Left stick → one paddle, right stick → another.** Pushing a stick fully in any direction shows an inactive paddle on the ring at the angle the stick points to; moving the stick rotates it. Letting the stick go back to the center sets the paddle and starts its lifetime, like releasing the mouse button. A stick only counts as pushed near full deflection and as released near the center, so a worn stick that rests slightly off-center never places a paddle.
+* **Each stick owns its paddle.** Setting a new paddle with a stick removes the previous paddle set with that same stick (if it's still on the ring), never the other stick's. The two-paddle limit ("first in, first out") still applies when mixing the controller with the mouse or touch.
+* **Capture:** pressing A, either trigger (LT / RT) or either stick (pressing it down) captures the charged atom crossing the core, one per press. A press when no atom can be captured does nothing.
+* Pause has no controller button yet.
+
 # Lives
 
 The player loses a live every time an atom escapes the containment ring. 

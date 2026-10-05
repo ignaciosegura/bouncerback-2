@@ -260,7 +260,7 @@ export default class GameEngine {
     this.updatePlaying(this.stateTime - START_DELAY)
   }
 
-  drawStartAnimation(t) {
+  drawStartAnimation (t) {
     const ring = easeOutQuad(Math.min(1, t / RING_GROW_TIME))
     const core = easeOutQuad(Math.min(1, Math.max(0, (t - RING_GROW_TIME) / CORE_GROW_TIME)))
     this.ring.draw(RING_RADIUS * ring)

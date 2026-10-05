@@ -43,3 +43,10 @@ Legend: `[x]` done · `[ ]` pending
 - [x] **Phase 27** — Logo blink (about once every 2 seconds, at random moments, a random logo piece turns white and fades back to black in 0.15 s)
 - [x] **Phase 28** — Intro headphones note ("GRAB YOUR BEST HEADPHONES FIRST ;)" above the `ENTER BOUNCERBACK` button, 32px, no border; the button stays centered)
 - [x] **Phase 29** — Main Menu credits & mixed-case text ("A game by NIK NAK STUDIO" / "Music and sfx by MAN FROM SPACE" at the bottom of the Main Menu, 24px, mixed case, the names link to niknak.es / manfromspace.com in a new tab with no link styling or feedback; the Intro note becomes "Grab your best headphones first ;)")
+
+## Third Development Cycle — ⏳ Pending
+
+- Game controller support (Xbox-style layout, Gamepad API):
+  - [x] **Phase 30** — Gamepad API fundamentals (`src/input/gamepad.js`: polled reader, one active controller, press detection, stick engage/release thresholds against drift)
+  - [ ] **Phase 31** — Menu navigation (d-pad / left stick move, A or RT activate, B back; selected item gets a double border via `outline`; not on the Intro, which must unlock audio)
+  - [ ] **Phase 32** — Gameplay (each stick drags and sets its own paddle; A, LT, RT, L3 or R3 captures; no pause action yet)

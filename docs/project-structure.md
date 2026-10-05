@@ -33,6 +33,9 @@ root/
     │   ├── Screen.jsx              # Base screen wrapper component (handles transitions, safe areas, etc.)
     │   ├── Overlay.jsx             # Generic overlay component to be placed on top of current screen content
     │   └── TextBox.jsx             # Floating text box component.
+    ├── input/                      # Game controller (Gamepad API); no React, no PixiJS
+    │   ├── gamepad.js              # Polled controller reader: button presses, sticks with drift thresholds
+    │   └── menuNavigation.js       # Controller navigation of the menu screens (selection class + click())
     ├── game/                       # Pure game logic & PixiJS implementation
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
     │   ├── levelLoader.js          # Validates level JSON and derives runtime values (timer, speeds, intervals)

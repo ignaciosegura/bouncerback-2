@@ -55,6 +55,13 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * The font used will be "C64 Angled", a monospaced font: `assets/fonts/c64_angled.ttf`.
 * All text boxes should put all the text in one line (no line-breaks).
 
+## Game controller selection
+
+* When the menus are navigated with a game controller, the selected item is marked with a double border: its own border, a gap, and a second line outside it, all three as thick as the border (like CSS's `double` border style). The second line is drawn with `outline`, so nothing moves.
+* It's drawn in the screen's foreground color, so it follows the screen transitions' tint and fades with its button.
+* The Settings `-` / `+` steps share their borders with the volume control, so on them the double line is drawn inside the step instead (line, gap, line).
+* Nothing is marked until the controller is used, and a mouse click or tap hides the mark.
+
 ## Scaling
 
 * The mockups are drawn at 1920x1080, 1:1 with CSS pixels. All UI sizes (fonts, borders, paddings, gaps) are defined in mockup pixels and scaled with the viewport: one mockup pixel = `min(viewport height / 1080, viewport width / 1920)`, with a floor of 0.4 CSS px so text stays readable on small phones.

@@ -70,6 +70,23 @@ Every doc, all seven mockups and the level schema were reviewed against each oth
 
 - **Mixed-case text (cycle 2):** all text is uppercase (forced by `text-transform: uppercase` on `body`), with two exceptions written in mixed case: the Main Menu credits and the Intro note, which becomes "Grab your best headphones first ;)" (both as in `MAIN MENU.png` and `INTRO.png`). The text is written in the JSX exactly as it should appear, and each of these elements opts out with `text-transform: none`. The font has lowercase glyphs, and it's monospaced, so the note keeps its width and the Intro layout doesn't change.
 
+### Game controller (cycle 3)
+- **API:** the browser's Gamepad API, no library. It has no input events: the state is read by polling `navigator.getGamepads()` once per frame (Chrome returns snapshots, so it must be called again every frame). The `gamepadconnected` / `gamepaddisconnected` events only tell us when to start and stop polling in the menus. Browsers expose a controller only after a button has been pressed on the page (fingerprinting protection), and only in a secure context (`https://` or `localhost`).
+- **Layout:** only controllers the browser reports with the `standard` mapping (Xbox-style layout: A bottom, B right) are used; others are ignored. Buttons by index: A 0, B 1, LT 6, RT 7, left stick press (L3) 10, right stick press (R3) 11, d-pad up / down / left / right 12–15. Sticks: left = axes 0–1, right = axes 2–3, y pointing down (as on screen). The reference test device is a Trust GXT pad with an Xbox layout, which macOS sees as an *Xbox Wireless Controller* (Bluetooth, vendor `045E`, product `02E0`).
+- **One controller at a time:** with several controllers connected, the one used last drives the game (the last one with a button pressed or a stick pushed past the engage threshold).
+- **Presses, not holds:** button actions (A, B, RT, captures) fire once, on the press. A button already held when reading starts (e.g. A still held from the menu when the level starts, or held across a pause) doesn't count as a press. Triggers are analog: they count as pressed from half travel (`TRIGGER_THRESHOLD = 0.5`).
+- **Stick thresholds (drift protection):** a stick only counts as pushed from 75% deflection (`STICK_ENGAGE = 0.75`) and counts as released again below 35% (`STICK_RELEASE = 0.35`). Worn sticks often rest at 10–30% deflection: they never reach the engage threshold, and a stick that rests a bit off-center still counts as released. The gap between the two thresholds (hysteresis) stops a stick sitting near one threshold from toggling on and off. A stick's angle only follows it while it's past the engage threshold: when the player lets go, the stick springs back through the middle in a frame or two, and the angle read on the way back would be noise.
+- **Menus (React domain):** navigation with the d-pad or the left stick (up / down / left / right), A or RT activates the selected item, B goes back (clicks the screen's `<<< BACK` button: Level Select and Settings; B does nothing on the other screens). Menu navigation is a small DOM module started once by `App.jsx`: it polls in its own `requestAnimationFrame` loop, toggles a class on the selected element and activates it with `element.click()`, so the screens' existing `onClick` handlers run unchanged. No React state, no per-screen wiring except two data attributes (see Phase 31).
+- **What can be selected:** every `<button>` of the current screen (menu buttons and the Settings `-` / `+` steps). The Main Menu credit links aren't buttons, so the controller skips them. Moving is spatial: from the selected item to the nearest item in the pushed direction, so the same code handles the vertical menus and the Settings rows (`-` ↔ `+` with left / right). No wrap-around, no auto-repeat: one move per push.
+- **Selection appears on use:** nothing is selected until the controller is used. The first push or A / RT press on a screen selects its first item without moving or activating anything. From then on (controller mode), every new screen arrives with its first item selected. Any mouse click or touch leaves controller mode and hides the selection.
+- **Selected item look:** a double border. The item's own border, a gap, and a second line outside it, all three as thick as the border (`var(--border-width)`), like CSS's `double` style. Drawn with `outline` (`outline-offset` = one border width), so the layout doesn't move. The outline uses `--fg`, so it tints with the screen transitions. The Settings `-` / `+` steps share their borders with the volume control, so their double line is drawn inward (negative offset) instead: line, gap, line inside the step.
+- **Transitions:** controller input is ignored in the menus while a screen transition runs, like taps and clicks. The selection itself appears at the swap, so it fades in with its button.
+- **Intro:** the controller doesn't work on the Intro. Browsers don't count controller input as a user interaction for unlocking audio (the HTML spec's activation-triggering events are keyboard, mouse and touch), so pressing `ENTER BOUNCERBACK` with A would leave the game silent. The Intro needs a click, tap or key press; controller navigation starts on the Main Menu.
+- **Gameplay (PixiJS domain):** `GameEngine` owns its own reader and polls it in `app.ticker`, so pause (ticker stopped) also stops controller input. Each stick drives one paddle with the same three steps as the pointer: pushed past the engage threshold → an inactive paddle appears at the stick's angle; moved → it follows; released → it's set and its lifetime starts.
+- **Each stick owns one paddle:** a paddle set with the left stick replaces the left stick's previous paddle (if it's still alive); the right stick's paddle is never touched, and vice versa. Like with the mouse, the old paddle stays until the new one is set (on release, not on push). The two-paddle limit and its FIFO rule still apply on top, but they only matter when mixing the controller with mouse / touch.
+- **Capture:** A, LT, RT, L3 or R3 captures the charged atom crossing the core (the same `captureAtCore()` as a tap at the core). One capture per press. Unlike a tap, a press that captures nothing does nothing (no paddle).
+- **Pause:** no controller action for now (Start / Menu button left for later, with the Pause overlay of Phase 8).
+
 ### VFX vocabulary
 `level-file-schema.json`'s `vfx[].name` and `graphical-specs.md`'s "optional effects" have no concrete identifiers yet. Two are introduced for cycle 2: `palette_invert` (black/white swap) and `glow_pulse` (paddle glow). Level files can reference these by name in their `vfx` timeline. The "one life left" state is not a timeline vfx: per graphical-specs "Visual feedback", the gameplay background fades to dark red (`#660000`) over 0.5 s, driven directly by game state regardless of the level's own vfx list.
 
@@ -77,7 +94,7 @@ Every doc, all seven mockups and the level schema were reviewed against each oth
 
 ## Development Cycles
 
-Implementation is split into two cycles. The **first development cycle** builds a fully playable MVP in the browser: core navigation, audio, level data, the PixiJS game engine, and scoring. The following are deferred to the **second development cycle**:
+Implementation is split into development cycles. The **first development cycle** builds a fully playable MVP in the browser: core navigation, audio, level data, the PixiJS game engine, and scoring. The following are deferred to the **second development cycle**:
 
 - Pause game functionality and overlay (no Pause screen/button in cycle 1; the game simply runs until win/loss).
 - Transitions between screens (all screen changes are immediate swaps in cycle 1).
@@ -87,6 +104,8 @@ Implementation is split into two cycles. The **first development cycle** builds 
 - Results ambience track (Game Over and You Win! are silent in cycle 1: the music just fades out).
 - Visual cue for capturable atoms (charge ≥ 3). In cycle 1 all atoms look the same.
 - Mobile build (Capacitor `ios`/`android` packaging, native icons/splash, native orientation lock). Cycle 1 targets the web build only; Capacitor deps are installed in Phase 0 but `cap add`/`cap sync` and everything native happen in cycle 2.
+
+The **third development cycle** starts with game controller support (Phases 30–32). Pending cycle 2 phases (Pause, mobile packaging, rotate-device overlay, optional VFX, level unlocking, results ambience track) stay in cycle 2.
 
 ---
 
@@ -358,6 +377,61 @@ Two small, independent phases that make the paddles easier to read. Neither chan
 
 ---
 
+## Third Development Cycle
+
+Builds on top of the second cycle's current state. It starts with game controller support.
+
+### Game controller support (Phases 30–32)
+Three phases that add controller support (see "Game controller" in Decisions, game-rules "Game controller", graphical-specs "Game controller selection" and `navigation.md`). Mouse, touch and keyboard keep working exactly as today, alongside the controller. New folder `src/input/` for code shared by the menus (React domain) and the game (PixiJS domain): it imports neither React nor PixiJS.
+
+### Phase 30 — Gamepad API fundamentals
+- New `src/input/gamepad.js`, pure JS:
+  - Constants: `STICK_ENGAGE = 0.75`, `STICK_RELEASE = 0.35`, `TRIGGER_THRESHOLD = 0.5`, and `BUTTONS` (`A`, `B`, `LT`, `RT`, `L3`, `R3`, `UP`, `DOWN`, `LEFT`, `RIGHT` → standard-mapping indices) as an enum-like object.
+  - `watchGamepads(onChange)`: listens to `gamepadconnected` / `gamepaddisconnected` and calls `onChange(hasGamepad())`; returns an unsubscribe function. `hasGamepad()`: whether at least one `standard` controller is connected. Both are safe where the API is missing (`navigator.getGamepads?.()`, e.g. an insecure context): no controller, no errors.
+  - `class GamepadReader`, one per consumer (the menus and each `GameEngine` have their own, so their press detection never interferes):
+    - `poll()`: reads `navigator.getGamepads()` and picks the active controller (see "One controller at a time"). Stores each button's state (digital buttons: `pressed`; LT / RT: `value ≥ TRIGGER_THRESHOLD`) and keeps the previous poll's. Updates each stick's state: `engaged` turns on at magnitude ≥ `STICK_ENGAGE` and off below `STICK_RELEASE`; `angle` = `Math.atan2(y, x)`, updated only while the magnitude is ≥ `STICK_ENGAGE`; `justEngaged` is true on the poll where `engaged` turns on.
+    - `isDown(button)`, `wasPressed(button)` (down now, up on the previous poll), `stick('left' | 'right')` → `{ engaged, justEngaged, angle }`.
+    - `reset()`: the next poll only records the state (no presses, no `justEngaged`). Also applied to the first poll after creation and whenever the active controller changes, so a button already held never counts as a press.
+- No other file changes. Nothing is visible yet: check it on the dev server with a temporary `console.log` of the reader's state (removed before committing), then through Phases 31–32.
+- `docs/project-structure.md` gets the new `src/input/` folder.
+
+### Phase 31 — Menu navigation
+- New `src/input/menuNavigation.js` (DOM only, like `Logo.jsx`'s blink: it toggles a class, no React state):
+  - `startMenuNavigation(root)` → `stop()`. `root` is the `.screen-transition` wrapper. It owns one `GamepadReader`, runs a `requestAnimationFrame` loop only while `hasGamepad()` (started and stopped through `watchGamepads`), and listens to `pointerdown` on `window` (capture phase) to leave controller mode. `stop()` cancels the loop and removes the listeners.
+  - Selectable items: `root.querySelectorAll('.screen button:not([data-gamepad="ignore"])')`, in DOM order.
+  - Every frame: `poll()`; drop the selection if its element is no longer in the document (the screen changed); in controller mode with nothing selected, select the first item, if any. Then, if `root` has the `screen-transition--out` or `screen-transition--in` class, stop here (input is ignored during transitions; the poll above keeps press detection up to date). Otherwise:
+    - Direction: d-pad `wasPressed`, or the left stick's `justEngaged` reduced to 4 directions (its dominant axis). With nothing selected, it turns controller mode on and selects the first item. Otherwise it moves to the nearest item in that direction: candidates are items whose center lies beyond the selected item's center on that axis; the score is the distance along that axis + 2 × the offset across it, lowest wins, ties go to DOM order. No candidate: nothing happens.
+    - A or RT `wasPressed`: with an item selected, `item.click()`; with nothing selected, select the first item (it doesn't activate anything).
+    - B `wasPressed`: `root.querySelector('.screen [data-gamepad="back"]')?.click()`.
+    - Any of the above turns controller mode on.
+  - Selecting an item moves the `gamepad-selected` class to it; leaving controller mode removes it and clears the selection.
+- `src/App.jsx`: a ref on the `.screen-transition` wrapper and a mount-only `useEffect(() => startMenuNavigation(wrapperRef.current), [])` (returns `stop`, so StrictMode's double effect is clean). No other change: activation goes through each button's `onClick`, so `navigate()` and its transition guard work as for a click.
+- `src/screens/IntroScreen.jsx`: `data-gamepad="ignore"` on the `ENTER BOUNCERBACK` button (`Button` already spreads extra props), with a comment: controller input can't unlock audio (see "Intro" in Decisions).
+- `src/screens/LevelSelectionMenuScreen.jsx`, `src/screens/SettingsMenuScreen.jsx`: `data-gamepad="back"` on the `<<< BACK` button.
+- `src/index.css`, new `/* Game controller selection */` block after `/* Settings: volume dual-button */`:
+  - `.button.gamepad-selected, .volume-control__step.gamepad-selected { outline: var(--border-width) solid var(--fg); outline-offset: var(--border-width); }`. Two classes, so it wins over `.button:focus-visible`'s `outline: none`. `var(--fg)` rather than `currentColor`: a focused (inverted) button's text is `--bg`.
+  - `.volume-control__step.gamepad-selected { outline-offset: calc(-2 * var(--border-width)); }`: inside the step, leaving a one-border gap to the control's outer border and to the label's side border.
+- Game Screen, Game Over, You Win!: no change. The Game Screen has no buttons, so the menu navigation does nothing there (the engine handles the controller); the result screens' TRY AGAIN / MAIN MENU are reachable, and they have no `data-gamepad="back"`, so B does nothing there.
+
+### Phase 32 — Gameplay
+- `src/game/entities/Paddle.js`: a `stick` property (`'left'`, `'right'` or `null`) that tells which stick set the paddle. `start()` resets it to `null`, so a paddle reused from the pool never keeps an old owner.
+- `src/game/GameEngine.js`:
+  - Import `GamepadReader` and `BUTTONS`. The constructor creates `this.gamepad = new GamepadReader()`.
+  - Pull the paddle logic out of the pointer handlers into methods keyed by an input id (the `pointerId`, or `'left'` / `'right'` for the sticks), so both inputs share it; `draggedPaddles` holds both kinds:
+    - `startPaddleDrag(inputId, angle)`: today's `onPointerDown` paddle part (release any paddle already dragged by that input, take one from the pool, `start(angle)`).
+    - `dragPaddle(inputId, angle)`: `setAngle`.
+    - `setPaddle(inputId, stick = null)`: today's `onPointerUp`. With a `stick`, it first releases the active paddle with the same `stick` (each stick owns one paddle), then tags the new one, activates it and pushes it; the `MAX_ACTIVE_PADDLES` FIFO stays as it is.
+    - The pointer handlers call these; their behavior doesn't change.
+  - `update()`: `this.gamepad.poll()` every frame, before the state switch (so press detection stays up to date during the start delay and the core collapse), then `this.handleGamepad()` only in `STATE.PLAYING`.
+  - `handleGamepad()`:
+    - Capture: if any of `A`, `LT`, `RT`, `L3`, `R3` `wasPressed`, call `captureAtCore()` once.
+    - For each stick: `engaged` → `startPaddleDrag` the first time, then `dragPaddle` with its `angle`; not `engaged` while it's dragging a paddle → `setPaddle(name, name)`. The stick's angle maps straight to the paddle angle: both have y pointing down.
+  - `togglePause()`: on resume, `this.gamepad.reset()`, so a button pressed during the pause doesn't fire on resume. While paused the ticker is stopped, so nothing is polled.
+  - `clearPaddles()` already clears every dragged paddle (sticks included) at the core collapse and on Game Over. Afterwards `handleGamepad()` isn't called, so a stick still pushed doesn't bring one back.
+- No React changes, no state to React (AGENTS.md rule 2). No listeners to remove on `destroy()`: the reader is polled, not event-driven.
+
+---
+
 ## Verification
 
 ### First development cycle
@@ -392,3 +466,7 @@ Two small, independent phases that make the paddles easier to read. Neither chan
 - Intro headphones note: a fresh load (and a native app launch) opens on the Intro, which matches `INTRO.png`: `GRAB YOUR BEST HEADPHONES FIRST ;)` on one line above the `ENTER BOUNCERBACK` button, the same size as the button's text, black, with no border and horizontally centered. The button is still centered on the screen. The note fades in with the button on launch. Pressing the button fades it out with the button, with the same tint and shake, and the Main Menu follows as before. The note stays on one line and the layout stays balanced at 4:3 and at wide phone ratios. Check in Safari, Firefox and Chrome, and in the iOS/Android apps.
 - Main Menu credits: the Main Menu matches `MAIN MENU.png` at 1920x1080. `A game by NIK NAK STUDIO` and `Music and sfx by MAN FROM SPACE` sit at the bottom in mixed case (lowercase letters as in the mockup), 24 px, black, with no border, each line centered on its own, the second line's box ending 109 px above the bottom. The logo and buttons haven't moved (logo top at 182 px, PLAY at 538 px, SETTINGS at 670 px). The names look exactly like the rest of the text: no underline, no blue or purple (also after visiting them), and nothing changes on hover, press, tap, long press or focus. Clicking NIK NAK STUDIO opens `https://niknak.es` in a new tab, and MAN FROM SPACE opens `https://manfromspace.com`. The rest of each line isn't clickable. Back on the game tab the menu, music and animation are still running. The credits fade in with the menu, and on PLAY / SETTINGS they fade out, tint and shake with the rest without moving sideways. Taps on them during a transition do nothing. They stay clear of the buttons at 4:3 and at wide phone ratios, and above the home indicator on iOS. Check in Safari, Firefox and Chrome, and in the iOS/Android apps (the links open the system browser).
 - Intro note in mixed case: the Intro shows `Grab your best headphones first ;)` exactly like that (capital G only), in the same place and at the same width as before, with the button still centered. Every other text in the game (buttons, HUD, titles, scores) is still all uppercase.
+
+### Third development cycle
+- Game controller, menus (test with the Trust GXT pad, Xbox layout): on the Intro the controller does nothing; clicking the button still starts the music. On the Main Menu nothing is selected until the controller is used; the first push or A selects PLAY without activating it. The d-pad and the left stick move the selection (one step per push, holding doesn't repeat, no wrap-around); A and RT activate it with the same transition as a click; the new screen arrives with its first item selected. Level Select: all five levels and BACK are reachable. Settings: up / down between MUSIC, SFX and BACK, left / right between `-` and `+`; A on `-` / `+` changes the volume one step per press and keeps it selected. B on Level Select / Settings goes back to the Main Menu; B does nothing on the Main Menu, Game Over and You Win!. The credit links are never selected. The selected button shows line, gap, line, all the same thickness, outside its border, and the layout doesn't move; the `-` / `+` steps show it inside. The selection fades, tints and shakes with its button during the screen-out. Presses during a transition do nothing. A mouse click or tap hides the selection, and the next controller press brings it back on the first item. A controller with a slightly drifting stick at rest doesn't move the selection.
+- Game controller, gameplay: pushing the left stick fully in any direction shows an inactive paddle at that angle on the ring, matching the stick's direction on screen; rotating the stick rotates it; letting go sets it where the stick last pointed fully (not skewed by the spring-back) and starts its lifetime. The right stick does the same with its own paddle. Setting a new left-stick paddle removes the previous left-stick paddle and never the right one, and vice versa. Both sticks can drag at the same time. A stick resting slightly off-center never creates a paddle. A, LT, RT, L3 and R3 each capture a charged atom crossing the core, one per press; holding doesn't capture repeatedly, and a press with nothing to capture does nothing. Nothing happens during the 3-second start delay, the core collapse or the Game Over delay; a stick held through the start delay produces its paddle as soon as play starts; holding A from the TRY AGAIN press doesn't capture at the start. Pausing with `P` freezes controller input, and a button pressed during the pause doesn't fire on resume. Mouse / touch and the controller work together. Check in Chrome, Safari and Firefox (`localhost` and the deployed `https://` site), and unplug / reconnect the controller mid-game and in the menus (no errors; it works again after reconnecting).

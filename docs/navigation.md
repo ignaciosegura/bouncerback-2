@@ -37,5 +37,9 @@ Every change from one screen to another plays the screen transition (see "Screen
   - Try Again Button (restarts the same level from scratch: score reset to 0, lives reset to the level file's value)
   - Main Menu Button
 
+## Game controller
+
+Menus can be navigated with a game controller (Xbox-style layout): the d-pad or the left stick moves the selection, A or the right trigger (RT) activates the selected button, and B goes back (the `<<< BACK` button on Level Select and Settings; B does nothing on the other screens). The selected button gets a double border (see "Game controller selection" in `graphical-specs.md`). The controller doesn't work on the Intro: its button must be clicked, tapped or pressed with the keyboard, because browsers only unlock audio on those. The Main Menu credit links can't be selected with the controller. Controller input is ignored during screen transitions. In-game controls are in `game-rules.md` ("Game controller").
+
 > [!NOTE]
 > When a doc and a mockup disagree on on-screen text, the mockup wins. For example: "HI-SCORE" (not "High Score" or "Best Score") and "TRY AGAIN" (not "Play Again").
