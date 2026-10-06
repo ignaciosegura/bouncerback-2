@@ -21,6 +21,7 @@ root/
     ├── implementation-guidelines.md  # Implementation guidelines
     ├── level-file-schema.json      # Level file schema
     ├── react-pixi-example.jsx      # Example of a React Pixi component
+    ├── crt-effect.md               # How the CRT effect works (learning resource) and how to tune it
     └── react-pixi-usage-example.jsx  # Example of a React Pixi usage example
 └── src/
     ├── audio/
@@ -34,6 +35,13 @@ root/
     │   ├── Screen.jsx              # Base screen wrapper component (handles transitions, safe areas, etc.)
     │   ├── Overlay.jsx             # Generic overlay component to be placed on top of current screen content
     │   └── TextBox.jsx             # Floating text box component.
+    ├── effects/                    # Reusable PixiJS visual effects; no game logic, no React
+    │   └── crt/                    # CRT post-processing (see docs/crt-effect.md)
+    │       ├── CrtEffect.js        # PixiJS glue: render textures, full-screen meshes, passes (the module's entry point)
+    │       ├── crtSettings.js      # Every tunable value of the effect (resolutions, blur, …)
+    │       ├── fullscreen.vert.glsl  # Vertex shader shared by every pass (one screen-covering rectangle)
+    │       ├── zoomBlur.frag.glsl  # Zoom blur pass: streaks pointing away from a center
+    │       └── crt.frag.glsl       # Final pass: scene + blur (CRT layers from Phase 38)
     ├── input/                      # Game controller (Gamepad API); no React, no PixiJS
     │   ├── gamepad.js              # Polled controller reader: button presses, sticks with drift thresholds
     │   └── menuNavigation.js       # Controller navigation of the menu screens (selection class + click())
