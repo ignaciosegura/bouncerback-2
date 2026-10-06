@@ -17,6 +17,7 @@ Every change from one screen to another plays the screen transition (see "Screen
 - **Settings Screen**
   - Sound FX Volume dual-button
   - Music Volume dual-button
+  - OLD TV switch (the CRT layers on the game arena; off by default)
   - Back Button
 - **Game Screen** *(During gameplay)*
   - HUD (score, time, hi-score, lives)

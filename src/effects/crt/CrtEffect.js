@@ -82,6 +82,7 @@ export default class CrtEffect {
       crtUniforms.uBlurMix = { value: settings.BLUR_MIX, type: 'f32' }
       crtDefines += '#define BLUR\n'
     }
+    if (settings.CRT_ENABLED) crtDefines += '#define CRT\n'
     this.crtUniforms = new UniformGroup(crtUniforms)
     crtResources.crtUniforms = this.crtUniforms
 
@@ -126,6 +127,7 @@ export default class CrtEffect {
   // The scene point shown at screen point `point` (screen pixels), through the curved glass. For
   // pointer input: what the player presses is what they see.
   toScene (point) {
+    if (!this.settings.CRT_ENABLED) return { x: point.x, y: point.y }
     const { width, height } = this.renderer.screen
     return warp(point.x, point.y, width, height, this.settings.CURVATURE)
   }

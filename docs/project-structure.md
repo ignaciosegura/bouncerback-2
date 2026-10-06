@@ -50,6 +50,7 @@ root/
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
     │   ├── levelLoader.js          # Validates level JSON and derives runtime values (timer, speeds, intervals)
     │   ├── scoring.js              # Pure score formulas and high-score persistence
+    │   ├── oldTv.js                # The Settings "OLD TV" switch (the CRT layers), persisted
     │   ├── color.js                # Color helpers (interpolation for the gameplay color transitions)
     │   ├── easing.js               # Easing curves for the gameplay animations (quadratic in / out / in-out)
     │   └── entities/               # Game objects

@@ -5,8 +5,9 @@
 // zoom blur, then darkens it with scanlines, a phosphor mask and a vignette, and makes up for
 // that with a brightness gain. Outside the glass it's black.
 //
-// BLUR is defined by CrtEffect.js above this source when BLUR_ENABLED is on. Without it, the blur
-// texture and the mix don't exist in the shader at all.
+// BLUR and CRT are defined by CrtEffect.js above this source when BLUR_ENABLED / CRT_ENABLED are
+// on. Without them, the blur or the CRT layers don't exist in the shader at all: with neither, it
+// just copies the scene to the canvas.
 
 in vec2 vUV;
 out vec4 finalColor;
@@ -60,8 +61,10 @@ vec2 toUV(vec2 c) {
 }
 
 void main() {
-  // 1. Curvature: where in the scene this pixel looks
   vec2 c = vUV * 2.0 - 1.0;
+
+#ifdef CRT
+  // 1. Curvature: where in the scene this pixel looks
   float r2 = radius2(c);
   vec2 p = warp(c);
 
@@ -80,6 +83,11 @@ void main() {
     texture(uScene, toUV(p)).g,
     texture(uScene, toUV(p * (1.0 - spread))).b
   );
+#else
+  // Flat screen: each pixel shows the scene point under it
+  vec2 p = c;
+  vec3 color = texture(uScene, vUV).rgb;
+#endif
 
 #ifdef BLUR
   // 4. Zoom blur, read at the same bent point so its streaks curve with the glass. The same as
@@ -87,6 +95,7 @@ void main() {
   color = mix(color, texture(uBlur, toUV(p)).rgb, uBlurMix);
 #endif
 
+#ifdef CRT
   // 5. Scanlines, counted on the bent image so they curve with the glass. lines goes up by 1 per
   // scanline; sin² is 0 between two lines and 1 in the middle of one: a smooth profile, no hard
   // edges to shimmer. (Squared by hand: pow() is undefined for negative numbers in GLSL.)
@@ -105,5 +114,9 @@ void main() {
   color *= 1.0 - uVignette * r2;
   color *= uBrightness;
 
-  finalColor = vec4(color * inside, 1.0);
+  // Fades the glass's edge to black
+  color *= inside;
+#endif
+
+  finalColor = vec4(color, 1.0);
 }

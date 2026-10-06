@@ -171,6 +171,8 @@ The blur texture is read at the same bent point `p` and mixed in (`mix(color, bl
 
 **`#ifdef BLUR`**: `CrtEffect.js` writes `#define BLUR` at the top of the source only when `BLUR_ENABLED` is on. With it off, the compiler never sees the blur lines, the blur texture isn't created and the blur pass doesn't run: no cost at all, not just a 0% mix.
 
+**`#ifdef CRT`**: the same trick for the CRT layers. Steps 1–3 and 5–7 only exist when `CRT_ENABLED` is on (`#define CRT`). Without them the pass reads the scene at the pixel's own UV (`p = c`, a flat screen) and only mixes the blur there; with neither switch on it simply copies the scene to the canvas. `toScene()` then returns points unchanged. In the game, `CRT_ENABLED` comes from the Settings screen's OLD TV switch (off by default), passed as an override when the engine creates the effect.
+
 ### Step 5 — Scanlines
 
 ```glsl
@@ -262,6 +264,7 @@ Every value lives in `src/effects/crt/crtSettings.js`. Change it and reload (the
 | :--- | :--- | :--- | :--- |
 | `MAX_RESOLUTION` | 2 | Sharpness of everything in the arena | Above 2 the difference is barely visible, but the GPU cost grows with its square |
 | `BLUR_ENABLED` | `true` | Streaks on / off | Off costs nothing |
+| `CRT_ENABLED` | `true` | CRT layers (steps 1–3, 5–7) on / off | In the game it's overridden by the Settings OLD TV switch, so to tune the CRT layers, switch OLD TV on |
 | `BLUR_TEXTURE_HEIGHT` | 360 | Softness of the streaks | Lower is blurrier and cheaper; below ~180 the streaks start to look blocky |
 | `BLUR_SAMPLES` | 24 | Smoothness of the streaks | Each extra sample costs a texture read per blur pixel. Raise it if you see copies along the streaks even with jitter |
 | `BLUR_STRENGTH` | 0.38 | Length of the streaks | Measured on the Resolume reference: an object at 100 px from the core streaks out to about 160 px. Close to 1 the streaks reach the center |

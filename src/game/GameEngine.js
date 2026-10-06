@@ -49,8 +49,9 @@ const ZOOM_TIME = 0.5
 const ZOOM_HOLD = 1
 const GAME_OVER_DELAY = LAST_ESCAPE_TIME + ZOOM_TIME + ZOOM_HOLD
 const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen before the WebGL context is lost
-// The arena is shown through the CRT effect (src/effects/crt/); off, it's drawn straight to the canvas
-const CRT_ENABLED = true
+// The arena is shown through the post-processing of src/effects/crt/ (zoom blur, and the CRT layers
+// with the Settings "OLD TV" switch on); off, it's drawn straight to the canvas
+const POST_PROCESSING_ENABLED = true
 
 // The background turns dark red while the player has only one life left
 const BACKGROUND_COLORS = {
@@ -73,7 +74,9 @@ const STATE = {
  * onGameOver({ score }) and onLevelWin({ score }).
  */
 export default class GameEngine {
-  constructor (level, callbacks) {
+  // `oldTv`: the Settings "OLD TV" switch (the CRT layers)
+  constructor (level, callbacks, { oldTv = false } = {}) {
+    this.oldTv = oldTv
     this.level = level
     this.callbacks = callbacks
     this.app = new Application()
@@ -117,7 +120,7 @@ export default class GameEngine {
       resizeTo: container,
       // With the CRT effect, the canvas shows black only outside its glass; the arena's own
       // background goes to crt.render()
-      background: CRT_ENABLED ? 0x000000 : this.backgroundColor,
+      background: POST_PROCESSING_ENABLED ? 0x000000 : this.backgroundColor,
       antialias: true,
       resolution: Math.min(window.devicePixelRatio || 1, CRT_SETTINGS.MAX_RESOLUTION),
       autoDensity: true,
@@ -178,9 +181,9 @@ export default class GameEngine {
     this.arena = new Container()
     this.arena.addChild(this.playfield)
 
-    if (CRT_ENABLED) {
+    if (POST_PROCESSING_ENABLED) {
       // Only the processed image goes on the stage; the arena is drawn into it by renderArena()
-      this.crt = new CrtEffect(this.app.renderer)
+      this.crt = new CrtEffect(this.app.renderer, { CRT_ENABLED: this.oldTv })
       this.app.stage.addChild(this.crt.view)
     } else {
       this.app.stage.addChild(this.arena)

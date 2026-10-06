@@ -35,6 +35,8 @@ export default function SettingsMenuScreen ({
   sfxVolume,
   onMusicVolumeChange,
   onSfxVolumeChange,
+  oldTv,
+  onOldTvToggle,
   onBack
 }) {
   return (
@@ -42,6 +44,8 @@ export default function SettingsMenuScreen ({
       <Menu footer={<Button data-gamepad="back" onClick={onBack}>&lt;&lt;&lt; BACK</Button>}>
         <VolumeControl label="MUSIC" value={musicVolume} onChange={onMusicVolumeChange} />
         <VolumeControl label="SFX" value={sfxVolume} onChange={onSfxVolumeChange} />
+        {/* The CRT layers on the game arena (src/effects/crt/) */}
+        <Button onClick={onOldTvToggle}>OLD TV {oldTv ? 'ON' : 'OFF'}</Button>
       </Menu>
     </Screen>
   )

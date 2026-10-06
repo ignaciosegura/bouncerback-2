@@ -27,6 +27,12 @@ export const CRT_SETTINGS = Object.freeze({
   // between samples into fine noise. 0 shows the steps (useful to compare). Range: 0–1.
   BLUR_JITTER: 1,
 
+  // CRT layers: curved glass, chromatic aberration, scanlines, phosphor mask, vignette
+
+  // Turns the CRT layers off; the zoom blur keeps working. Off, they're left out of the shader and
+  // input isn't bent.
+  CRT_ENABLED: true,
+
   // Curved glass
 
   // How far the glass bulges: the image at the corners is pushed this share farther out (0.08 =

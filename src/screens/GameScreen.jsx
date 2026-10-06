@@ -3,7 +3,7 @@ import Screen from '../components/Screen.jsx'
 import HUD from '../components/HUD.jsx'
 import GameEngine from '../game/GameEngine.js'
 
-export default function GameScreen ({ level, hiScore, onScoreChange, onGameOver, onLevelWin }) {
+export default function GameScreen ({ level, hiScore, oldTv, onScoreChange, onGameOver, onLevelWin }) {
   const canvasContainerRef = useRef(null)
   const [score, setScore] = useState(0)
   const [lives, setLives] = useState(level.lives)
@@ -20,10 +20,10 @@ export default function GameScreen ({ level, hiScore, onScoreChange, onGameOver,
       onTimeChange: setTimeTenths,
       onGameOver: (result) => handleGameOver(result),
       onLevelWin: (result) => handleLevelWin(result)
-    })
+    }, { oldTv })
     engine.mount(canvasContainerRef.current)
     return () => engine.destroy()
-  }, [level])
+  }, [level, oldTv])
 
   return (
     <Screen variant="dark" className="game-screen">

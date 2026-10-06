@@ -57,3 +57,4 @@ Legend: `[x]` done · `[ ]` pending
 - CRT effect on the game arena (reusable module `src/effects/crt/`, constants in `crtSettings.js`, documented in `docs/crt-effect.md`; the HUD stays flat in React):
   - [x] **Phase 37** — Post-processing pipeline & zoom blur (arena rendered to a texture; low-res zoom blur from the core mixed at 15%)
   - [x] **Phase 38** — CRT layers & input mapping (curved glass, chromatic aberration, scanlines, phosphor mask, vignette; touch and mouse follow the curved image)
+  - [x] **Phase 39** — Old TV setting (Settings switch for the CRT layers, off by default and saved; the zoom blur stays on)
