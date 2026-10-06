@@ -95,14 +95,14 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * The HUD is not part of it: it stays flat and sharp on top, with no curvature, scanlines or blur. The menus and the other screens don't change either.
 * The player chooses: the Settings screen's **OLD TV** switch (`OLD TV ON` / `OLD TV OFF`, below SFX, as wide as the volume controls; see the SETTINGS MENU mockup) turns the CRT layers (curved glass, chromatic aberration, scanlines, phosphor mask, vignette) on and off. It's **off by default** and saved like the volumes. The zoom blur isn't part of the switch: it's always on.
 * The effect is made of these layers, from the scene outward:
-    * Zoom blur: a copy of the arena blurred into streaks that point away from the core, mixed over the arena at 15% (aesthetic reference: Resolume Avenue's Radial Blur). Streaks are about 38% of an object's distance from the core long, so the paddles and atoms streak visibly, while the core and the thin ring only get a faint halo. The streaks always come from the core, also while it moves during the last life zoom.
+    * Zoom blur: a copy of the arena blurred into streaks that point away from the core, mixed over the arena at a low opacity, so it stays subtle (aesthetic reference: Resolume Avenue's Radial Blur). Streak length grows with an object's distance from the core, so the paddles and atoms streak, while the core and the thin ring only get a faint halo. The streaks always come from the core, also while it moves during the last life zoom.
     * Curved glass: the image bulges like a CRT's curved glass, more toward the corners. Outside the glass (the screen's rounded corners and edges) is black.
     * Chromatic aberration: the red and blue channels separate slightly toward the edges.
     * Scanlines: horizontal dark lines, a fixed number per screen height whatever the device, following the curve of the glass.
     * Phosphor mask: very faint vertical red / green / blue stripes.
     * Vignette: the image darkens slightly toward the edges.
 * Scanlines, the mask and the vignette darken the image; a brightness gain compensates, so the arena's white and colors stay close to their values above.
-* Every amount (scanline count, curvature, blur strength, the opacities, the resolutions) is a starting value meant to be tuned by eye. They're defined in the code, one settings file per effect (`src/effects/zoomBlur/zoomBlurSettings.js`, `src/effects/crt/crtSettings.js`), not in this document.
+* Every amount (scanline count, curvature, blur strength, the opacities, the resolutions) is tuned by eye. The values are defined only in the code, one settings file per effect (`src/effects/zoomBlur/zoomBlurSettings.js`, `src/effects/crt/crtSettings.js`), never in this document.
 * Touch and mouse input follow what's on screen: pressing where a paddle or the core is shown hits it, even near the edges where the glass moves things.
 
 ## Visual feedback (changes in the visuals during gameplay to communicate the player relevant information)

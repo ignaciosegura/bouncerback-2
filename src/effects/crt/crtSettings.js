@@ -4,8 +4,8 @@
 export const CRT_SETTINGS = Object.freeze({
   // Curved glass
 
-  // How far the glass bulges: the image at the corners is pushed this share farther out (0.08 =
-  // 8%), less toward the middle of the edges, nothing at the center. What's pushed past the edges
+  // How far the glass bulges: the image at the corners is pushed this share farther out (e.g.
+  // 0.08 = 8%), less toward the middle of the edges, nothing at the center. What's pushed past the edges
   // falls outside the glass (black). 0 is a flat screen. Range: 0–0.3.
   CURVATURE: 0.08,
   // Rounding of the glass's corners, as a share of the screen height. Range: 0–0.15.
@@ -14,12 +14,12 @@ export const CRT_SETTINGS = Object.freeze({
   EDGE_SOFTNESS: 0.004,
 
   // Chromatic aberration: red is read this share farther from the center at the corners, blue
-  // this share closer (0.002 = 0.2%, about 2 px at the corners of a 1080p screen), less toward the
-  // center, none at the center. Range: 0–0.01.
+  // this share closer (e.g. 0.002 = 0.2%, about 2 px at the corners of a 1080p screen), less
+  // toward the center, none at the center. Range: 0–0.01.
   ABERRATION: 0.002,
 
-  // Scanlines: horizontal lines across the screen, whatever its size or pixel density (270 is
-  // about a 240p arcade screen). They fade out by themselves when a line would be under about
+  // Scanlines: horizontal lines across the screen, whatever its size or pixel density (e.g.
+  // 270 is about a 240p arcade screen). They fade out by themselves when a line would be under about
   // 2 device pixels (a small window), where they'd shimmer. Range: 120–540.
   SCANLINE_COUNT: 270,
   // How dark the gap between two lines gets: 0 no scanlines, 1 black gaps. Range: 0–0.6.

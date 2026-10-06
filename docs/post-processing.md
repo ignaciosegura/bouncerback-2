@@ -4,6 +4,8 @@ This document explains the post-processing in `src/effects/`, step by step: the 
 
 It covers Phases 37–38 (the zoom blur, the CRT layers and input mapping), 39 (the OLD TV switch) and 40 (one folder per effect, composed into one final pass).
 
+**About the numbers in this document:** the values of the settings live only in the settings files (`postProcessingSettings.js`, `zoomBlurSettings.js`, `crtSettings.js`), each commented with its unit and range. Numbers used here to explain how something works are **examples**, not the current values.
+
 ---
 
 ## 1. Post-processing in one paragraph
@@ -176,10 +178,10 @@ for (int i = 0; i < SAMPLES; i++) {
 finalColor = sum / float(SAMPLES);
 ```
 
-Why does that make streaks pointing outward? Take an atom at 100 px from the center, with `STRENGTH = 0.38`:
+Why does that make streaks pointing outward? Take an atom at 100 px from the center, with, for example, `STRENGTH = 0.35`:
 
-- A pixel at 130 px from the center looks inward from 130 down to 130 × (1 − 0.38) ≈ 81 px. The atom (at 100) is on that line, so the pixel picks up some of its brightness.
-- A pixel at 170 px looks from 170 down to ≈ 105 px: it just misses the atom. So the streak ends at about 100 / (1 − 0.38) ≈ 160 px.
+- A pixel at 130 px from the center looks inward from 130 down to 130 × (1 − 0.35) ≈ 85 px. The atom (at 100) is on that line, so the pixel picks up some of its brightness.
+- A pixel at 165 px looks from 165 down to ≈ 107 px: it just misses the atom. So the streak ends at about 100 / (1 − 0.35) ≈ 155 px.
 - A pixel at 90 px (between the atom and the center) looks further inward, away from the atom: no streak on that side.
 
 So the streak runs from the object outward, and its length grows with the object's distance from the center: the paddles streak a lot, the core almost not at all.
@@ -188,13 +190,13 @@ So the streak runs from the object outward, and its length grows with the object
 
 ### Jitter: fewer samples, no stepping
 
-With 24 samples spread along a 60 px streak, the samples are 2–3 px apart, and a small, sharp object shows up as a row of separate copies instead of a smooth streak. Doubling the samples doubles the cost. Instead, each pixel starts its samples at a slightly different point (`offset`, between 0 and 1 sample step), so neighboring pixels see the object at different steps. The copies blend into a fine, even noise that's invisible at 15% opacity.
+With, say, 8 samples spread along a 60 px streak, the samples are about 7 px apart, and a small, sharp object shows up as a row of separate copies instead of a smooth streak. Doubling the samples doubles the cost. Instead, each pixel starts its samples at a slightly different point (`offset`, between 0 and 1 sample step), so neighboring pixels see the object at different steps. The copies blend into a fine noise. The fewer the samples, the coarser that noise; at a low `MIX` it's invisible, so a few samples are enough. A stronger mix needs more samples.
 
 The offset comes from `pixelNoise()`, an "interleaved gradient noise" formula: a fixed pseudo-random value for each pixel position. It doesn't change from frame to frame, so it doesn't sparkle. `JITTER = 0` turns it off, to see the difference.
 
 ### The sample count is built into the shader
 
-GLSL needs a loop's bound to be a constant known when the shader is compiled. `ZoomBlurEffect.js` writes `#define SAMPLES 24` (from `SAMPLES`) at the top of the shader's source before compiling it. That's also why `SAMPLES` can't change while the game runs.
+GLSL needs a loop's bound to be a constant known when the shader is compiled. `ZoomBlurEffect.js` writes the `SAMPLES` setting as a constant (`#define SAMPLES 8`, for example) at the top of the shader's source before compiling it. That's also why `SAMPLES` can't change while the game runs.
 
 ### The mix
 
@@ -204,7 +206,7 @@ vec3 zoomBlur(vec2 uv) {
 }
 ```
 
-`mix(a, b, 0.15)` is `a × 0.85 + b × 0.15`: exactly what drawing the blur on top of the image at 15% opacity gives (Resolume's effect opacity works the same way). The blur texture is smaller than the screen; reading it at `uv` scales it up smoothly.
+`mix(a, b, m)` is `a × (1 − m) + b × m`: exactly what drawing the blur on top of the image at opacity `m` (`MIX`) gives (Resolume's effect opacity works the same way). The blur texture is smaller than the screen; reading it at `uv` scales it up smoothly.
 
 Its own pass blurs the **scene**, not its input: a pass that runs before the final pass can't see the effects that run inside it. As the first effect in the chain that makes no difference; an effect placed before it would not be blurred.
 
@@ -238,7 +240,7 @@ vec2 warp(vec2 c) {
 }
 ```
 
-A fragment shader can't move pixels: each pixel can only choose **where to read from**. So instead of "push the image outward", the question is "which image point does this pixel show?". The answer here: a point a little farther from the center than the pixel itself, `1 + CURVATURE × r²` times as far. At the center that's 1 (no change); at the corners `1 + CURVATURE` (8% farther with 0.08).
+A fragment shader can't move pixels: each pixel can only choose **where to read from**. So instead of "push the image outward", the question is "which image point does this pixel show?". The answer here: a point a little farther from the center than the pixel itself, `1 + CURVATURE × r²` times as far. At the center that's 1 (no change); at the corners `1 + CURVATURE` (8% farther with a `CURVATURE` of 0.08, for example).
 
 What that looks like:
 
@@ -369,38 +371,38 @@ Things to know:
 
 ## 9. Tuning
 
-Each value lives in its effect's settings file. Change it and reload (the dev server reloads on save); it applies from the next level started. To tune the CRT, switch **OLD TV** on in Settings.
+Each value lives only in its effect's settings file, with its unit and range in a comment; the tables below say what each one does, not its value. Change it and reload (the dev server reloads on save); it applies from the next level started. To tune the CRT, switch **OLD TV** on in Settings.
 
 `src/effects/postProcessingSettings.js`:
 
-| Setting | Start | What you'll see | Notes |
-| :--- | :--- | :--- | :--- |
-| `MAX_RESOLUTION` | 2 | Sharpness of everything in the arena | Above 2 the difference is barely visible, but the GPU cost grows with its square. The engine caps the canvas resolution with it |
+| Setting | What you'll see | Notes |
+| :--- | :--- | :--- |
+| `MAX_RESOLUTION` | Sharpness of everything in the arena | Above 2 the difference is barely visible, but the GPU cost grows with its square. The engine caps the canvas resolution with it |
 
 `src/effects/zoomBlur/zoomBlurSettings.js`:
 
-| Setting | Start | What you'll see | Notes |
-| :--- | :--- | :--- | :--- |
-| `MIX` | 0.15 | How visible the streaks are (opacity) | Also slightly dims the sharp image (85% of it remains) |
-| `STRENGTH` | 0.38 | Length of the streaks | Measured on the Resolume reference: an object at 100 px from the core streaks out to about 160 px. Close to 1 the streaks reach the center |
-| `TEXTURE_HEIGHT` | 360 | Softness of the streaks | Lower is blurrier and cheaper; below ~180 the streaks start to look blocky |
-| `SAMPLES` | 24 | Smoothness of the streaks | Each extra sample costs a texture read per blur pixel. Raise it if you see copies along longer streaks even with jitter |
-| `JITTER` | 1 | Stepping vs. fine noise | 0 shows the separate sample copies |
+| Setting | What you'll see | Notes |
+| :--- | :--- | :--- |
+| `MIX` | How visible the streaks are (opacity) | Also slightly dims the sharp image (`1 − MIX` of it remains). The Resolume reference was around 0.15; lower is subtler. Raising it shows the samples' noise sooner: raise `SAMPLES` with it |
+| `STRENGTH` | Length of the streaks | An object at distance `d` from the core streaks out to about `d / (1 − STRENGTH)` (the Resolume reference measured around 0.38). Close to 1 the streaks reach the center |
+| `TEXTURE_HEIGHT` | Softness of the streaks | Lower is blurrier and cheaper; below ~180 the streaks start to look blocky |
+| `SAMPLES` | Smoothness of the streaks | Each extra sample costs a texture read per blur pixel. A few are enough with a low `MIX`; raise it (16–24, for example) if you see copies or grain along the streaks with a stronger `MIX` or `STRENGTH` |
+| `JITTER` | Stepping vs. fine noise | 0 shows the separate sample copies |
 
 `src/effects/crt/crtSettings.js`:
 
-| Setting | Start | What you'll see | Notes |
-| :--- | :--- | :--- | :--- |
-| `CURVATURE` | 0.08 | How much the glass bulges, and how wide the black border is | 0 is a flat screen. Touch input follows it automatically |
-| `CORNER_RADIUS` | 0.03 | Rounding of the glass's corners | Share of the screen height |
-| `EDGE_SOFTNESS` | 0.004 | Sharp or blurry glass edge | Share of the screen height. Too low looks jagged |
-| `ABERRATION` | 0.002 | Red / blue fringes toward the edges | 0.002 is about 2 px at the corners of a 1080p screen. Above ~0.006 white lines look doubled |
-| `SCANLINE_COUNT` | 270 | Size of the scanlines | Fixed per screen height. Higher looks finer but fades out sooner on small screens |
-| `SCANLINE_INTENSITY` | 0.3 | How dark the gaps between lines are | Darkens the whole image: raise `BRIGHTNESS` with it |
-| `MASK_PITCH` | 3 | Width of the RGB stripes | Whole device pixels only |
-| `MASK_INTENSITY` | 0.12 | How visible the RGB stripes are | Above ~0.3 colors visibly shift |
-| `VIGNETTE` | 0.3 | Darkening toward the corners | |
-| `BRIGHTNESS` | 1.2 | Overall brightness | Compensates scanlines, mask and vignette. Too high clips colors to white |
+| Setting | What you'll see | Notes |
+| :--- | :--- | :--- |
+| `CURVATURE` | How much the glass bulges, and how wide the black border is | 0 is a flat screen. Touch input follows it automatically |
+| `CORNER_RADIUS` | Rounding of the glass's corners | Share of the screen height |
+| `EDGE_SOFTNESS` | Sharp or blurry glass edge | Share of the screen height. Too low looks jagged |
+| `ABERRATION` | Red / blue fringes toward the edges | For example, 0.002 is about 2 px at the corners of a 1080p screen. Above ~0.006 white lines look doubled |
+| `SCANLINE_COUNT` | Size of the scanlines | Fixed per screen height. Higher looks finer but fades out sooner on small screens |
+| `SCANLINE_INTENSITY` | How dark the gaps between lines are | Darkens the whole image: raise `BRIGHTNESS` with it |
+| `MASK_PITCH` | Width of the RGB stripes | Whole device pixels only |
+| `MASK_INTENSITY` | How visible the RGB stripes are | Above ~0.3 colors visibly shift |
+| `VIGNETTE` | Darkening toward the corners | |
+| `BRIGHTNESS` | Overall brightness | Compensates scanlines, mask and vignette. Too high clips colors to white |
 
 **On a black background most CRT layers don't show:** scanlines, the mask, the vignette and the glass's border darken what's there, and black can't get darker. They're visible on the lit shapes (the ring, atoms, paddles, streaks) and on the dark red one-life-left background, where the glass's shape shows clearly. To see every layer while tuning, temporarily set the engine's `BACKGROUND_COLORS.DEFAULT` to a grey such as `0x404040`.
 
@@ -408,10 +410,12 @@ Each value lives in its effect's settings file. Change it and reload (the dev se
 
 GPU cost depends on **pixels × texture reads per pixel**; the CPU only sets a few uniforms and issues a handful of draws per frame.
 
-| Pass | Pixels (1080p screen, resolution 2) | Reads per pixel | Rough GPU time, mid-range phone |
+Example figures, for a 1080p screen at resolution 2, a 360 px tall blur texture and 8 blur samples:
+
+| Pass | Pixels | Reads per pixel | Rough GPU time, mid-range phone |
 | :--- | :--- | :--- | :--- |
 | Scene | Full resolution, MSAA | (the scene's own drawing) | ~0.3–1 ms, mostly the MSAA resolve |
-| Zoom blur's own pass | 640 × 360 ≈ 230,000 | 24 | ~0.3–0.8 ms |
+| Zoom blur's own pass | 640 × 360 ≈ 230,000 | `SAMPLES` (8) | ~0.1–0.3 ms (it grows with `SAMPLES` and `TEXTURE_HEIGHT`) |
 | Final pass, OLD TV off (blur mix) | Full resolution | 2 | ~0.3–0.8 ms |
 | Final pass, OLD TV on (blur mix + CRT) | Full resolution (minus the black outside the glass) | 6 (the CRT's three reads, each with the blur's two) | ~1–2 ms |
 
