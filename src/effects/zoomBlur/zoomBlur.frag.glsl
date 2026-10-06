@@ -1,4 +1,5 @@
-// Zoom blur pass (docs/crt-effect.md, "Zoom blur").
+// Zoom blur, its own pass: the blurred copy (docs/post-processing.md, "Zoom blur"). Run before
+// the final pass, where zoomBlurMix.glsl mixes the copy over the image.
 //
 // Runs once for every pixel of the low-resolution blur texture. Each pixel averages SAMPLES
 // points of the scene on the straight line from itself toward the center, up to uStrength of the
@@ -6,7 +7,7 @@
 // center), which is a streak pointing away from the center. Its length grows with the distance
 // from the center, so objects near the center barely streak.
 //
-// SAMPLES is defined by CrtEffect.js above this source (BLUR_SAMPLES in crtSettings.js).
+// SAMPLES is defined by ZoomBlurEffect.js above this source (SAMPLES in zoomBlurSettings.js).
 
 in vec2 vUV;
 out vec4 finalColor;

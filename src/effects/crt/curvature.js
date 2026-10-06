@@ -1,6 +1,6 @@
 // The curved glass's formula in JavaScript, for input: the scene point shown at screen point
-// (x, y), in screen pixels. Its twin is warp() in crt.frag.glsl: change both together.
-// Explained in docs/crt-effect.md ("Curved glass").
+// (x, y), in screen pixels. Its twin is crtWarp() in crt.glsl: change both together.
+// Explained in docs/post-processing.md ("Curved glass").
 export function warp (x, y, width, height, curvature) {
   // Centered coordinates: −1…1 across the screen on each axis
   const cx = (x / width) * 2 - 1

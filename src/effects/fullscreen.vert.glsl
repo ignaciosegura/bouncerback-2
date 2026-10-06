@@ -1,4 +1,4 @@
-// Full-screen vertex shader, shared by every pass (docs/crt-effect.md, "Full-screen quads").
+// Full-screen vertex shader, shared by every pass (docs/post-processing.md, "Full-screen quads").
 //
 // Each pass draws one rectangle (two triangles, four corners) that covers its whole target. A
 // vertex shader runs once per corner: it says where the corner goes on the target and hands the
@@ -6,7 +6,8 @@
 // pixel in between.
 
 // Per-corner inputs, from the quad's geometry. Both go from (0, 0) at the top left to (1, 1) at
-// the bottom right; the mesh is scaled to the screen's size, so aPosition becomes screen pixels.
+// the bottom right; the mesh is scaled to the screen's size, so aPosition becomes screen pixels
+// (FullscreenPass.js).
 in vec2 aPosition;
 in vec2 aUV;
 

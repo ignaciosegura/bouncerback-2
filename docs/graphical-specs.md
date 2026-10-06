@@ -102,7 +102,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
     * Phosphor mask: very faint vertical red / green / blue stripes.
     * Vignette: the image darkens slightly toward the edges.
 * Scanlines, the mask and the vignette darken the image; a brightness gain compensates, so the arena's white and colors stay close to their values above.
-* Every amount (scanline count, curvature, blur strength, the opacities, the resolutions) is a starting value meant to be tuned by eye. They're defined in one place in the code (`src/effects/crt/crtSettings.js`), not in this document. The zoom blur has its own on/off switch there, so the CRT look can be used without it.
+* Every amount (scanline count, curvature, blur strength, the opacities, the resolutions) is a starting value meant to be tuned by eye. They're defined in the code, one settings file per effect (`src/effects/zoomBlur/zoomBlurSettings.js`, `src/effects/crt/crtSettings.js`), not in this document.
 * Touch and mouse input follow what's on screen: pressing where a paddle or the core is shown hits it, even near the edges where the glass moves things.
 
 ## Visual feedback (changes in the visuals during gameplay to communicate the player relevant information)

@@ -13,7 +13,7 @@ This document defines the core technology stack, architectural boundaries, proje
 | **Animations** | **PixiJS Ticker (`app.ticker`)** | Drives the 60 FPS game loop, physics steps, frame-by-frame updates, and continuous animations. |
 | **Input Management** | **PixiJS Event System / Vanilla JS** | Handles touch and mouse interactions seamlessly across desktop browsers and mobile webviews (`touchAction: 'none'`). |
 | **Game Controller** | **Gamepad API** (browser, no library) | Polled once per frame: by the `GameEngine` in `app.ticker` during gameplay, and by a small DOM module (`src/input/`) for menu navigation. Only controllers with the `standard` mapping. See `docs/game-controller.md`. |
-| **Post-processing** | **Custom GLSL shaders** on PixiJS full-screen meshes (WebGL only) | The CRT effect on the game arena (`src/effects/crt/`, see `docs/crt-effect.md`). |
+| **Post-processing** | **Custom GLSL shaders** on PixiJS full-screen meshes (WebGL only) | The zoom blur and CRT effects on the game arena (`src/effects/`, see `docs/post-processing.md`). |
 | **Menu Background Animation** | **lottie-web** (SVG player) | Plays the Lottie vector animation behind the menu screens (DOM layer, React domain). |
 | **Audio** | Manages cross-platform sound effects and background music playback. |
 | **Mobile Packaging** | **Capacitor** | Wraps the web application into native iOS and Android packages. |
