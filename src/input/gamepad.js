@@ -17,6 +17,7 @@ export const BUTTONS = {
   B: 1,
   LT: 6,
   RT: 7,
+  MENU: 9, // Xbox Menu (≡), PlayStation Options
   L3: 10, // left stick pressed down
   R3: 11, // right stick pressed down
   UP: 12,

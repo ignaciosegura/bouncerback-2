@@ -11,7 +11,9 @@ const ACTIVATE_BUTTONS = [BUTTONS.A, BUTTONS.RT]
 // Every button of the current screen, except the ones opted out (the Intro's: controller input
 // can't unlock audio)
 const ITEMS_SELECTOR = '.screen button:not([data-gamepad="ignore"])'
-const BACK_SELECTOR = '.screen [data-gamepad="back"]'
+// `data-gamepad` holds space-separated roles: "back" (right face button), "menu" (menu button)
+const BACK_SELECTOR = '.screen [data-gamepad~="back"]'
+const MENU_SELECTOR = '.screen [data-gamepad~="menu"]'
 const TRANSITION_CLASSES = ['screen-transition--out', 'screen-transition--in']
 // Moving prefers the items in line with the selected one: the offset across the direction counts double
 const CROSS_AXIS_WEIGHT = 2
@@ -66,6 +68,8 @@ export function startMenuNavigation (root) {
   let press = null // { element, button }: a button held down on a menu button
   // On from the first controller use; a mouse click or touch turns it off
   let controllerMode = false
+  // First item of the previous frame: when it changes, a new menu is shown
+  let firstItem = null
 
   const select = (item) => {
     selected?.classList.remove(SELECTED_CLASS)
@@ -125,6 +129,16 @@ export function startMenuNavigation (root) {
     if (selected && !selected.isConnected) selected = null
     if (controllerMode && !selected && items.length > 0) select(items[0])
 
+    // A new menu (screen, or the Pause overlay, which opens without a transition): buttons held
+    // from before don't count as presses on it. Otherwise the menu button press that paused the
+    // game could also press the overlay's RESUME
+    if ((items[0] ?? null) !== firstItem) {
+      firstItem = items[0] ?? null
+      cancelPress()
+      reader.reset()
+      return
+    }
+
     // Ignored during screen transitions, like taps and clicks
     if (TRANSITION_CLASSES.some((name) => root.classList.contains(name))) {
       cancelPress()
@@ -133,11 +147,15 @@ export function startMenuNavigation (root) {
 
     updatePress()
 
-    // Back presses the screen's BACK button. While a press is held, other presses are ignored
-    if (reader.wasPressed(BUTTONS.B)) {
+    // Back presses the screen's BACK button (RESUME on the Pause overlay), the menu button the
+    // overlay's RESUME. While a press is held, other presses are ignored
+    for (const [button, selector] of [[BUTTONS.B, BACK_SELECTOR], [BUTTONS.MENU, MENU_SELECTOR]]) {
+      if (!reader.wasPressed(button)) continue
+      const target = root.querySelector(selector)
+      // The menu button does nothing where there's no RESUME (the game pauses itself)
+      if (button === BUTTONS.MENU && !target) continue
       controllerMode = true
-      const back = root.querySelector(BACK_SELECTOR)
-      if (back && !press) startPress(back, BUTTONS.B)
+      if (target && !press) startPress(target, button)
       return
     }
 

@@ -31,6 +31,10 @@ for (const [path, url] of Object.entries(sfxUrls)) {
 
 // Voice IDs of the voice-limited effects, oldest first, keyed like `sfx`
 const activeVoices = {}
+// Every SFX voice playing or paused ({ howl, id }), so a game pause can pause them all
+const liveVoices = new Set()
+// Voices paused by pauseSfx, waiting for resumeSfx or stopPausedSfx
+let pausedVoices = []
 
 // Tracks are large once decoded: each one is loaded when it starts (or is preloaded) and unloaded
 // when it stops. Keyed by file name ('learn.mp3'), as referenced by the level files' soundTrack field.
@@ -100,20 +104,51 @@ export function playSfx (name) {
 
   const limit = SFX_VOICE_LIMITS[name]
   if (!limit) {
-    howl.play()
+    trackVoice(howl, howl.play())
     return
   }
 
   const voices = (activeVoices[name] ?? []).filter((id) => howl.playing(id))
   while (voices.length >= limit) stealVoice(howl, voices.shift())
-  voices.push(howl.play())
+  const id = howl.play()
+  trackVoice(howl, id)
+  voices.push(id)
   activeVoices[name] = voices
+}
+
+function trackVoice (howl, id) {
+  const voice = { howl, id }
+  liveVoices.add(voice)
+  const forget = () => liveVoices.delete(voice)
+  howl.once('end', forget, id)
+  howl.once('stop', forget, id)
 }
 
 // Quick fade before stopping, so cutting a voice short doesn't click
 function stealVoice (howl, id) {
   howl.fade(howl.volume(), 0, STEAL_FADE_MS, id)
   setTimeout(() => howl.stop(id), STEAL_FADE_MS)
+}
+
+/**
+ * Pauses every sound effect playing (game paused); resumeSfx continues them where they were.
+ */
+export function pauseSfx () {
+  pausedVoices = [...liveVoices].filter(({ howl, id }) => howl.playing(id))
+  for (const { howl, id } of pausedVoices) howl.pause(id)
+}
+
+export function resumeSfx () {
+  for (const { howl, id } of pausedVoices) howl.play(id)
+  pausedVoices = []
+}
+
+/**
+ * Stops the sound effects paused by pauseSfx (the game is left while paused).
+ */
+export function stopPausedSfx () {
+  for (const { howl, id } of pausedVoices) howl.stop(id)
+  pausedVoices = []
 }
 
 /**

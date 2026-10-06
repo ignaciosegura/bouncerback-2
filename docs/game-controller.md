@@ -16,7 +16,7 @@ Buttons are named by **position**, not by the label printed on them, because tha
 | **right face button** | B | Circle | 1 | `B` |
 | **LT / RT** (left / right trigger) | LT / RT | L2 / R2 | 6 / 7 | `LT` / `RT` |
 | **L3 / R3** (pressing a stick down) | LS / RS | L3 / R3 | 10 / 11 | `L3` / `R3` |
-| **menu button** | Menu (≡) | Options | 9 | `MENU` (added in Phase 8) |
+| **menu button** | Menu (≡) | Options | 9 | `MENU` |
 | **d-pad** up / down / left / right | d-pad | d-pad | 12 / 13 / 14 / 15 | `UP` / `DOWN` / `LEFT` / `RIGHT` |
 | **left / right stick** | left / right stick | left / right stick | axes 0–1 / 2–3 | `stick('left' \| 'right')` |
 

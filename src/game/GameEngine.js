@@ -66,7 +66,7 @@ const STATE = {
 /**
  * Owns the PixiJS application and the game loop. Only low-frequency events reach React,
  * through the callbacks: onScoreChange(score), onLivesChange(lives), onTimeChange(tenths),
- * onGameOver({ score }) and onLevelWin({ score }).
+ * onPauseChange({ paused, backgroundColor }), onGameOver({ score }) and onLevelWin({ score }).
  */
 export default class GameEngine {
   constructor (level, callbacks) {
@@ -76,6 +76,7 @@ export default class GameEngine {
     this.mounted = false
     this.destroyed = false
     this.paused = false
+    this.leaving = false // EXIT TO MENU pressed: stays paused until unmounted
 
     this.state = STATE.STARTING
     this.time = 0
@@ -141,6 +142,9 @@ export default class GameEngine {
     if (!this.mounted) return
     this.mounted = false
     window.removeEventListener('keydown', this.onKeyDown)
+    window.removeEventListener('blur', this.onAutoPause)
+    document.removeEventListener('visibilitychange', this.onVisibilityChange)
+    if (this.paused) soundManager.stopPausedSfx()
     this.app.ticker.stop()
     // Losing the WebGL context while the canvas is still on screen flashes it white: wait until
     // the next screen has been painted (two frames), then until the GPU has put it on screen
@@ -190,26 +194,56 @@ export default class GameEngine {
     stage.on('pointerup', this.onPointerUp)
     stage.on('pointerupoutside', this.onPointerUp)
     window.addEventListener('keydown', this.onKeyDown)
+    // Auto-pause while the player is away (another tab, window or app)
+    window.addEventListener('blur', this.onAutoPause)
+    document.addEventListener('visibilitychange', this.onVisibilityChange)
+  }
+
+  onAutoPause = () => this.pause()
+
+  onVisibilityChange = () => {
+    if (document.hidden) this.pause()
   }
 
   onKeyDown = (event) => {
     if (event.code === 'KeyP' && !event.repeat) this.togglePause()
   }
 
-  // Pause freezes the game loop (and with it the clock and the rendering) and the music
   togglePause () {
-    if (this.state === STATE.ENDED) return
+    if (this.paused) this.resume()
+    else this.pause()
+  }
 
-    this.paused = !this.paused
-    if (this.paused) {
-      this.app.ticker.stop()
-      soundManager.pauseTrack()
-    } else {
-      // A controller button pressed during the pause doesn't fire on resume
-      this.gamepad.reset()
-      this.app.ticker.start()
-      soundManager.resumeTrack()
-    }
+  // Pause freezes the game loop (and with it the clock and the rendering), the music and the SFX.
+  // Only while playing: from the core collapse on, the level is over for the player.
+  pause () {
+    if (this.state !== STATE.PLAYING || this.paused || this.leaving) return
+
+    this.paused = true
+    this.app.ticker.stop()
+    soundManager.pauseTrack()
+    soundManager.pauseSfx()
+    this.emit('onPauseChange', {
+      paused: true,
+      backgroundColor: `#${this.backgroundColor.toString(16).padStart(6, '0')}`
+    })
+  }
+
+  resume () {
+    if (!this.paused || this.leaving) return
+
+    this.paused = false
+    // A controller button pressed during the pause doesn't fire on resume
+    this.gamepad.reset()
+    this.app.ticker.start()
+    soundManager.resumeTrack()
+    soundManager.resumeSfx()
+    this.emit('onPauseChange', { paused: false })
+  }
+
+  // EXIT TO MENU: the game stays paused until it's unmounted, so it can't resume during the screen-out
+  leave () {
+    this.leaving = true
   }
 
   onPointerDown = (event) => {
@@ -234,8 +268,14 @@ export default class GameEngine {
 
   // Controller: a stick pushed past its engage threshold drags a paddle, released it sets it
   // (the angle maps straight to the paddle: both have y pointing down). A capture button captures
-  // like a tap at the core, but a press with nothing to capture does nothing.
+  // like a tap at the core, but a press with nothing to capture does nothing. The menu button pauses.
   handleGamepad () {
+    // Resuming goes through the Pause overlay's RESUME button: the ticker (and this poll) is stopped
+    if (this.gamepad.wasPressed(BUTTONS.MENU)) {
+      this.pause()
+      return
+    }
+
     if (CAPTURE_BUTTONS.some((button) => this.gamepad.wasPressed(button))) this.captureAtCore()
 
     for (const stick of STICKS) {

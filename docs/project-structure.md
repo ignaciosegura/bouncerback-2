@@ -31,6 +31,7 @@ root/
     │   ├── Logo.jsx                # Inline SVG game logo (Main Menu), paths inlined for segment animation
     │   ├── Menu.jsx                # Generic menu container component
     │   ├── MenuBackground.jsx      # Lottie animation behind the menu screens (mounted in App.jsx, persists across them)
+    │   ├── SettingsControls.jsx    # MUSIC / SFX volume controls and the OLD TV button (Settings screen and Pause overlay)
     │   ├── Screen.jsx              # Base screen wrapper component (handles transitions, safe areas, etc.)
     │   ├── Overlay.jsx             # Generic overlay component to be placed on top of current screen content
     │   └── TextBox.jsx             # Floating text box component.

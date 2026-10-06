@@ -101,6 +101,14 @@ export default function App () {
     setSfxVolume(soundManager.getSfxVolume())
   }
 
+  // Shown on the Settings screen and on the Pause overlay
+  const settings = {
+    musicVolume,
+    sfxVolume,
+    onMusicVolumeChange: changeMusicVolume,
+    onSfxVolumeChange: changeSfxVolume
+  }
+
   // `score` isn't reset: only the result screens show it and endLevel always sets it first.
   // Resetting it here would show 0 on Game Over / You Win! while it fades out after Try Again.
   const startLevel = (selectedLevel) => {
@@ -140,13 +148,7 @@ export default function App () {
 
     case SCREENS.SETTINGS:
       return (
-        <SettingsMenuScreen
-          musicVolume={musicVolume}
-          sfxVolume={sfxVolume}
-          onMusicVolumeChange={changeMusicVolume}
-          onSfxVolumeChange={changeSfxVolume}
-          onBack={goToMainMenu}
-        />
+        <SettingsMenuScreen settings={settings} onBack={goToMainMenu} />
       )
 
     case SCREENS.GAME:
@@ -154,9 +156,11 @@ export default function App () {
         <GameScreen
           level={level}
           hiScore={hiScore}
+          settings={settings}
           onScoreChange={registerScore}
           onGameOver={endLevel(SCREENS.GAME_OVER)}
           onLevelWin={endLevel(SCREENS.YOU_WIN)}
+          onExitToMenu={goToMainMenu}
         />
       )
 

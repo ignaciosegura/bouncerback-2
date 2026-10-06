@@ -431,6 +431,32 @@ button {
   background: currentColor;
 }
 
+/* Settings: the controls start 360px from the top, not centered (SETTINGS MENU mockup) */
+.settings-menu .menu__items {
+  margin-top: calc(217 * var(--u));
+  margin-bottom: auto;
+}
+
+/* Pause overlay (GAMEPLAY PAUSE MENU mockup): the menu centered on a panel in the gameplay
+   background's color (inline style), 64px around the buttons */
+
+.pause-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Taps on the panel never reach the canvas; outside it, the paused game ignores them */
+.pause-overlay__panel {
+  padding: calc(64 * var(--u));
+  pointer-events: auto;
+}
+
+/* With the menu's 64px gap: 128px between OLD TV and EXIT TO MENU */
+.pause-overlay__exit {
+  margin-top: calc(64 * var(--u));
+}
+
 /* Game */
 
 .game-screen__canvas {

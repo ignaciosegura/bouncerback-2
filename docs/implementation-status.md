@@ -19,8 +19,7 @@ Legend: `[x]` done · `[ ]` pending
 
 ## Second Development Cycle (Quality of Life) — ⏳ Pending
 
-- [ ] **Phase 8** — Pause functionality
-  - Groundwork only: the `P` key toggles pause in `GameEngine` (ticker stop/start + music pause/resume). The Pause button and `PauseOverlay` (MUSIC / SFX / OLD TV, EXIT TO MENU, RESUME) are still missing.
+- [x] **Phase 8** — Pause functionality (`PauseOverlay` over the frozen game: MUSIC / SFX / OLD TV, EXIT TO MENU, RESUME, on a panel in the gameplay background's color; `P` or the controller's menu button toggles it, only while playing; auto-pause when the tab is hidden or the window loses focus; music and SFX pause with the game. The on-screen Pause button for touch-only devices is left for a later phase)
 - [x] **Phase 9** — Screen transitions (old-TV effect on every screen change, pure CSS, on the screen's elements only — backgrounds, the menu animation and the game canvas stay still: 1 s screen-out — fade out, color blends to transition dark yellow `#666600` then transition dark red `#660000`, vertical shake at the end — then 0.5 s fade-in)
 - [ ] **Phase 10** — Mobile packaging (Capacitor iOS/Android, orientation lock, icons/splash)
 - [ ] **Phase 11** — Rotate-device overlay
