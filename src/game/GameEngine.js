@@ -8,6 +8,8 @@ import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
 import Atom, { ATOM_RADIUS, ATOM_STATE, CAPTURE_MIN_CHARGE } from './entities/Atom.js'
 import Paddle, { PADDLE_THICKNESS } from './entities/Paddle.js'
 import { BUTTONS, GamepadReader } from '../input/gamepad.js'
+import CrtEffect from '../effects/crt/CrtEffect.js'
+import { CRT_SETTINGS } from '../effects/crt/crtSettings.js'
 
 // The playfield is laid out in mockup pixels for a 1080px-tall screen, then scaled to fit
 const REFERENCE_SIZE = 1080
@@ -47,6 +49,8 @@ const ZOOM_TIME = 0.5
 const ZOOM_HOLD = 1
 const GAME_OVER_DELAY = LAST_ESCAPE_TIME + ZOOM_TIME + ZOOM_HOLD
 const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen before the WebGL context is lost
+// The arena is shown through the CRT effect (src/effects/crt/); off, it's drawn straight to the canvas
+const CRT_ENABLED = true
 
 // The background turns dark red while the player has only one life left
 const BACKGROUND_COLORS = {
@@ -111,10 +115,14 @@ export default class GameEngine {
 
     await this.app.init({
       resizeTo: container,
-      background: this.backgroundColor,
+      // With the CRT effect, the canvas shows black only outside its glass; the arena's own
+      // background goes to crt.render()
+      background: CRT_ENABLED ? 0x000000 : this.backgroundColor,
       antialias: true,
-      resolution: window.devicePixelRatio || 1,
-      autoDensity: true
+      resolution: Math.min(window.devicePixelRatio || 1, CRT_SETTINGS.MAX_RESOLUTION),
+      autoDensity: true,
+      // The CRT effect's shaders are GLSL (WebGL only)
+      preference: 'webgl'
     })
 
     // Unmounted while initializing (e.g. React StrictMode's double effect)
@@ -128,7 +136,7 @@ export default class GameEngine {
     this.buildScene()
     this.bindInput()
     this.layout()
-    this.app.renderer.on('resize', this.layout)
+    this.app.renderer.on('resize', this.onResize)
     this.app.ticker.add(this.update)
 
     this.emit('onScoreChange', this.score)
@@ -145,6 +153,9 @@ export default class GameEngine {
     // Losing the WebGL context while the canvas is still on screen flashes it white: wait until
     // the next screen has been painted (two frames), then until the GPU has put it on screen
     requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => {
+      // Off the stage with the CRT effect, so app.destroy() wouldn't reach them
+      this.crt?.destroy()
+      this.arena.destroy({ children: true })
       this.app.destroy(true, { children: true, texture: true })
     }, TEARDOWN_DELAY)))
   }
@@ -162,7 +173,24 @@ export default class GameEngine {
     this.pulseLayer = new Container() // over the core, behind every atom
     this.atomLayer = new Container()
     this.playfield.addChild(this.ring.view, this.flashLayer, this.paddleLayer, this.emitter.view, this.pulseLayer, this.atomLayer)
-    this.app.stage.addChild(this.playfield)
+    // Everything the CRT effect processes. Its root is rendered as is, so the playfield's layout
+    // (position, scale) goes on a child.
+    this.arena = new Container()
+    this.arena.addChild(this.playfield)
+
+    if (CRT_ENABLED) {
+      // Only the processed image goes on the stage; the arena is drawn into it by renderArena()
+      this.crt = new CrtEffect(this.app.renderer)
+      this.app.stage.addChild(this.crt.view)
+    } else {
+      this.app.stage.addChild(this.arena)
+    }
+  }
+
+  // Draws the arena into the CRT effect's textures, which the stage then shows. The blur's
+  // streaks come from the core: the playfield's position on screen, also during the last life zoom.
+  renderArena () {
+    this.crt?.render(this.arena, { background: this.backgroundColor, center: this.playfield.position })
   }
 
   // Centres the playfield and scales it with the screen, applying the last life zoom; game state
@@ -177,6 +205,15 @@ export default class GameEngine {
       height / 2 + focusY * (base * offset - s)
     )
     this.playfield.scale.set(s)
+  }
+
+  // PixiJS draws the stage right after a resize, also while paused: the CRT effect's textures are
+  // reallocated empty, so the arena is drawn into them again first
+  onResize = (width, height) => {
+    this.layout()
+    if (!this.crt) return
+    this.crt.resize(width, height)
+    this.renderArena()
   }
 
   // Input
@@ -312,6 +349,8 @@ export default class GameEngine {
     default:
       break
     }
+
+    this.renderArena()
   }
 
   // Start delay: the ring and core grow in, but the timer, spawns, music and input wait
@@ -564,7 +603,7 @@ export default class GameEngine {
     if (this.backgroundTime >= BACKGROUND_TRANSITION_TIME) return
     this.backgroundTime = Math.min(BACKGROUND_TRANSITION_TIME, this.backgroundTime + dt)
     this.backgroundColor = lerpColor(this.backgroundFrom, this.backgroundTo, this.backgroundTime / BACKGROUND_TRANSITION_TIME)
-    this.app.renderer.background.color = this.backgroundColor
+    if (!this.crt) this.app.renderer.background.color = this.backgroundColor
   }
 
   addScore (points) {
