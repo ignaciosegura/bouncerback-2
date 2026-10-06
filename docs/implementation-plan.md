@@ -154,8 +154,72 @@ The **third development cycle** starts with game controller support (Phases 30�
 Builds on top of the playable MVP from the first cycle. Each item below assumes cycle 1 is complete and merged.
 
 ### Phase 8 — Pause functionality
-- `src/screens/PauseOverlay.jsx` (the only overlay screen), with Resume / Settings / Main Menu per `navigation.md`. No mockup exists yet; follow the style of the other menus.
-- A Pause button (top-right of the Game Screen) stops `app.ticker`; Resume restarts it. Settings opened from Pause returns to Pause without losing game state.
+- `src/screens/PauseOverlay.jsx` (the only overlay screen), per `navigation.md`, graphical-specs "Pause overlay" and the GAMEPLAY PAUSE MENU mockup: the Settings controls (MUSIC, SFX, OLD TV) inline, then EXIT TO MENU and `<<< RESUME`. There's no Settings button, so the Settings screen is never opened from Pause.
+- OLD TV is a button only (on Settings and Pause): its functionality comes from another branch and will be connected when that branch is merged. Until then, pressing it does nothing.
+- Pausing stops `app.ticker` (as `P` does today); RESUME restarts it. EXIT TO MENU goes to the Main Menu with the usual screen transition; RESUME closes the overlay without one.
+- The on-screen Pause button (top-right of the Game Screen in `navigation.md`) is out of scope for now: it will be decided later. Until then the touch-only mobile builds can only pause through auto-pause.
+- Pause toggles (each opens the Pause overlay while playing, and resumes while it's open, like RESUME):
+  - Keyboard: `P` (as today). Not Esc: once the game goes fullscreen, browsers use Esc to leave fullscreen and don't pass it to the page.
+  - Game controller: the menu button (Xbox Menu, standard index 9; see `game-controller.md`). It works while playing and on the overlay; elsewhere it does nothing.
+- When pausing is allowed: only while playing (`STATE.PLAYING`): the arena is fully drawn and the level music has started. Not during the 3-second start delay (`STARTING`), the core collapse (`COLLAPSING`) or the Game Over delay (`LOST`), and not after the end (`ENDED`). From the core collapse on, the level is over for the player: the music has ended and nothing can be done in-game anymore, so there's nothing to pause. Today `togglePause()` in `GameEngine.js` only blocks `ENDED`, so `P` pauses during the start delay too: fix it to pause only in `PLAYING` (resuming is always allowed). This applies to every pause trigger: `P`, the menu button and auto-pause.
+- Auto-pause: the game pauses itself, with the overlay, when the tab is hidden (`visibilitychange` → `document.hidden`) or the window loses focus (`window` `blur`), so the level timer never runs while the player is away. Once the game goes fullscreen, leaving fullscreen (`fullscreenchange`) pauses too. It never resumes by itself: the player resumes with RESUME, `P` or the menu button. It follows the rule above, and does nothing when the game is already paused.
+- Who owns what: the `GameEngine` owns the pause itself (ticker, music, SFX, input) and decides when it's allowed. It reports each change to React through a new low-frequency callback, `onPauseChange`. `GameScreen` keeps only `paused` (and the panel color) in React state and shows the overlay. The overlay's buttons call back into the engine. No frame-by-frame state reaches React.
+
+#### Files
+
+- `src/input/gamepad.js`: add `MENU: 9` to `BUTTONS` (Xbox Menu ≡ / PlayStation Options).
+- `src/audio/soundManager.js`: pause the sound effects too. Today `pauseTrack()` only pauses the music, and the SFX playing at that moment (launch, bounce, life lost…) play on during the pause.
+  - Keep track of the playing SFX voices: `playSfx()` adds `{ howl, id }` to a `liveVoices` set and removes it on that voice's `end` (`howl.once('end', …, id)`) and when `stealVoice()` stops it.
+  - `pauseSfx()`: pauses every voice in `liveVoices` that is still playing and remembers them in `pausedVoices`.
+  - `resumeSfx()`: plays each remembered voice again (`howl.play(id)` continues it from where it was paused) and clears `pausedVoices`.
+  - `stopPausedSfx()`: stops the remembered voices and clears them (leaving the level while paused). Paused voices would otherwise stay in Howler's pool forever.
+- `src/game/GameEngine.js`:
+  - Replace `togglePause()` with three methods:
+    - `pause()`: does nothing unless `state === STATE.PLAYING`, the game isn't already paused, and it isn't leaving (below). Then: `paused = true`, `app.ticker.stop()`, `soundManager.pauseTrack()`, `soundManager.pauseSfx()`, and `emit('onPauseChange', { paused: true, backgroundColor })`. `backgroundColor` is the current background as a CSS hex string (`#` + `this.backgroundColor` in 6 hex digits). If the one-life-left fade is in progress, that's the in-between color the canvas shows, frozen with it.
+    - `resume()`: does nothing unless paused and not leaving. Then: `paused = false`, `this.gamepad.reset()` (as today), `app.ticker.start()`, `soundManager.resumeTrack()`, `soundManager.resumeSfx()`, and `emit('onPauseChange', { paused: false })`.
+    - `togglePause()`: `this.paused ? this.resume() : this.pause()`. Used by `P`.
+  - `leave()`: called by `GameScreen` when EXIT TO MENU is pressed. It sets `this.leaving = true`, so `P` and auto-pause can't resume the game during the 1 s screen-out. The game stays paused, with its music and SFX paused, until the screen swap unmounts it.
+  - Menu button: at the top of `handleGamepad()` (which only runs in `PLAYING`), `if (this.gamepad.wasPressed(BUTTONS.MENU)) { this.pause(); return }`. While paused the ticker is stopped, so the engine doesn't poll: the menu button's resume goes through the overlay's RESUME button (see `menuNavigation.js`).
+  - Auto-pause: in `bindInput()`, add `document`'s `visibilitychange` (pause when `document.hidden`) and `window`'s `blur` (pause), both calling `pause()`, which applies the rules above. Remove both in `destroy()`, next to `keydown`. There's no `fullscreenchange` listener yet: add it when fullscreen is added.
+  - `destroy()`: if the game is paused, call `soundManager.stopPausedSfx()`. The paused level track needs nothing: the Main Menu's `playTrack(MENU_TRACK)` fades it out and unloads it as usual.
+  - Update the class comment's list of callbacks with `onPauseChange({ paused, backgroundColor })`.
+  - Pointer input while paused stays as today: presses and moves are ignored. A paddle dragged when the pause starts is set where it was when the pointer is released.
+- `src/components/SettingsControls.jsx` (new): the Settings controls, shared by the Settings screen and the Pause overlay. It moves `VolumeControl` out of `SettingsMenuScreen.jsx`, and renders a fragment: MUSIC and SFX `VolumeControl`s, then `<Button onClick={() => {}}>OLD TV ON</Button>` (no functionality yet). It returns a fragment so the three are direct children of `.menu__items` and get its 64px gap. Props: `musicVolume`, `sfxVolume`, `onMusicVolumeChange`, `onSfxVolumeChange`.
+- `src/screens/SettingsMenuScreen.jsx`: takes `settings` (the four props above, as one object) and `onBack`, and renders `<SettingsControls {...settings} />` inside its `Menu`. The layout stays as it is (BACK pinned as the footer); check it against the updated SETTINGS MENU mockup.
+- `src/screens/PauseOverlay.jsx` (new): `PauseOverlay({ settings, backgroundColor, onExitToMenu, onResume })`.
+  - `<Overlay className="pause-overlay">` holding a `<div className="pause-overlay__panel" style={{ background: backgroundColor }}>` holding a `<Menu>` with `<SettingsControls {...settings} />`, `<Button className="pause-overlay__exit" onClick={onExitToMenu}>EXIT TO MENU</Button>` and `<Button data-gamepad="back menu" onClick={onResume}>&lt;&lt;&lt; RESUME</Button>`.
+  - RESUME is the last menu item, not a `Menu` footer: the footer layout pins it to the bottom of the screen, while here the whole menu is centered.
+  - It's rendered inside the Game Screen's `Screen`, as a direct child, so it takes part in the screen-out when EXIT TO MENU is pressed, and the controller navigation finds its buttons (`.screen button`).
+- `src/screens/GameScreen.jsx`:
+  - New props: `settings` and `onExitToMenu`.
+  - Keep the engine in a ref (`engineRef`), so the overlay's buttons can call it.
+  - State: `const [pause, setPause] = useState(null)`: `null` while playing, `{ backgroundColor }` while paused. The engine's `onPauseChange` sets it: `({ paused, backgroundColor }) => setPause(paused ? { backgroundColor } : null)`.
+  - When `pause` is set, render `<PauseOverlay>` after the `HUD`, with `onResume={() => engineRef.current.resume()}` and `onExitToMenu={() => { engineRef.current.leave(); onExitToMenu() }}`.
+- `src/App.jsx`:
+  - Build a `settings` object once per render (`{ musicVolume, sfxVolume, onMusicVolumeChange: changeMusicVolume, onSfxVolumeChange: changeSfxVolume }`) and pass it to `SettingsMenuScreen` and `GameScreen`.
+  - `GameScreen` gets `onExitToMenu={goToMainMenu}`. `navigate()` already ignores it during a transition. The music effect needs no change: the Main Menu fades the menu track in and fades out the paused level track.
+- `src/input/menuNavigation.js`:
+  - `data-gamepad` can now hold several space-separated values (RESUME has `back menu`): `BACK_SELECTOR` becomes `.screen [data-gamepad~="back"]`, and a new `MENU_SELECTOR = '.screen [data-gamepad~="menu"]'`.
+  - The menu button presses the element matching `MENU_SELECTOR`, the same way the right face button presses BACK (shows pressed while held, activates on release). With no match (any other screen, or the game while playing) it does nothing. So on the overlay, the menu button and the right face button both activate RESUME.
+  - A held button never counts as a press on a newly shown menu. The pause opens without a screen transition, so the menu button press that paused the game could also reach the overlay's RESUME on the same frame and close it again. The menu loop and the engine's ticker both run on `requestAnimationFrame`, and React can render the overlay between them. To prevent that, remember the first item of the previous frame. When it changes (a new screen, or the overlay opening or closing), call `reader.reset()` and skip the rest of that frame, after the usual first-item selection. Screens only swap during transitions, when input is ignored anyway, so the menu screens are unaffected.
+  - On the overlay, controller mode works as on any menu: in controller mode it opens with MUSIC's `-` selected; the d-pad / left stick move, the bottom face button and RT activate.
+- `src/index.css`:
+  - `.pause-overlay`: `display: flex; align-items: center; justify-content: center;` (on top of `.overlay`'s `position: absolute; inset: 0; pointer-events: none`).
+  - `.pause-overlay__panel`: `padding: calc(64 * var(--u)); pointer-events: auto;` so taps on the panel never reach the canvas. Taps outside it reach the canvas, which ignores them while paused. Its background comes from the inline style.
+  - `.pause-overlay__exit`: `margin-top: calc(64 * var(--u))`, so with the menu's 64px gap there are 128px between OLD TV and EXIT TO MENU (GAMEPLAY PAUSE MENU mockup). At the reference size the menu then runs from y = 210 to 870 and the panel from 146 to 934 (x = 715 to 1205), centered, which matches the mockup.
+- Docs, when done:
+  - `docs/project-structure.md`: add `components/SettingsControls.jsx`.
+  - `docs/game-controller.md`: change the menu button's row from "added in Phase 8" to `MENU`.
+  - `docs/implementation-status.md`: mark Phase 8 done.
+
+#### Checks
+- `P` does nothing during the start delay, the core collapse, the Game Over delay or on the result screens. While playing it pauses: the ring, atoms, paddles, HUD (TIME included) and music freeze, the overlay appears, and SFX in progress stop and continue on resume. `P` again resumes.
+- The overlay matches the GAMEPLAY PAUSE MENU mockup at 1920x1080 and other sizes. Its panel is black, or dark red with one life left. Paused mid-fade to dark red, it matches the canvas exactly.
+- MUSIC / SFX change the volume on the overlay as on Settings, and the values are the same in both places and survive a reload. OLD TV ON does nothing.
+- RESUME (mouse, touch, bottom face button, right face button, menu button) closes the overlay with no transition, and the game continues where it was. No capture or paddle fires from the button used to resume.
+- EXIT TO MENU plays the screen transition to the Main Menu. The game stays frozen during the screen-out, and `P` doesn't resume it then. The menu track fades in with the menu animation from its start, and the hi-score beaten during the level is kept.
+- Controller: the menu button pauses while playing and resumes on the overlay. A single press never pauses and resumes at once. The d-pad navigates the overlay. Nothing happens with the menu button on the menu screens.
+- Auto-pause: switching tabs, minimizing the window or clicking another app while playing pauses the game and shows the overlay. Coming back, it stays paused. During the start delay or the core collapse, nothing happens. Check in Chrome, Safari and Firefox, and in the iOS / Android apps (sending the app to the background).
 
 ### Phase 9 — Screen transitions
 - Every screen change plays the same old-TV transition on the screen's elements: a 1 s **screen out**, then a 0.5 s **screen in** (see "Screen transitions" in Decisions and graphical-specs "Screen transitions"). All the visuals are CSS keyframes. JavaScript never animates anything: React only keeps the old screen up until its screen-out ends, then swaps.
@@ -188,7 +252,7 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 - `src/screens/IntroScreen.jsx`: comment only (the Main Menu, not the button, starts the menu track).
 - `src/screens/GameScreen.jsx`, `GameEngine.js`: no change. When the engine reports Game Over / You Win!, it's already `ENDED` (frozen scene, `P` ignored): the canvas keeps showing that scene while the HUD goes out, and disappears at the swap, when the `GameScreen` unmounts (and destroys PixiJS) as today.
 - `src/components/MenuBackground.jsx`, `src/components/Screen.jsx`: no change.
-- Out of scope: the Pause overlay (Phase 8) sits on top of the Game Screen and isn't a screen change, so it doesn't use this transition. The Settings screen opened from Pause is decided in Phase 8.
+- Out of scope: the Pause overlay (Phase 8) sits on top of the Game Screen and isn't a screen change, so it doesn't use this transition. *(Phase 8 later puts the Settings controls inside the Pause overlay, so the Settings screen is never opened from Pause.)*
 - Browser support: `@property` needs Safari / iOS 16.4+, Chrome 85+, Firefox 128+. Without it, the tint jumps instead of blending, and everything else (fade, shake, swap) still works.
 
 ### Phase 10 — Mobile packaging
@@ -283,7 +347,7 @@ Two small, independent phases that make the paddles easier to read. Neither chan
   - The background always sits in the same place in the tree, outside the screen components, so React keeps the same instance (and the animation keeps playing) when the screen changes between those four screens. It unmounts on `GAME` and mounts fresh (frame 0) when coming back from Game Over / You Win!.
 - `src/components/Screen.jsx` + `src/index.css`: a `transparent` prop (`screen--transparent`) that drops the screen's own background but keeps the `light` colors (black text and borders), so the animation shows through. `IntroScreen`, `MainMenuScreen`, `LevelSelectionMenuScreen` and `SettingsMenuScreen` use `<Screen variant="light" transparent>`. Screens come after the background in the DOM, so they sit on top of it and keep receiving taps and clicks (the Intro's tap-anywhere included).
 - Phase 9 (screen transitions), when implemented, must animate the screens only, not the background, so the animation stays continuous. *(Phase 9 animates only the screens' elements: the background and the screens themselves stay still.)*
-- The Settings screen opened from the Pause overlay (Phase 8) is out of scope here: it's shown over the game, where the background isn't mounted.
+- The Pause overlay (Phase 8) doesn't show the menu animation: it's shown over the game, where the background isn't mounted. *(Phase 8 later puts the Settings controls inside the overlay, so the Settings screen is never shown over the game.)*
 
 ### Phase 24 — Enter screen & menu music start
 - Makes the menu animation and the menu track start together (see "Enter screen & menu music start" in Decisions). No new mockup: the Enter screen follows the light menu layout. *(Phase 26 later turns the Enter screen into the Intro and removes the logo-only Intro.)*
@@ -495,7 +559,7 @@ Three phases that add controller support (see `docs/game-controller.md`, "Game c
 - Production build (`npm run build` + `npm run preview`): assets load with hashed filenames.
 
 ### Second development cycle
-- Pause/Resume works mid-game via `app.ticker` stop/start, and Settings/Main Menu are reachable from Pause without losing game state incorrectly.
+- Pause/Resume works mid-game via `app.ticker` stop/start; the volume and OLD TV controls on the Pause overlay work like on the Settings screen and keep their values there; EXIT TO MENU goes back to the Main Menu.
 - Screen transitions: every navigation path in `navigation.md` (Intro → Main Menu, Main Menu ↔ Level Select / Settings, Level Select → Game, Game → Game Over / You Win!, Try Again, back to the Main Menu) plays the same effect on the screen's elements only: the old screen's text, buttons, logo and HUD fade out over 1 s; their color blends gradually (no jumps) from their own color (black on the light menus, white on the dark screens) to transition dark yellow between 0.5 and 0.75 s, then to transition dark red by 1 s; they vibrate once, slightly, up and down in the last 0.125 s; then the new screen's elements fade in over 0.5 s with no tint or shake. The backgrounds never fade, tint or shake: between menu screens the `#D8D8D8` background and the menu animation stay still and keep playing; the background changes at once at the swap (e.g. light → black when a level starts). On the Game Screen only the HUD animates: the ring, core, atoms and the black / dark-red background don't move, fade or change color, and disappear at the swap. A pressed or keyboard-focused button tints like the rest. The Main Menu logo looks as before and tints with the buttons. A fresh load fades the Intro's button in. Tapping twice quickly (e.g. PLAY, or a level button) only navigates once, and taps during a transition do nothing, including on the game canvas. From the Intro, the menu track starts at full volume with no fade-in when the Main Menu appears, together with its animation. After Game Over / You Win! the level music keeps playing while the HUD goes out; the result screen then shows the final score (never 0), and Try Again shows the Game Over / You Win! scores fading out unchanged. Returning to the Main Menu fades the menu track in with the animation starting with it. No layout jump or scrollbar from the shake. Check in Safari, Firefox and Chrome, and in the iOS/Android apps.
 - `npx cap sync` completes cleanly; app boots in an Android/iOS simulator with landscape locked and audio unlocking on first tap.
 - Rotate-device overlay appears in a portrait emulated viewport (browser and native) and disappears when rotated back to landscape.

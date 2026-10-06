@@ -20,7 +20,7 @@ Legend: `[x]` done · `[ ]` pending
 ## Second Development Cycle (Quality of Life) — ⏳ Pending
 
 - [ ] **Phase 8** — Pause functionality
-  - Groundwork only: the `P` key toggles pause in `GameEngine` (ticker stop/start + music pause/resume). The Pause button and `PauseOverlay` (Resume / Settings / Main Menu) are still missing.
+  - Groundwork only: the `P` key toggles pause in `GameEngine` (ticker stop/start + music pause/resume). The Pause button and `PauseOverlay` (MUSIC / SFX / OLD TV, EXIT TO MENU, RESUME) are still missing.
 - [x] **Phase 9** — Screen transitions (old-TV effect on every screen change, pure CSS, on the screen's elements only — backgrounds, the menu animation and the game canvas stay still: 1 s screen-out — fade out, color blends to transition dark yellow `#666600` then transition dark red `#660000`, vertical shake at the end — then 0.5 s fade-in)
 - [ ] **Phase 10** — Mobile packaging (Capacitor iOS/Android, orientation lock, icons/splash)
 - [ ] **Phase 11** — Rotate-device overlay

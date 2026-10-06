@@ -55,6 +55,14 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * The font used will be "C64 Angled", a monospaced font: `assets/fonts/c64_angled.ttf`.
 * All text boxes should put all the text in one line (no line-breaks).
 
+## Pause overlay
+
+* It's shown on top of the Game Screen, which stays as it was when the game was paused: the HUD, the ring, the paddles and the atoms stay visible and frozen, on their black (or one-life-left dark red) background (see the GAMEPLAY PAUSE MENU mockup).
+* It uses the dark layout: white text and borders, like the HUD.
+* It's the Settings screen's menu (MUSIC, SFX, OLD TV), with EXIT TO MENU and `<<< RESUME` below it in place of `<<< BACK`. The buttons are the same size as on the Settings screen, and the whole menu is vertically centered.
+* Behind the buttons there's an opaque panel that hides the part of the game under the menu (in the mockup the ring is cut at its edges). It covers all the buttons together plus 64px of padding on every side (top, bottom, left and right). Its color is the gameplay area's current background: black (#000000), or dark red (#550000) when the player has only one life left.
+* It isn't a screen change, so it doesn't play the screen transitions (see "Screen transitions"). EXIT TO MENU does: it leaves the Game Screen for the Main Menu.
+
 ## Game controller selection
 
 * When the menus are navigated with a game controller, the selected item is marked with a double border: its own border, a gap, and a second line outside it, all three as thick as the border (like CSS's `double` border style). The second line is drawn with `outline`, so nothing moves.

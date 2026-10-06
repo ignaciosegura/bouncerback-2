@@ -15,17 +15,18 @@ Every change from one screen to another plays the screen transition (see "Screen
   - One button per level, labeled with the level file's `name` (LEARN, FEMTOCOSMOS, CHRONOSAEDR0N, MEKANOMANCER, NEUTRONIKA). All levels are unlocked from the start.
   - Back Button
 - **Settings Screen**
-  - Sound FX Volume dual-button
   - Music Volume dual-button
+  - Sound FX Volume dual-button
+  - Old TV toggle button (shows its current state: OLD TV ON). Button only for now: its functionality comes from another branch and will be connected later.
   - Back Button
 - **Game Screen** *(During gameplay)*
   - HUD (score, time, hi-score, lives)
   - Game Canvas
   - Pause Button (top‑right) *(second development cycle)*
-- **Pause Overlay** *(second development cycle; shown on top of the Game Screen. No mockup yet: follow the style of the other menus)*
-  - Resume Button
-  - Settings Button
-  - Main Menu Button
+- **Pause Overlay** *(second development cycle; shown on top of the frozen Game Screen, see the GAMEPLAY PAUSE MENU mockup)*
+  - The same controls as the Settings Screen (Music Volume, Sound FX Volume, Old TV toggle), so there's no separate Settings button
+  - Exit To Menu Button (leaves the level → Main Menu; the level's progress is lost)
+  - Resume Button (`<<< RESUME`, in place of Settings' `<<< BACK`; closes the overlay and the game continues)
 - **Game Over Screen** *(replaces the Game Screen when the player runs out of lives)*
   - Score
   - Hi-Score

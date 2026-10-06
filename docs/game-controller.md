@@ -16,6 +16,7 @@ Buttons are named by **position**, not by the label printed on them, because tha
 | **right face button** | B | Circle | 1 | `B` |
 | **LT / RT** (left / right trigger) | LT / RT | L2 / R2 | 6 / 7 | `LT` / `RT` |
 | **L3 / R3** (pressing a stick down) | LS / RS | L3 / R3 | 10 / 11 | `L3` / `R3` |
+| **menu button** | Menu (≡) | Options | 9 | `MENU` (added in Phase 8) |
 | **d-pad** up / down / left / right | d-pad | d-pad | 12 / 13 / 14 / 15 | `UP` / `DOWN` / `LEFT` / `RIGHT` |
 | **left / right stick** | left / right stick | left / right stick | axes 0–1 / 2–3 | `stick('left' \| 'right')` |
 
@@ -33,7 +34,7 @@ Other terms:
 
 * **d-pad or left stick:** moves the selection to the nearest button in that direction. One step per push: holding doesn't repeat, and there's no wrap-around. Only buttons can be selected (menu buttons and the Settings `-` / `+` steps); the Main Menu credit links are skipped.
 * **bottom face button or RT:** activates the selected button, exactly like a click: the button shows pressed (inverted, as under a held mouse button) while the control is held, and it activates on release.
-* **right face button:** goes back, by activating the screen's `<<< BACK` button (Level Select and Settings), with the same press and release: BACK shows pressed while it's held. It does nothing on the other screens.
+* **right face button:** goes back, by activating the screen's `<<< BACK` button (Level Select and Settings) or the Pause overlay's `<<< RESUME` button, with the same press and release: the button shows pressed while it's held. It does nothing on the other screens.
 * **Cancelling a press:** like dragging the mouse off a button before releasing it, a held press is cancelled without activating anything if the selection moves, a mouse click or touch happens, the button leaves the screen, or the controller is disconnected or another one takes over.
 * **Selection:** nothing is selected until the controller is used. Connecting a controller counts as using it: browsers only expose a controller after one of its buttons has been pressed. The first push or press on a screen with nothing selected only selects its first button. In controller mode, every new screen arrives with its first button selected. A mouse click, a touch or disconnecting the last controller leaves controller mode and hides the selection.
 * **Screen transitions:** controller input is ignored while a transition runs, like taps and clicks.
@@ -45,7 +46,7 @@ Other terms:
 * **The sticks share the paddles:** either stick places the next paddle, like a finger on a touch screen. With two paddles set, setting a third one removes the oldest (first in, first out), whichever stick, mouse or touch set it. Until then, the paddle that will be removed is shown in red (see "Paddles" in `game-rules.md`).
 * **bottom face button, LT, RT, L3 or R3:** captures the charged atom crossing the core, like a tap at the core. One capture per press. A press with nothing to capture does nothing (unlike a tap, it never places a paddle).
 * **When it's ignored:** during the 3-second start delay, the core collapse and the Game Over delay. A stick held through the start delay places its paddle as soon as play starts.
-* **Pause:** no controller button yet (`P` on the keyboard). Pausing also freezes controller input, and a button pressed during the pause doesn't fire on resume.
+* **menu button:** pauses the game and opens the Pause overlay; on the overlay, it resumes (like `<<< RESUME`). Same as `P` on the keyboard. Pausing also freezes gameplay controller input, and a button pressed during the pause doesn't fire on resume. On the overlay, the controller navigates the menu as on any other menu screen (see "Menus").
 
 ---
 
