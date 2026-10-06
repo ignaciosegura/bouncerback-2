@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import * as soundManager from './audio/soundManager.js'
 import { levels } from './game/levelLoader.js'
 import { getHiScore, beatHiScore } from './game/highScore.js'
+import { getOldTv, setOldTv } from './game/oldTv.js'
 import IntroScreen from './screens/IntroScreen.jsx'
 import MainMenuScreen from './screens/MainMenuScreen.jsx'
 import LevelSelectionMenuScreen from './screens/LevelSelectionMenuScreen.jsx'
@@ -39,6 +40,7 @@ export default function App () {
   const [hiScore, setHiScore] = useState(getHiScore)
   const [musicVolume, setMusicVolume] = useState(soundManager.getMusicVolume)
   const [sfxVolume, setSfxVolume] = useState(soundManager.getSfxVolume)
+  const [oldTv, setOldTvState] = useState(getOldTv)
 
   // Menus play the menu track; Game Over and You Win! are silent. The game screen fades the music
   // out and the GameEngine starts the level's track when its start delay ends.
@@ -101,12 +103,19 @@ export default function App () {
     setSfxVolume(soundManager.getSfxVolume())
   }
 
+  const toggleOldTv = () => {
+    setOldTv(!oldTv)
+    setOldTvState(!oldTv)
+  }
+
   // Shown on the Settings screen and on the Pause overlay
   const settings = {
     musicVolume,
     sfxVolume,
+    oldTv,
     onMusicVolumeChange: changeMusicVolume,
-    onSfxVolumeChange: changeSfxVolume
+    onSfxVolumeChange: changeSfxVolume,
+    onOldTvToggle: toggleOldTv
   }
 
   // `score` isn't reset: only the result screens show it and endLevel always sets it first.

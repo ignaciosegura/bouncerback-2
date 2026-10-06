@@ -15,6 +15,9 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
   const handleScoreChange = useEffectEvent((value) => onScoreChange(value))
   const handleGameOver = useEffectEvent((result) => onGameOver(result))
   const handleLevelWin = useEffectEvent((result) => onLevelWin(result))
+  // The engine starts with the current OLD TV switch; later changes (from the Pause overlay) go
+  // to setOldTv(), so they don't restart the level
+  const getOldTv = useEffectEvent(() => settings.oldTv)
 
   // PixiJS owns the canvas and the game loop; React only receives the engine's low-frequency updates
   useEffect(() => {
@@ -25,11 +28,15 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
       onPauseChange: ({ paused, backgroundColor }) => setPause(paused ? { backgroundColor } : null),
       onGameOver: (result) => handleGameOver(result),
       onLevelWin: (result) => handleLevelWin(result)
-    })
+    }, { oldTv: getOldTv() })
     engineRef.current = engine
     engine.mount(canvasContainerRef.current)
     return () => engine.destroy()
   }, [level])
+
+  useEffect(() => {
+    engineRef.current.setOldTv(settings.oldTv)
+  }, [settings.oldTv])
 
   const exitToMenu = () => {
     engineRef.current.leave()

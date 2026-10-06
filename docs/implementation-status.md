@@ -53,3 +53,8 @@ Legend: `[x]` done · `[ ]` pending
 - [x] **Phase 34** — Paddle replacement warning (while a new paddle is being dragged, the set paddle its release will push out turns red `#FF0000` at once; mouse, touch and sticks; the one-life-left background darkens to `#550000` so the red stands out)
 - [x] **Phase 35** — Controller press feedback (a menu button activated with the controller shows the mouse's pressed look while held and activates on release; a press can be cancelled)
 - [x] **Phase 36** — Last life zoom (on the loss of the last life, the other atoms freeze; the last atom keeps escaping without fading for 0.5 s, then freezes; the camera then zooms 8× in 0.5 s, ease-out, on the point midway between the atom and where it crossed the ring, panning it to the center; Game Over 2 s after the loss)
+- CRT effect on the game arena (reusable post-processing in `src/effects/`, one folder and settings file per effect, documented in `docs/post-processing.md`; the HUD stays flat in React):
+  - [x] **Phase 37** — Post-processing pipeline & zoom blur (arena rendered to a texture; low-res zoom blur from the core mixed at 15%)
+  - [x] **Phase 38** — CRT layers & input mapping (curved glass, chromatic aberration, scanlines, phosphor mask, vignette; touch and mouse follow the curved image)
+  - [x] **Phase 39** — Old TV setting (Settings switch for the CRT layers, off by default and saved; the zoom blur stays on)
+  - [x] **Phase 40** — Effects split (`zoomBlur/` and `crt/` each with their own settings, GLSL chunk and code; `PostProcessing` composes the chunks into one final pass, so no extra GPU time)

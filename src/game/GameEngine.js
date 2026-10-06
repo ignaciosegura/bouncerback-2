@@ -8,6 +8,10 @@ import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
 import Atom, { ATOM_RADIUS, ATOM_STATE, CAPTURE_MIN_CHARGE } from './entities/Atom.js'
 import Paddle, { PADDLE_THICKNESS } from './entities/Paddle.js'
 import { BUTTONS, GamepadReader } from '../input/gamepad.js'
+import PostProcessing from '../effects/PostProcessing.js'
+import { POST_PROCESSING_SETTINGS } from '../effects/postProcessingSettings.js'
+import ZoomBlurEffect from '../effects/zoomBlur/ZoomBlurEffect.js'
+import CrtEffect from '../effects/crt/CrtEffect.js'
 
 // The playfield is laid out in mockup pixels for a 1080px-tall screen, then scaled to fit
 const REFERENCE_SIZE = 1080
@@ -47,6 +51,11 @@ const ZOOM_TIME = 0.5
 const ZOOM_HOLD = 1
 const GAME_OVER_DELAY = LAST_ESCAPE_TIME + ZOOM_TIME + ZOOM_HOLD
 const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen before the WebGL context is lost
+// The arena is shown through the post-processing of src/effects/: the zoom blur, then the CRT
+// effect with the Settings "OLD TV" switch on. With it off (or no effect on), it's drawn straight
+// to the canvas.
+const POST_PROCESSING_ENABLED = true
+const ZOOM_BLUR_ENABLED = true
 
 // The background turns dark red while the player has only one life left
 const BACKGROUND_COLORS = {
@@ -69,7 +78,10 @@ const STATE = {
  * onPauseChange({ paused, backgroundColor }), onGameOver({ score }) and onLevelWin({ score }).
  */
 export default class GameEngine {
-  constructor (level, callbacks) {
+  // `oldTv`: the Settings "OLD TV" switch (the CRT layers)
+  constructor (level, callbacks, { oldTv = false } = {}) {
+    this.oldTv = oldTv
+    this.postProcessing = POST_PROCESSING_ENABLED && (ZOOM_BLUR_ENABLED || oldTv)
     this.level = level
     this.callbacks = callbacks
     this.app = new Application()
@@ -112,10 +124,14 @@ export default class GameEngine {
 
     await this.app.init({
       resizeTo: container,
-      background: this.backgroundColor,
+      // With post-processing, the canvas shows black only outside the CRT effect's glass; the
+      // arena's own background goes to post.render()
+      background: this.postProcessing ? 0x000000 : this.backgroundColor,
       antialias: true,
-      resolution: window.devicePixelRatio || 1,
-      autoDensity: true
+      resolution: Math.min(window.devicePixelRatio || 1, POST_PROCESSING_SETTINGS.MAX_RESOLUTION),
+      autoDensity: true,
+      // The post-processing shaders are GLSL (WebGL only)
+      preference: 'webgl'
     })
 
     // Unmounted while initializing (e.g. React StrictMode's double effect)
@@ -129,7 +145,7 @@ export default class GameEngine {
     this.buildScene()
     this.bindInput()
     this.layout()
-    this.app.renderer.on('resize', this.layout)
+    this.app.renderer.on('resize', this.onResize)
     this.app.ticker.add(this.update)
 
     this.emit('onScoreChange', this.score)
@@ -149,6 +165,9 @@ export default class GameEngine {
     // Losing the WebGL context while the canvas is still on screen flashes it white: wait until
     // the next screen has been painted (two frames), then until the GPU has put it on screen
     requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => {
+      // Off the stage with post-processing, so app.destroy() wouldn't reach them
+      this.post?.destroy()
+      this.arena.destroy({ children: true })
       this.app.destroy(true, { children: true, texture: true })
     }, TEARDOWN_DELAY)))
   }
@@ -166,7 +185,33 @@ export default class GameEngine {
     this.pulseLayer = new Container() // over the core, behind every atom
     this.atomLayer = new Container()
     this.playfield.addChild(this.ring.view, this.flashLayer, this.paddleLayer, this.emitter.view, this.pulseLayer, this.atomLayer)
-    this.app.stage.addChild(this.playfield)
+    // Everything the post-processing processes. Its root is rendered as is, so the playfield's
+    // layout (position, scale) goes on a child.
+    this.arena = new Container()
+    this.arena.addChild(this.playfield)
+
+    if (this.postProcessing) {
+      const { renderer } = this.app
+      const effects = []
+      if (ZOOM_BLUR_ENABLED) {
+        this.zoomBlur = new ZoomBlurEffect(renderer)
+        effects.push(this.zoomBlur)
+      }
+      if (this.oldTv) effects.push(new CrtEffect(renderer))
+      // Only the processed image goes on the stage; the arena is drawn into it by renderArena()
+      this.post = new PostProcessing(renderer, effects)
+      this.app.stage.addChild(this.post.view)
+    } else {
+      this.app.stage.addChild(this.arena)
+    }
+  }
+
+  // Draws the arena through the post-processing, which the stage then shows. The blur's streaks
+  // come from the core: the playfield's position on screen, also during the last life zoom.
+  renderArena () {
+    if (!this.post) return
+    if (this.zoomBlur) this.zoomBlur.center = this.playfield.position
+    this.post.render(this.arena, { background: this.backgroundColor })
   }
 
   // Centres the playfield and scales it with the screen, applying the last life zoom; game state
@@ -181,6 +226,15 @@ export default class GameEngine {
       height / 2 + focusY * (base * offset - s)
     )
     this.playfield.scale.set(s)
+  }
+
+  // PixiJS draws the stage right after a resize, also while paused: the post-processing textures are
+  // reallocated empty, so the arena is drawn into them again first
+  onResize = (width, height) => {
+    this.layout()
+    if (!this.post) return
+    this.post.resize(width, height)
+    this.renderArena()
   }
 
   // Input
@@ -249,7 +303,7 @@ export default class GameEngine {
   onPointerDown = (event) => {
     if (this.state !== STATE.PLAYING || this.paused) return
 
-    const { x, y } = this.playfield.toLocal(event.global)
+    const { x, y } = this.playfield.toLocal(this.scenePoint(event.global))
     if (Math.hypot(x, y) <= CAPTURE_TAP_RADIUS && this.captureAtCore()) return
 
     this.startPaddleDrag(event.pointerId, Math.atan2(y, x))
@@ -258,8 +312,14 @@ export default class GameEngine {
   onPointerMove = (event) => {
     if (!this.draggedPaddles.has(event.pointerId) || this.paused) return
 
-    const { x, y } = this.playfield.toLocal(event.global)
+    const { x, y } = this.playfield.toLocal(this.scenePoint(event.global))
     this.dragPaddle(event.pointerId, Math.atan2(y, x))
+  }
+
+  // Where the pointer is in the arena: the point shown under it, through the effects (the CRT
+  // effect's curved glass)
+  scenePoint (global) {
+    return this.post?.toScene(global) ?? global
   }
 
   onPointerUp = (event) => {
@@ -352,6 +412,8 @@ export default class GameEngine {
     default:
       break
     }
+
+    this.renderArena()
   }
 
   // Start delay: the ring and core grow in, but the timer, spawns, music and input wait
@@ -604,7 +666,7 @@ export default class GameEngine {
     if (this.backgroundTime >= BACKGROUND_TRANSITION_TIME) return
     this.backgroundTime = Math.min(BACKGROUND_TRANSITION_TIME, this.backgroundTime + dt)
     this.backgroundColor = lerpColor(this.backgroundFrom, this.backgroundTo, this.backgroundTime / BACKGROUND_TRANSITION_TIME)
-    this.app.renderer.background.color = this.backgroundColor
+    if (!this.post) this.app.renderer.background.color = this.backgroundColor
   }
 
   addScore (points) {

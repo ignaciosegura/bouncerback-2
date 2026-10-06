@@ -21,6 +21,7 @@ root/
     ├── implementation-guidelines.md  # Implementation guidelines
     ├── level-file-schema.json      # Level file schema
     ├── react-pixi-example.jsx      # Example of a React Pixi component
+    ├── post-processing.md          # How the post-processing (zoom blur, CRT) works (learning resource) and how to tune it
     └── react-pixi-usage-example.jsx  # Example of a React Pixi usage example
 └── src/
     ├── audio/
@@ -35,6 +36,22 @@ root/
     │   ├── Screen.jsx              # Base screen wrapper component (handles transitions, safe areas, etc.)
     │   ├── Overlay.jsx             # Generic overlay component to be placed on top of current screen content
     │   └── TextBox.jsx             # Floating text box component.
+    ├── effects/                    # Reusable PixiJS post-processing; no game logic, no React (see docs/post-processing.md)
+    │   ├── PostProcessing.js       # The pipeline: scene texture, builds the final pass from the effects' chunks, input mapping
+    │   ├── postProcessing.frag.glsl  # The final pass's template, where the effects' GLSL chunks go
+    │   ├── postProcessingSettings.js  # Values shared by the whole pipeline (resolution cap)
+    │   ├── FullscreenPass.js       # One full-screen pass: a screen-covering rectangle + a fragment shader
+    │   ├── fullscreen.vert.glsl    # Vertex shader shared by every pass
+    │   ├── zoomBlur/               # Zoom blur effect: streaks pointing away from a center
+    │   │   ├── ZoomBlurEffect.js   # The effect
+    │   │   ├── zoomBlurSettings.js # Its tunable values
+    │   │   ├── zoomBlur.frag.glsl  # Its own pass: the blurred copy (low resolution)
+    │   │   └── zoomBlurMix.glsl    # Its chunk of the final pass: the blur mixed over the image
+    │   └── crt/                    # CRT effect: curved glass, chromatic aberration, scanlines, mask, vignette
+    │       ├── CrtEffect.js        # The effect
+    │       ├── crtSettings.js      # Its tunable values
+    │       ├── crt.glsl            # Its chunk of the final pass
+    │       └── curvature.js        # The curved glass's formula in JavaScript, for pointer input (twin of crtWarp() in crt.glsl)
     ├── input/                      # Game controller (Gamepad API); no React, no PixiJS
     │   ├── gamepad.js              # Polled controller reader: button presses, sticks with drift thresholds
     │   └── menuNavigation.js       # Controller navigation of the menu screens (selection class + click())
@@ -42,6 +59,7 @@ root/
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
     │   ├── levelLoader.js          # Validates level JSON and derives runtime values (timer, speeds, intervals)
     │   ├── scoring.js              # Pure score formulas and high-score persistence
+    │   ├── oldTv.js                # The Settings "OLD TV" switch (the CRT effect), persisted
     │   ├── color.js                # Color helpers (interpolation for the gameplay color transitions)
     │   ├── easing.js               # Easing curves for the gameplay animations (quadratic in / out / in-out)
     │   └── entities/               # Game objects
