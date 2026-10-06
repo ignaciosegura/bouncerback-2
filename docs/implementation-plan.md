@@ -172,7 +172,7 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 
 ### Phase 8 — Pause functionality
 - `src/screens/PauseOverlay.jsx` (the only overlay screen), per `navigation.md`, graphical-specs "Pause overlay" and the GAMEPLAY PAUSE MENU mockup: the Settings controls (MUSIC, SFX, OLD TV) inline, then EXIT TO MENU and `<<< RESUME`. There's no Settings button, so the Settings screen is never opened from Pause.
-- OLD TV is a button only (on Settings and Pause): its functionality comes from another branch and will be connected when that branch is merged. Until then, pressing it does nothing.
+- OLD TV (on Settings and Pause) is the CRT switch from Phase 39, connected when the shader branch was merged. From the Pause overlay it changes the effects on the running engine (`GameEngine.setOldTv()`), so the level isn't restarted, and the frozen frame behind the overlay shows the change at once.
 - Pausing stops `app.ticker` (as `P` does today); RESUME restarts it. EXIT TO MENU goes to the Main Menu with the usual screen transition; RESUME closes the overlay without one.
 - The on-screen Pause button (top-right of the Game Screen in `navigation.md`) is out of scope for now: it will be decided later. Until then the touch-only mobile builds can only pause through auto-pause.
 - Pause toggles (each opens the Pause overlay while playing, and resumes while it's open, like RESUME):
@@ -232,7 +232,7 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 #### Checks
 - `P` does nothing during the start delay, the core collapse, the Game Over delay or on the result screens. While playing it pauses: the ring, atoms, paddles, HUD (TIME included) and music freeze, the overlay appears, and SFX in progress stop and continue on resume. `P` again resumes.
 - The overlay matches the GAMEPLAY PAUSE MENU mockup at 1920x1080 and other sizes. Its panel is black, or dark red with one life left. Paused mid-fade to dark red, it matches the canvas exactly.
-- MUSIC / SFX change the volume on the overlay as on Settings, and the values are the same in both places and survive a reload. OLD TV ON does nothing.
+- MUSIC / SFX change the volume on the overlay as on Settings, and the values are the same in both places and survive a reload. OLD TV toggles the CRT layers on the frozen arena behind the overlay without restarting the level, and its state matches the Settings screen's.
 - RESUME (mouse, touch, bottom face button, right face button, menu button) closes the overlay with no transition, and the game continues where it was. No capture or paddle fires from the button used to resume.
 - EXIT TO MENU plays the screen transition to the Main Menu. The game stays frozen during the screen-out, and `P` doesn't resume it then. The menu track fades in with the menu animation from its start, and the hi-score beaten during the level is kept.
 - Controller: the menu button pauses while playing and resumes on the overlay. A single press never pauses and resumes at once. The d-pad navigates the overlay. Nothing happens with the menu button on the menu screens.

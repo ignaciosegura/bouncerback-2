@@ -78,7 +78,7 @@ const STATE = {
  * onPauseChange({ paused, backgroundColor }), onGameOver({ score }) and onLevelWin({ score }).
  */
 export default class GameEngine {
-  // `oldTv`: the Settings "OLD TV" switch (the CRT layers)
+  // `oldTv`: the Settings "OLD TV" switch (the CRT layers); changed mid-level with setOldTv()
   constructor (level, callbacks, { oldTv = false } = {}) {
     this.oldTv = oldTv
     this.postProcessing = POST_PROCESSING_ENABLED && (ZOOM_BLUR_ENABLED || oldTv)
@@ -189,9 +189,19 @@ export default class GameEngine {
     // layout (position, scale) goes on a child.
     this.arena = new Container()
     this.arena.addChild(this.playfield)
+    this.buildPostProcessing()
+  }
+
+  // Puts the arena on the stage, through the post-processing or straight. Called again when the
+  // OLD TV switch changes mid-level, so it first takes down the previous chain.
+  buildPostProcessing () {
+    const { renderer, stage } = this.app
+    this.post?.destroy()
+    this.post = null
+    this.zoomBlur = null
+    stage.removeChild(this.arena)
 
     if (this.postProcessing) {
-      const { renderer } = this.app
       const effects = []
       if (ZOOM_BLUR_ENABLED) {
         this.zoomBlur = new ZoomBlurEffect(renderer)
@@ -200,9 +210,26 @@ export default class GameEngine {
       if (this.oldTv) effects.push(new CrtEffect(renderer))
       // Only the processed image goes on the stage; the arena is drawn into it by renderArena()
       this.post = new PostProcessing(renderer, effects)
-      this.app.stage.addChild(this.post.view)
+      stage.addChild(this.post.view)
     } else {
-      this.app.stage.addChild(this.arena)
+      stage.addChild(this.arena)
+    }
+    renderer.background.color = this.post ? 0x000000 : this.backgroundColor
+  }
+
+  // The Settings "OLD TV" switch, from the Settings screen or the Pause overlay. The effects are
+  // rebuilt in place, so the level goes on.
+  setOldTv (on) {
+    if (on === this.oldTv) return
+    this.oldTv = on
+    this.postProcessing = POST_PROCESSING_ENABLED && (ZOOM_BLUR_ENABLED || on)
+    // Not mounted yet: buildScene() picks it up
+    if (!this.mounted) return
+    this.buildPostProcessing()
+    // Paused, the ticker doesn't draw: the frozen frame behind the overlay shows the change now
+    if (this.paused) {
+      this.renderArena()
+      this.app.render()
     }
   }
 

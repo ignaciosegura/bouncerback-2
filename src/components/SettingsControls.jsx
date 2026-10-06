@@ -30,13 +30,13 @@ function VolumeControl ({ label, value, onChange }) {
 
 // The Settings controls, shared by the Settings screen and the Pause overlay. A fragment, so they
 // are direct items of the surrounding Menu.
-// OLD TV is a button only for now: its functionality will be connected from another branch.
-export default function SettingsControls ({ musicVolume, sfxVolume, onMusicVolumeChange, onSfxVolumeChange }) {
+export default function SettingsControls ({ musicVolume, sfxVolume, oldTv, onMusicVolumeChange, onSfxVolumeChange, onOldTvToggle }) {
   return (
     <>
       <VolumeControl label="MUSIC" value={musicVolume} onChange={onMusicVolumeChange} />
       <VolumeControl label="SFX" value={sfxVolume} onChange={onSfxVolumeChange} />
-      <Button onClick={() => {}}>OLD TV ON</Button>
+      {/* The CRT layers on the game arena (src/effects/crt/) */}
+      <Button onClick={onOldTvToggle}>OLD TV {oldTv ? 'ON' : 'OFF'}</Button>
     </>
   )
 }
