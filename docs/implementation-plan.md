@@ -541,7 +541,7 @@ Split in two so the blur can be judged on its own before the CRT layers go on to
   - `CURVATURE = 0.08`: how much the corners are pushed out (0 = flat).
   - `CORNER_RADIUS = 0.03`: rounding of the glass's corners, as a share of the screen height.
   - `EDGE_SOFTNESS = 0.004`: width of the glass edge's fade to black, same unit.
-  - `ABERRATION = 0.002`: red / blue offset at the corners (0–1 coordinates), growing from 0 at the center.
+  - `ABERRATION = 0.002`: red is read this share farther from the center at the corners, blue this share closer (about 2 px at the corners of a 1080p screen), growing from 0 at the center.
   - `SCANLINE_COUNT = 270`: lines per screen height, on every device (about 240p arcade; at least about 2.9 device pixels per line on a landscape phone at 2×, so they don't flicker).
   - `SCANLINE_INTENSITY = 0.3`: how dark the gap between lines gets.
   - `MASK_PITCH = 3`: width of one red-green-blue stripe group in device pixels (a whole number, so it lines up with the pixels and makes no moiré).
@@ -557,8 +557,8 @@ Split in two so the blur can be judged on its own before the CRT layers go on to
   5. Scanlines from the bent `y` (so they curve): a smooth `cos²` profile, not hard on/off lines. They fade out when a line would be thinner than 2 device pixels (small windows), instead of shimmering.
   6. Mask from `gl_FragCoord.x` (device pixels).
   7. Vignette, brightness gain, output with alpha 1.
-- `CrtEffect.js`: new uniforms; `MASK_PITCH` and the scanline fade use the renderer's resolution. New `toScene(point)`: returns the scene point shown at a screen point (`warp()`), for input.
-- `GameEngine.js`: `onPointerDown` / `onPointerMove` call `this.playfield.toLocal(this.crt?.toScene(event.global) ?? event.global)`. The capture tap and paddle angles then follow what's on screen. Sticks: no change.
+- `CrtEffect.js`: one `UniformGroup` with every CRT uniform (plus `uBlurMix` only with the blur on), and `uAspect` updated on resize. `MASK_PITCH` is already in device pixels (`gl_FragCoord`). The scanline fade is computed in JavaScript on each resize (`scanlineFade()`: device pixels per line, smoothstep from 1.5 to 2.5) and applied to `uScanlineIntensity`, instead of per pixel. New `toScene(point)`: returns the scene point shown at a screen point (`warp()`), for input.
+- `GameEngine.js`: `onPointerDown` / `onPointerMove` call `this.playfield.toLocal(this.scenePoint(event.global))`, where `scenePoint()` returns `this.crt?.toScene(global) ?? global`. The capture tap and paddle angles then follow what's on screen. Sticks: no change.
 - `docs/crt-effect.md`: completed with curvature (the formula, why it preserves angles, why corners go black, why input needs the same formula and no inverse), chromatic aberration, scanlines (fixed count, the smooth profile, moiré and the thin-line fade), the phosphor mask (whole-pixel pitch), vignette and brightness, the order of the steps and why it matters, the performance budget, and the tuning table for the new constants.
 
 ---

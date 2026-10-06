@@ -38,10 +38,11 @@ root/
     ├── effects/                    # Reusable PixiJS visual effects; no game logic, no React
     │   └── crt/                    # CRT post-processing (see docs/crt-effect.md)
     │       ├── CrtEffect.js        # PixiJS glue: render textures, full-screen meshes, passes (the module's entry point)
-    │       ├── crtSettings.js      # Every tunable value of the effect (resolutions, blur, …)
+    │       ├── crtSettings.js      # Every tunable value of the effect (resolutions, blur, curvature, scanlines, …)
+    │       ├── curvature.js        # The curved glass's formula in JavaScript, for pointer input (twin of warp() in crt.frag.glsl)
     │       ├── fullscreen.vert.glsl  # Vertex shader shared by every pass (one screen-covering rectangle)
     │       ├── zoomBlur.frag.glsl  # Zoom blur pass: streaks pointing away from a center
-    │       └── crt.frag.glsl       # Final pass: scene + blur (CRT layers from Phase 38)
+    │       └── crt.frag.glsl       # Final pass: curvature, glass edge, chromatic aberration, blur mix, scanlines, mask, vignette
     ├── input/                      # Game controller (Gamepad API); no React, no PixiJS
     │   ├── gamepad.js              # Polled controller reader: button presses, sticks with drift thresholds
     │   └── menuNavigation.js       # Controller navigation of the menu screens (selection class + click())

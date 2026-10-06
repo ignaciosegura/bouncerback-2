@@ -56,4 +56,4 @@ Legend: `[x]` done · `[ ]` pending
 - [x] **Phase 36** — Last life zoom (on the loss of the last life, the other atoms freeze; the last atom keeps escaping without fading for 0.5 s, then freezes; the camera then zooms 8× in 0.5 s, ease-out, on the point midway between the atom and where it crossed the ring, panning it to the center; Game Over 2 s after the loss)
 - CRT effect on the game arena (reusable module `src/effects/crt/`, constants in `crtSettings.js`, documented in `docs/crt-effect.md`; the HUD stays flat in React):
   - [x] **Phase 37** — Post-processing pipeline & zoom blur (arena rendered to a texture; low-res zoom blur from the core mixed at 15%)
-  - [ ] **Phase 38** — CRT layers & input mapping (curved glass, chromatic aberration, scanlines, phosphor mask, vignette; touch and mouse follow the curved image)
+  - [x] **Phase 38** — CRT layers & input mapping (curved glass, chromatic aberration, scanlines, phosphor mask, vignette; touch and mouse follow the curved image)

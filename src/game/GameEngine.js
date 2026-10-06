@@ -252,7 +252,7 @@ export default class GameEngine {
   onPointerDown = (event) => {
     if (this.state !== STATE.PLAYING || this.paused) return
 
-    const { x, y } = this.playfield.toLocal(event.global)
+    const { x, y } = this.playfield.toLocal(this.scenePoint(event.global))
     if (Math.hypot(x, y) <= CAPTURE_TAP_RADIUS && this.captureAtCore()) return
 
     this.startPaddleDrag(event.pointerId, Math.atan2(y, x))
@@ -261,8 +261,13 @@ export default class GameEngine {
   onPointerMove = (event) => {
     if (!this.draggedPaddles.has(event.pointerId) || this.paused) return
 
-    const { x, y } = this.playfield.toLocal(event.global)
+    const { x, y } = this.playfield.toLocal(this.scenePoint(event.global))
     this.dragPaddle(event.pointerId, Math.atan2(y, x))
+  }
+
+  // Where the pointer is in the arena: through the CRT effect's curved glass, the point shown under it
+  scenePoint (global) {
+    return this.crt?.toScene(global) ?? global
   }
 
   onPointerUp = (event) => {
