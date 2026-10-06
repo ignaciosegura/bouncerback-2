@@ -89,6 +89,21 @@ The screen will be used in forced landscape mode. The visual style is based on e
     * Color palette switch (e.g. when the player has only one life left)
     * Glow effects (e.g. when the player uses a power-up)
 
+## CRT effect (game arena)
+
+* The game arena (the game canvas: ring, core, atoms, paddles, echoes and the black or dark red background) is shown as if on an old CRT screen. It's a post-process applied to the finished image, so the shapes themselves are still the same 2D vector drawings.
+* The HUD is not part of it: it stays flat and sharp on top, with no curvature, scanlines or blur. The menus and the other screens don't change either.
+* The effect is made of these layers, from the scene outward:
+    * Zoom blur: a copy of the arena blurred into streaks that point away from the core, mixed over the arena at 15% (aesthetic reference: Resolume Avenue's Radial Blur). Streaks are about 38% of an object's distance from the core long, so the paddles and atoms streak visibly, while the core and the thin ring only get a faint halo. The streaks always come from the core, also while it moves during the last life zoom.
+    * Curved glass: the image bulges like a CRT's curved glass, more toward the corners. Outside the glass (the screen's rounded corners and edges) is black.
+    * Chromatic aberration: the red and blue channels separate slightly toward the edges.
+    * Scanlines: horizontal dark lines, a fixed number per screen height whatever the device, following the curve of the glass.
+    * Phosphor mask: very faint vertical red / green / blue stripes.
+    * Vignette: the image darkens slightly toward the edges.
+* Scanlines, the mask and the vignette darken the image; a brightness gain compensates, so the arena's white and colors stay close to their values above.
+* Every amount (scanline count, curvature, blur strength, the opacities, the resolutions) is a starting value meant to be tuned by eye. They're defined in one place in the code (`src/effects/crt/crtSettings.js`), not in this document. The zoom blur has its own on/off switch there, so the CRT look can be used without it.
+* Touch and mouse input follow what's on screen: pressing where a paddle or the core is shown hits it, even near the edges where the glass moves things.
+
 ## Visual feedback (changes in the visuals during gameplay to communicate the player relevant information)
 
 Note: All color changes use a transition time of 0.5 seconds unless otherwise specified.
