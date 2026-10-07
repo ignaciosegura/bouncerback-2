@@ -1,7 +1,6 @@
 ![Bouncerback logo](assets/images/game_logo_gray_600px.svg)
 
-# Bouncerback
-Bouncerback is a retro-inspired 2D video game that challenges the player on speed, precision and concurrent attention.
+**Bouncerback** is a retro-inspired 2D video game that challenges the player on speed, precision and concurrent attention.
 
 Design, gameplay and coding: [Ignacio Segura](https://www.linkedin.com/in/isegura/)  
 Music and SFX: [Man from Space](https://manfromspace.com)
