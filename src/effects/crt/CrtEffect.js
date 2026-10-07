@@ -19,6 +19,7 @@ export default class CrtEffect {
     this.uniforms = new UniformGroup({
       uCrtAspect: { value: width / height, type: 'f32' },
       uCrtCurvature: { value: settings.CURVATURE, type: 'f32' },
+      uCrtZoom: { value: settings.ZOOM, type: 'f32' },
       uCrtCornerRadius: { value: settings.CORNER_RADIUS, type: 'f32' },
       uCrtEdgeSoftness: { value: settings.EDGE_SOFTNESS, type: 'f32' },
       uCrtAberration: { value: settings.ABERRATION, type: 'f32' },
@@ -52,7 +53,7 @@ export default class CrtEffect {
   // pointer input: what the player presses is what they see.
   toScene (point) {
     const { width, height } = this.renderer.screen
-    return warp(point.x, point.y, width, height, this.settings.CURVATURE)
+    return warp(point.x, point.y, width, height, this.settings.CURVATURE, this.settings.ZOOM)
   }
 
   destroy () {}

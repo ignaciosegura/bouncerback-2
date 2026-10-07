@@ -236,11 +236,13 @@ float radius2(vec2 c) {
 
 ```glsl
 vec2 warp(vec2 c) {
-  return c * (1.0 + uCurvature * radius2(c));
+  return c * (1.0 + uCurvature * radius2(c)) / uZoom;
 }
 ```
 
 A fragment shader can't move pixels: each pixel can only choose **where to read from**. So instead of "push the image outward", the question is "which image point does this pixel show?". The answer here: a point a little farther from the center than the pixel itself, `1 + CURVATURE × r²` times as far. At the center that's 1 (no change); at the corners `1 + CURVATURE` (8% farther with a `CURVATURE` of 0.08, for example).
+
+That alone would show the middle at its true size and everything around it slightly smaller, so the ring would shrink a little. Dividing by `ZOOM` magnifies the whole image behind the glass, like a CRT's overscan: with a `ZOOM` a bit above 1 the middle (the ring) looks slightly **bigger** than with the CRT off, a subtle fisheye, while the bulge toward the corners stays the same. The cost is that the outermost strip of the image falls past the glass's edges and isn't shown.
 
 What that looks like:
 
@@ -394,6 +396,7 @@ Each value lives only in its effect's settings file, with its unit and range in 
 | Setting | What you'll see | Notes |
 | :--- | :--- | :--- |
 | `CURVATURE` | How much the glass bulges, and how wide the black border is | 0 is a flat screen. Touch input follows it automatically |
+| `ZOOM` | How big the middle of the image (the ring) looks behind the glass | 1 is no zoom: the ring shrinks slightly with the curvature. Higher hides more of the image's outer strip past the glass's edges. Touch input follows it automatically |
 | `CORNER_RADIUS` | Rounding of the glass's corners | Share of the screen height |
 | `EDGE_SOFTNESS` | Sharp or blurry glass edge | Share of the screen height. Too low looks jagged |
 | `ABERRATION` | Red / blue fringes toward the edges | For example, 0.002 is about 2 px at the corners of a 1080p screen. Above ~0.006 white lines look doubled |

@@ -10,6 +10,7 @@
 
 uniform float uCrtAspect; // screen width / height
 uniform float uCrtCurvature;
+uniform float uCrtZoom;
 uniform float uCrtCornerRadius; // share of the screen height
 uniform float uCrtEdgeSoftness; // share of the screen height
 uniform float uCrtAberration;
@@ -28,9 +29,10 @@ float crtRadius2(vec2 c) {
 }
 
 // Curved glass: the image point shown at centered point c, pushed straight away from the center,
-// more the farther out it is. Its twin is warp() in curvature.js: change both together.
+// more the farther out it is, and magnified by the zoom. Its twin is warp() in curvature.js:
+// change both together.
 vec2 crtWarp(vec2 c) {
-  return c * (1.0 + uCrtCurvature * crtRadius2(c));
+  return c * (1.0 + uCrtCurvature * crtRadius2(c)) / uCrtZoom;
 }
 
 // 1 inside the glass, 0 outside, with a soft edge. p is a centered point after warping. The glass
