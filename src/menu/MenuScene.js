@@ -4,15 +4,17 @@ import { Application, CanvasSource, Sprite, Texture } from 'pixi.js'
 import lottie from 'lottie-web/build/player/esm/lottie_canvas.min.js'
 import animationData from '../../assets/motion/intro_animation.json'
 import { MENU_SETTINGS } from './menuSettings.js'
+import MenuLogo from './MenuLogo.js'
 
 // The content ends at frame 7485; the file's empty tail is cut to 5 s (300 frames at 60 fps)
 const LOOP_END_FRAME = 7785
 const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen before the WebGL context is lost
 
 /**
- * The menu screens' PixiJS scene: the menu background animation, behind the menus' HTML layer.
- * Lottie draws the animation into an off-screen canvas with its own frame loop; that canvas is a
- * texture, uploaded to the GPU each time Lottie draws a new frame. Mounted by MenuBackground.jsx.
+ * The menu screens' PixiJS scene, behind the menus' HTML layer: the menu background animation and
+ * the Main Menu logo. Lottie draws the animation into an off-screen canvas with its own frame loop;
+ * that canvas is a texture, uploaded to the GPU each time Lottie draws a new frame. Mounted by
+ * MenuBackground.jsx, which also passes the logo's state and box on (setLogo, setLogoRect).
  */
 export default class MenuScene {
   constructor () {
@@ -37,6 +39,14 @@ export default class MenuScene {
       }
     })
     this.animation.addEventListener('drawnFrame', this.onDrawnFrame)
+
+    // Also created now, so it takes its state and box before PixiJS is ready
+    this.logo = new MenuLogo({
+      base: cssColor('--color-black'),
+      white: cssColor('--color-white'),
+      tintYellow: cssColor('--color-tint-yellow'),
+      tintRed: cssColor('--color-tint-red')
+    })
   }
 
   async mount (container) {
@@ -44,6 +54,8 @@ export default class MenuScene {
     await this.app.init({
       resizeTo: container,
       background: cssColor('--color-white-bg'),
+      // The logo's edges
+      antialias: true,
       resolution,
       autoDensity: true,
       preference: 'webgl'
@@ -51,6 +63,7 @@ export default class MenuScene {
 
     // Unmounted while initializing (e.g. React StrictMode's double effect)
     if (this.destroyed) {
+      this.logo.destroy({ children: true })
       this.app.destroy(true, { children: true, texture: true })
       return
     }
@@ -63,7 +76,7 @@ export default class MenuScene {
     // Dynamic: the sprite follows the texture's size when the canvas is resized (otherwise it
     // keeps drawing at the size it had when it was created)
     this.background = new Sprite(new Texture({ source: this.source, dynamic: true }))
-    this.app.stage.addChild(this.background)
+    this.app.stage.addChild(this.background, this.logo)
     this.onResize(width, height)
 
     this.app.renderer.on('resize', this.onResize)
@@ -73,6 +86,16 @@ export default class MenuScene {
   // Starts the animation from the beginning, looping over its content and the empty tail
   play () {
     this.animation.playSegments([0, LOOP_END_FRAME], true)
+  }
+
+  // The logo's state in the screen transitions: 'hidden', 'in', 'shown' or 'out' (MenuLogo.js)
+  setLogo (state) {
+    this.logo.setState(state)
+  }
+
+  // The logo's box in the Main Menu's layout, in screen pixels
+  setLogoRect (rect) {
+    this.logo.setRect(rect)
   }
 
   destroy () {
@@ -104,13 +127,15 @@ export default class MenuScene {
   }
 
   update = () => {
+    this.logo.update()
     if (!this.dirty) return
     this.source.update()
     this.dirty = false
   }
 }
 
-// A color token from index.css (e.g. '--color-white-bg'), so the stylesheet stays its only source
+// A color token from index.css (e.g. '--color-white-bg', written #RRGGBB) as a 0xRRGGBB number,
+// so the stylesheet stays the colors' only source
 function cssColor (name) {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  return Number.parseInt(getComputedStyle(document.documentElement).getPropertyValue(name).trim().slice(1), 16)
 }

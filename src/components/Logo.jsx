@@ -1,69 +1,34 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useEffectEvent, useRef } from 'react'
 
-// Must stay longer than the 0.15 s blink in index.css, so only one piece blinks at a time
-const BLINK_MIN_WAIT = 500
-const BLINK_MAX_WAIT = 3500
-const BLINK_CLASS = 'logo__piece--blink'
-
-// Inline SVG (not a CSS mask) so individual segments can be targeted for animation.
-export default function Logo (props) {
-  const svgRef = useRef(null)
+// The Main Menu logo's place in the layout. The logo itself is drawn by PixiJS in the menu scene
+// (src/menu/MenuLogo.js), behind the HTML layer: this empty box holds its size and position, which
+// the scene follows through onRect({ x, y, width, height }), and names it for screen readers.
+export default function Logo ({ onRect, ...props }) {
+  const boxRef = useRef(null)
+  const reportRect = useEffectEvent((rect) => onRect?.(rect))
 
   useEffect(() => {
-    const pieces = svgRef.current.children
-    let previous = -1
-    let timeout
-
-    const scheduleBlink = () => {
-      timeout = setTimeout(() => {
-        pieces[previous]?.classList.remove(BLINK_CLASS)
-        // Never the same piece twice in a row, so re-adding the class always restarts the animation
-        const choices = previous === -1 ? pieces.length : pieces.length - 1
-        let next = Math.floor(Math.random() * choices)
-        if (previous !== -1 && next >= previous) next++
-        pieces[next].classList.add(BLINK_CLASS)
-        previous = next
-        scheduleBlink()
-      }, BLINK_MIN_WAIT + Math.random() * (BLINK_MAX_WAIT - BLINK_MIN_WAIT))
+    const box = boxRef.current
+    let active = true
+    // Relative to the transition root, which the menu scene's canvas also fills, and without the
+    // screen-out's shake (a translation the scene plays itself), in case it's measured mid-shake
+    const measure = () => {
+      if (!active) return
+      const root = box.closest('.screen-transition').getBoundingClientRect()
+      const { left, top, width, height } = box.getBoundingClientRect()
+      const shake = new DOMMatrix(getComputedStyle(box).transform)
+      reportRect({ x: left - root.left - shake.e, y: top - root.top - shake.f, width, height })
     }
 
-    scheduleBlink()
-    return () => clearTimeout(timeout)
+    measure()
+    // The buttons below it are text: the layout can shift once the font has loaded
+    document.fonts?.ready.then(measure)
+    window.addEventListener('resize', measure)
+    return () => {
+      active = false
+      window.removeEventListener('resize', measure)
+    }
   }, [])
 
-  return (
-    <svg ref={svgRef} viewBox="0 0 965.894 82.105" fill="currentColor" role="img" aria-label="BOUNCERBACK" {...props}>
-      <path d="M0,3.601h9.201c14.201,0,27.602,3.7,27.602,20.701c0,5.5-3,11.9-8.101,14.301v0.2c8.901,1.6,15.101,10.301,15.101,19.101
-        c0,15.102-12.901,21.102-26.202,21.102H0V3.601z M9.4,37.002h2.4c8.9,0,16.201-1.8,16.201-12.601c0-10.601-7.201-12.4-16.001-12.4
-        H9.4V37.002z M9.4,70.604h7.201c8.701,0,17.801-2.601,17.801-13.301c0-10.601-10.801-12.801-19.201-12.801H9.4V70.604z" />
-      <path d="M158.003,41.303c0,22.401-17.701,39.302-39.502,39.302c-21.801,0-39.502-16.9-39.502-39.302
-        C78.999,19.701,96.9,2,118.501,2C140.103,2,158.003,19.701,158.003,41.303z M148.603,41.303c0-16.602-12.401-30.502-30.102-30.502
-        c-17.701,0-30.102,13.9-30.102,30.502c0,17.201,13.801,30.502,30.102,30.502C134.802,71.805,148.603,58.504,148.603,41.303z
-        M138.501,41.303c0-10.886-8.239-20-20-20c-11.761,0-20,9.114-20,20c0,11.279,9.169,20,20,20
-        C129.332,61.303,138.501,52.581,138.501,41.303z" />
-      <path d="M205.198,23.603v24.5c0,12.301,3.7,23.702,18.201,23.702s18.201-11.401,18.201-23.702v-24.5h9.4v27.7
-        c0,16.602-10.3,29.302-27.602,29.302c-17.301,0-27.602-12.7-27.602-29.302v-27.7H205.198z" />
-      <path d="M293.097,0L349.7,59.304V23.603h9.4v58.503l-56.603-59.304v36.201h-9.401V0z" />
-      <path d="M650.895,3.601h9.2c14.201,0,27.602,3.7,27.602,20.701c0,5.5-3,11.9-8.101,14.301v0.2
-        c8.901,1.6,15.102,10.301,15.102,19.101c0,15.102-12.901,21.102-26.202,21.102h-17.601V3.601z M660.295,37.002h2.4
-        c8.9,0,16.201-1.8,16.201-12.601c0-10.601-7.201-12.4-16.001-12.4h-2.601V37.002z M660.295,70.604h7.2
-        c8.701,0,17.802-2.601,17.802-13.301c0-10.601-10.801-12.801-19.201-12.801h-5.801V70.604z" />
-      <path d="M952.993,3.601h12.301l-33.902,33.901l34.503,41.503h-12.701l-28.401-35.103l-3.801,3.601v31.502h-9.4V3.601h9.4v32.702
-        L952.993,3.601z" />
-      <path d="M438.947,71.951c-1,0.032-1.104,0.054-1.668,0.054c-16.801,0-29.593-14.102-29.593-30.603
-        c0-16.701,12.887-30.802,29.788-30.802c0.494,0,1.472,0.016,1.472,0.041V2.018c0-0.003-0.373-0.018-0.567-0.018
-        c-22.201,0-40.094,17.401-40.094,39.702c0,21.802,17.788,38.902,39.289,38.902c0.456,0,1.372-0.031,1.372-0.049V71.951z" />
-      <path d="M870.947,71.979c0,0.014-0.509,0.026-0.877,0.026c-16.801,0-29.49-14.102-29.49-30.603
-        c0-16.701,12.733-30.802,29.634-30.802c0.299,0,0.732,0.011,0.732,0.021V2c-22,0-39.879,17.401-39.879,39.702
-        c0,21.802,17.689,38.902,39.191,38.902c0.263,0,0.688-0.022,0.688-0.028V71.979z" />
-      <rect x="481.731" y="3.341" width="40.503" height="8.66" />
-      <rect x="481.731" y="36.713" width="40.503" height="8.66" />
-      <rect x="481.731" y="70.085" width="40.503" height="8.66" />
-      <path d="M745.592,60.104l-8.601,18.901h-10.101l36.002-78.604l36.002,78.604h-10.101l-8.6-18.901H745.592z M762.893,21.001
-        l-13.4,30.502h26.802L762.893,21.001z" />
-      <path d="M609.049,79.005h-11.4l-22.201-31.902h-3.9v31.902h-9.4V3.601h11.4c6.701,0,13.9,0.1,19.901,3.5
-        c6.3,3.7,9.9,10.801,9.9,18.001c0,10.801-7.2,19.801-18.101,21.102L609.049,79.005z M571.547,39.303h3
-        c9.601,0,20.002-1.801,20.002-13.801c0-11.801-11.201-13.501-20.502-13.501h-2.5V39.303z" />
-    </svg>
-  )
+  return <div ref={boxRef} role="img" aria-label="BOUNCERBACK" {...props} />
 }

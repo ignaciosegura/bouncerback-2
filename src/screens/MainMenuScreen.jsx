@@ -4,11 +4,11 @@ import Button from '../components/Button.jsx'
 import Logo from '../components/Logo.jsx'
 import TextBox from '../components/TextBox.jsx'
 
-export default function MainMenuScreen ({ onPlay, onSettings, onHowTo }) {
+export default function MainMenuScreen ({ onPlay, onSettings, onHowTo, onLogoRect }) {
   return (
     <Screen variant="light" transparent className="main-menu-screen">
-      {/* Drawn in the foreground color (currentColor fill), so it tints with the buttons in screen transitions */}
-      <Logo className="main-menu__logo" />
+      {/* Only the logo's place: the menu scene draws it there, and plays the screen transitions on it */}
+      <Logo className="main-menu__logo" onRect={onLogoRect} />
       <Menu>
         <Button onClick={onPlay}>PLAY</Button>
         <Button onClick={onSettings}>SETTINGS</Button>

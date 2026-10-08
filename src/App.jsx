@@ -43,6 +43,8 @@ export default function App () {
   const [musicVolume, setMusicVolume] = useState(soundManager.getMusicVolume)
   const [sfxVolume, setSfxVolume] = useState(soundManager.getSfxVolume)
   const [oldTv, setOldTvState] = useState(getOldTv)
+  // The Main Menu logo's box, measured in the layout, for the menu scene that draws it
+  const [logoRect, setLogoRect] = useState(null)
 
   // Menus play the menu track; Game Over and You Win! are silent. The game screen fades the music
   // out and the GameEngine starts the level's track when its start delay ends.
@@ -146,6 +148,7 @@ export default function App () {
           onPlay={() => navigate(SCREENS.LEVEL_SELECT)}
           onSettings={() => navigate(SCREENS.SETTINGS)}
           onHowTo={() => navigate(SCREENS.HOW_TO)}
+          onLogoRect={setLogoRect}
         />
       )
 
@@ -201,9 +204,11 @@ export default function App () {
   // keeps the same instance (and the animation) instead of remounting it. The transition wrapper
   // never animates itself: only the screen's elements do.
   const transitionClass = transition ? `screen-transition--${transition}` : ''
+  // The menu scene draws the Main Menu logo, so it plays the Main Menu's transitions itself
+  const logoState = screen === SCREENS.MAIN_MENU ? (transition ?? 'shown') : 'hidden'
   return (
     <div ref={transitionRootRef} className={`screen-transition ${transitionClass}`} onAnimationEnd={handleTransitionEnd}>
-      {MENU_BACKGROUND_SCREENS.includes(screen) ? <MenuBackground /> : null}
+      {MENU_BACKGROUND_SCREENS.includes(screen) ? <MenuBackground logo={logoState} logoRect={logoRect} /> : null}
       {renderScreen()}
     </div>
   )

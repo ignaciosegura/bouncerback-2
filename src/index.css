@@ -115,6 +115,8 @@ button {
  * elements only. The wrapper holds the menu background and the screen but never animates:
  * backgrounds, the menu animation and the game canvas stay still. React only switches the
  * classes and swaps the screen when screen-out ends.
+ * The Main Menu logo is drawn by PixiJS, which replays these timings on it: src/menu/MenuLogo.js
+ * (OUT_*, IN_DURATION) must change together with the animations and keyframes below.
  */
 
 .screen-transition {
@@ -313,7 +315,9 @@ button {
 /* Main Menu */
 
 /* Logo + buttons are centered as a group; the menu's bottom margin lifts it so the
-   logo's top sits 182px from the top at the reference size (MAIN MENU mockup) */
+   logo's top sits 182px from the top at the reference size (MAIN MENU mockup). This is only the
+   logo's empty box: the menu scene draws the logo over it (src/menu/MenuLogo.js, whose shake uses
+   the 1518px width) */
 .main-menu__logo {
   display: block;
   width: calc(1518 * var(--u));
@@ -322,16 +326,6 @@ button {
   pointer-events: none;
 }
 
-.logo__piece--blink {
-  animation: logo-blink 0.15s linear;
-}
-
-/* No 100% keyframe: it ends on the inherited fill (--fg), so it follows the screen-out tint too */
-@keyframes logo-blink {
-  from {
-    fill: var(--color-white);
-  }
-}
 .main-menu-screen .menu {
   margin-bottom: calc(123 * var(--u));
 }

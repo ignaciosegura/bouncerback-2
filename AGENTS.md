@@ -40,7 +40,7 @@ Violating these rules will break the game or cause hard-to-debug issues.
 ### 1. React and PixiJS have strictly separate domains
 
 - **React** owns: routing, menus, HUD overlays, modal screens, settings. It sits on top of the canvas as an HTML layer.
-- **PixiJS** owns: the game canvas, the game loop, all in-game entities, physics, rendering, and in-game input handling.
+- **PixiJS** owns: the game canvas, the game loop, all in-game entities, physics, rendering, and in-game input handling. It also draws the menu screens' background animation and the Main Menu logo, behind the menus' HTML layer (`src/menu/`); React only tells it, on screen changes and resizes, which screen transition the logo plays and where the logo's box is.
 - These layers must never cross. React does not read or write frame-by-frame game state.
 
 ### 2. Never bind fast-moving game state to React `useState`
