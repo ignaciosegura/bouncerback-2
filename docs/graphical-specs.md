@@ -14,6 +14,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * It starts at the same moment as the menu music (they were made together), and stays still until the music starts.
 * It plays continuously while the player moves between those four screens: changing screens never restarts or pauses it. It starts again from the beginning when the player comes back to the menus after playing a level.
 * It covers the whole screen (cropped at the top and bottom on screens wider than 16:9) and loops: the content (about 125 s) plus 5 seconds of empty background, then back to the start.
+* It's drawn on a PixiJS canvas behind the menus' HTML layer (`src/menu/MenuScene.js`): Lottie's canvas renderer draws each frame into an off-screen canvas, which PixiJS shows as a full-screen texture. It looks the same as when Lottie drew it as SVG; drawing it in PixiJS lets the CRT effect process it (see "CRT on the menus" in `docs/implementation-plan.md`).
 
 ## How To Play screen
 

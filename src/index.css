@@ -169,17 +169,19 @@ button {
   to { opacity: 1; }
 }
 
-/* Menu background animation (Lottie), behind the menu screens */
+/* Menu background animation (Lottie, drawn by PixiJS), behind the menu screens. Its own
+   background shows until PixiJS draws its first frame. */
 
 .menu-background {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+  touch-action: none;
   background: var(--color-white-bg);
 }
 
-.menu-background svg {
+.menu-background canvas {
   display: block;
 }
 

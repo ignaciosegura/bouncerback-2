@@ -33,7 +33,7 @@ root/
     │   ├── HowToPlayDiagram.jsx    # Inline SVG example drawing of the arena for the How To Play screen
     │   ├── Logo.jsx                # Inline SVG game logo (Main Menu), paths inlined for segment animation
     │   ├── Menu.jsx                # Generic menu container component
-    │   ├── MenuBackground.jsx      # Lottie animation behind the menu screens (mounted in App.jsx, persists across them)
+    │   ├── MenuBackground.jsx      # Mounts the menu scene (src/menu/) behind the menu screens (mounted in App.jsx, persists across them)
     │   ├── SettingsControls.jsx    # MUSIC / SFX volume controls and the OLD TV button (Settings screen and Pause overlay)
     │   ├── Screen.jsx              # Base screen wrapper component (handles transitions, safe areas, etc.)
     │   ├── Overlay.jsx             # Generic overlay component to be placed on top of current screen content
@@ -57,6 +57,9 @@ root/
     ├── input/                      # Game controller (Gamepad API); no React, no PixiJS
     │   ├── gamepad.js              # Polled controller reader: button presses, sticks with drift thresholds
     │   └── menuNavigation.js       # Controller navigation of the menu screens (selection class + click())
+    ├── menu/                       # The menu screens' PixiJS scene, behind their HTML layer; no React
+    │   ├── MenuScene.js            # PixiJS application: the Lottie background animation (canvas renderer) as a texture
+    │   └── menuSettings.js         # Its tunable values (resolution cap)
     ├── game/                       # Pure game logic & PixiJS implementation
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
     │   ├── levelLoader.js          # Validates level JSON and derives runtime values (timer, speeds, intervals)

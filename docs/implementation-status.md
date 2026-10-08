@@ -60,6 +60,6 @@ Legend: `[x]` done · `[ ]` pending
   - [x] **Phase 40** — Effects split (`zoomBlur/` and `crt/` each with their own settings, GLSL chunk and code; `PostProcessing` composes the chunks into one final pass, so no extra GPU time)
 - [x] **Phase 41** — How To Play screen (`HOW TO` button on the Main Menu below SETTINGS; opens a screen with the instructions from `docs/game-instructions.md`, the example drawing and Back, over the menu background animation like the other menu screens)
 - CRT on the menus (the OLD TV switch also covers the menu background animation and the Main Menu logo on Main Menu, Level Select, Settings and How To Play; buttons and texts stay flat in React):
-  - [ ] **Phase 42** — Menu background in PixiJS (Lottie's canvas renderer into a texture in a new `src/menu/MenuScene`; no visible change)
+  - [x] **Phase 42** — Menu background in PixiJS (Lottie's canvas renderer into a texture in a new `src/menu/MenuScene`; no visible change)
   - [ ] **Phase 43** — Logo in the menu scene (the logo's pieces drawn by PixiJS with their blink and screen transitions; an invisible DOM box keeps its layout; no visible change)
   - [ ] **Phase 44** — CRT on the menus (the menu scene through `CrtEffect` with its own brightness and vignette, following OLD TV, live on Settings; new configurable glass-edge color, black by default)
