@@ -22,6 +22,7 @@ export default class CrtEffect {
       uCrtZoom: { value: settings.ZOOM, type: 'f32' },
       uCrtCornerRadius: { value: settings.CORNER_RADIUS, type: 'f32' },
       uCrtEdgeSoftness: { value: settings.EDGE_SOFTNESS, type: 'f32' },
+      uCrtEdgeColor: { value: rgb(settings.EDGE_COLOR), type: 'vec3<f32>' },
       uCrtAberration: { value: settings.ABERRATION, type: 'f32' },
       uCrtScanlineCount: { value: settings.SCANLINE_COUNT, type: 'f32' },
       uCrtScanlineIntensity: { value: settings.SCANLINE_INTENSITY, type: 'f32' },
@@ -57,4 +58,9 @@ export default class CrtEffect {
   }
 
   destroy () {}
+}
+
+// 0xRRGGBB as red, green and blue from 0 to 1, for a vec3 uniform
+function rgb (color) {
+  return new Float32Array([(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff].map((channel) => channel / 255))
 }

@@ -6,7 +6,7 @@ export const CRT_SETTINGS = Object.freeze({
 
   // How far the glass bulges: the image at the corners is pushed this share farther out (e.g.
   // 0.08 = 8%), less toward the middle of the edges, nothing at the center. What's pushed past the edges
-  // falls outside the glass (black). 0 is a flat screen. Range: 0–0.3.
+  // falls outside the glass (EDGE_COLOR). 0 is a flat screen. Range: 0–0.3.
   CURVATURE: 0.3,
   // Magnification of the image behind the glass, like a CRT's overscan (e.g. 1.02 = 2% bigger):
   // the middle (the ring) looks slightly bigger instead of slightly smaller, and the outermost
@@ -14,8 +14,11 @@ export const CRT_SETTINGS = Object.freeze({
   ZOOM: 1.03,
   // Rounding of the glass's corners, as a share of the screen height. Range: 0–0.15.
   CORNER_RADIUS: 0.03,
-  // Width of the glass edge's fade to black, as a share of the screen height. Range: 0.001–0.02.
+  // Width of the glass edge's fade to the edge color, as a share of the screen height. Range: 0.001–0.02.
   EDGE_SOFTNESS: 0.004,
+  // Color outside the glass (the rounded corners and the edges the curvature uncovers), like the
+  // TV's frame around the picture, as 0xRRGGBB.
+  EDGE_COLOR: 0x000000,
 
   // Chromatic aberration: red is read this share farther from the center at the corners, blue
   // this share closer (e.g. 0.002 = 0.2%, about 2 px at the corners of a 1080p screen), less

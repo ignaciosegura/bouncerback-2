@@ -208,7 +208,7 @@ export default function App () {
   const logoState = screen === SCREENS.MAIN_MENU ? (transition ?? 'shown') : 'hidden'
   return (
     <div ref={transitionRootRef} className={`screen-transition ${transitionClass}`} onAnimationEnd={handleTransitionEnd}>
-      {MENU_BACKGROUND_SCREENS.includes(screen) ? <MenuBackground logo={logoState} logoRect={logoRect} /> : null}
+      {MENU_BACKGROUND_SCREENS.includes(screen) ? <MenuBackground logo={logoState} logoRect={logoRect} oldTv={oldTv} /> : null}
       {renderScreen()}
     </div>
   )

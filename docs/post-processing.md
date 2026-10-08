@@ -1,8 +1,8 @@
 # Post-processing — How It Works
 
-This document explains the post-processing in `src/effects/`, step by step: the pipeline, and the two effects it chains today, the **zoom blur** and the **CRT**. It's written as a learning resource: it assumes you know JavaScript and the basics of PixiJS, but not shaders. What the effects must look like is in `docs/graphical-specs.md` ("CRT effect (game arena)"); this document is about how they're built.
+This document explains the post-processing in `src/effects/`, step by step: the pipeline, and the two effects it chains today, the **zoom blur** and the **CRT**. It's written as a learning resource: it assumes you know JavaScript and the basics of PixiJS, but not shaders. What the effects must look like is in `docs/graphical-specs.md` ("CRT effect"); this document is about how they're built.
 
-It covers Phases 37–38 (the zoom blur, the CRT layers and input mapping), 39 (the OLD TV switch) and 40 (one folder per effect, composed into one final pass).
+It covers Phases 37–38 (the zoom blur, the CRT layers and input mapping), 39 (the OLD TV switch), 40 (one folder per effect, composed into one final pass) and 44 (the CRT on the menu screens, and the glass-edge color).
 
 **About the numbers in this document:** the values of the settings live only in the settings files (`postProcessingSettings.js`, `zoomBlurSettings.js`, `crtSettings.js`), each commented with its unit and range. Numbers used here to explain how something works are **examples**, not the current values.
 
@@ -153,6 +153,10 @@ On a resize the textures are reallocated (and emptied), so the engine redraws th
 
 **The order matters.** The CRT comes last because it plays the screen: its curvature bends the blur's streaks with everything else, and its scanlines and mask sit on top of the whole picture, like a real CRT showing an image.
 
+### The chain on the menus
+
+The menu screens' PixiJS scene (`src/menu/MenuScene.js`: the background animation and the Main Menu logo) is the pipeline's second user. With OLD TV on, its chain is the CRT alone (no zoom blur: there's no core to radiate from), created with the menus' own values over the arena's (`MENU_CRT_OVERRIDES` in `src/menu/menuSettings.js`; see "Tuning"). Its background goes to `post.render()` as `#D8D8D8`, so the CRT layers darken it like any other part of the picture. With OLD TV off, the scene goes straight on the stage. The switch rebuilds the chain in place, as in the game, so the Settings screen shows the change at once.
+
 ### Why one pass, not a pass per effect
 
 Running each effect as its own full-screen pass, writing a texture that the next one reads, is simpler to build but costs one full-resolution write and read per extra effect (~0.3–0.8 ms of GPU time on a mid-range phone each). Composing the chunks into one shader costs nothing extra per effect beyond its own maths and texture reads. The price is the two naming rules above. Effects that need a different resolution (the zoom blur's low-resolution blur) still run that part as their own pass in `prepare()`.
@@ -247,7 +251,7 @@ That alone would show the middle at its true size and everything around it sligh
 What that looks like:
 
 - Near the edges, each pixel shows content from farther out, so the image looks **squeezed toward the center more and more toward the edges**, which is how straight lines near the edges bow outward, like on a curved CRT.
-- Near the edges, pixels look past the image's border (beyond ±1): there's nothing there, so those pixels are outside the glass (step 2). That's what makes the black border, wider at the corners, where the push is strongest.
+- Near the edges, pixels look past the image's border (beyond ±1): there's nothing there, so those pixels are outside the glass (step 2). That's what makes the border (the edge color, black by default), wider at the corners, where the push is strongest.
 
 **Why this formula:** `c` is multiplied by one number, the same for x and y, so every pixel looks **straight along the line from the center**. Directions from the center don't change, only distances. The core is at the screen's center, so a paddle placed at an angle stays at that angle, and circles centered on the core (the ring) stay circles. That's also why `radius2()` measures true distances: with the stretched `c`, the ring would bend into an oval. Many CRT shaders online bend x and y separately (`uv.x *= 1 + uv.y² × k`); that skews angles, so it isn't used here.
 
@@ -255,10 +259,10 @@ What that looks like:
 
 ```glsl
 float inside = glass(p);
-if (inside <= 0.0) return vec3(0.0);
+if (inside <= 0.0) return uEdgeColor;
 ```
 
-`glass()` tests the bent point `p` against a rectangle with rounded corners (`CORNER_RADIUS`). It uses a **signed distance function** (SDF), a standard shader trick: a formula giving the distance from a point to a shape's outline, negative inside and positive outside. `smoothstep(-softness, 0, outline)` then turns it into a value that goes from 1 well inside to 0 at the outline, over `EDGE_SOFTNESS`: a soft edge, with no jagged pixels. Pixels fully outside stop right there, which skips the texture reads for them.
+`glass()` tests the bent point `p` against a rectangle with rounded corners (`CORNER_RADIUS`). It uses a **signed distance function** (SDF), a standard shader trick: a formula giving the distance from a point to a shape's outline, negative inside and positive outside. `smoothstep(-softness, 0, outline)` then turns it into a value that goes from 1 well inside to 0 at the outline, over `EDGE_SOFTNESS`: a soft edge, with no jagged pixels. Pixels fully outside stop right there, which skips the texture reads for them. They show `EDGE_COLOR`, like the TV's frame around the picture.
 
 ### Step 3 — Chromatic aberration
 
@@ -300,7 +304,7 @@ A CRT's picture is made of tiny red, green and blue phosphor stripes (an "apertu
 
 ### Step 6 — Vignette and brightness
 
-`color *= 1 − VIGNETTE × r²` darkens toward the corners, using the pixel's own distance (`r2`, before bending). Then `color *= BRIGHTNESS`: scanlines, the mask and the vignette all darken the image, and the gain brings the whites and colors back close to their real values. Finally the color is multiplied by `inside`, which fades the glass's edge.
+`color *= 1 − VIGNETTE × r²` darkens toward the corners, using the pixel's own distance (`r2`, before bending). Then `color *= BRIGHTNESS`: scanlines, the mask and the vignette all darken the image, and the gain brings the whites and colors back close to their real values. Finally `mix(uEdgeColor, color, inside)` fades the glass's edge into the edge color (with black, the same as multiplying by `inside`).
 
 ### Why this order
 
@@ -395,10 +399,11 @@ Each value lives only in its effect's settings file, with its unit and range in 
 
 | Setting | What you'll see | Notes |
 | :--- | :--- | :--- |
-| `CURVATURE` | How much the glass bulges, and how wide the black border is | 0 is a flat screen. Touch input follows it automatically |
+| `CURVATURE` | How much the glass bulges, and how wide the border outside the glass is | 0 is a flat screen. Touch input follows it automatically |
 | `ZOOM` | How big the middle of the image (the ring) looks behind the glass | 1 is no zoom: the ring shrinks slightly with the curvature. Higher hides more of the image's outer strip past the glass's edges. Touch input follows it automatically |
 | `CORNER_RADIUS` | Rounding of the glass's corners | Share of the screen height |
 | `EDGE_SOFTNESS` | Sharp or blurry glass edge | Share of the screen height. Too low looks jagged |
+| `EDGE_COLOR` | Color outside the glass (the frame around the picture) | 0xRRGGBB. The edge fades into it over `EDGE_SOFTNESS` |
 | `ABERRATION` | Red / blue fringes toward the edges | For example, 0.002 is about 2 px at the corners of a 1080p screen. Above ~0.006 white lines look doubled |
 | `SCANLINE_COUNT` | Size of the scanlines | Fixed per screen height. Higher looks finer but fades out sooner on small screens |
 | `SCANLINE_INTENSITY` | How dark the gaps between lines are | Darkens the whole image: raise `BRIGHTNESS` with it |
@@ -408,6 +413,13 @@ Each value lives only in its effect's settings file, with its unit and range in 
 | `BRIGHTNESS` | Overall brightness | Compensates scanlines, mask and vignette. Too high clips colors to white |
 
 **On a black background most CRT layers don't show:** scanlines, the mask, the vignette and the glass's border darken what's there, and black can't get darker. They're visible on the lit shapes (the ring, atoms, paddles, streaks) and on the dark red one-life-left background, where the glass's shape shows clearly. To see every layer while tuning, temporarily set the engine's `BACKGROUND_COLORS.DEFAULT` to a grey such as `0x404040`.
+
+`src/menu/menuSettings.js`, `MENU_CRT_OVERRIDES`: the CRT values that differ on the menus. Every other CRT value is the arena's, so a change in `crtSettings.js` shows on both.
+
+| Setting | What you'll see | Notes |
+| :--- | :--- | :--- |
+| `BRIGHTNESS` | Overall brightness of the menus' picture | The menus' picture is light grey with lighter lines: too high clips the brightest parts of the background (the middle of a scanline, on its phosphor stripe) and the lines to white, and the lines disappear into the background. Too low darkens it away from `#D8D8D8` |
+| `VIGNETTE` | Darkening toward the corners of the menus | Much more visible on a light picture than on the arena's black |
 
 ## 10. Performance
 
@@ -423,6 +435,8 @@ Example figures, for a 1080p screen at resolution 2, a 360 px tall blur texture 
 | Final pass, OLD TV on (blur mix + CRT) | Full resolution (minus the black outside the glass) | 6 (the CRT's three reads, each with the blur's two) | ~1–2 ms |
 
 That's why the blur runs at a fixed low resolution, the resolution is capped at 2×, and the effects share one final pass instead of each adding its own.
+
+On the menus with OLD TV on there's no zoom blur: the scene render (the background animation's texture and the logo) and a final pass with the CRT's 3 reads per pixel. On top of that, with OLD TV on or off, the animation's off-screen canvas is drawn by the CPU and uploaded to the GPU each time it changes (every frame while it plays); `MAX_RESOLUTION` in `src/menu/menuSettings.js` caps its size.
 
 ## 11. Pitfalls met along the way
 

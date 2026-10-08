@@ -62,4 +62,4 @@ Legend: `[x]` done · `[ ]` pending
 - CRT on the menus (the OLD TV switch also covers the menu background animation and the Main Menu logo on Main Menu, Level Select, Settings and How To Play; buttons and texts stay flat in React):
   - [x] **Phase 42** — Menu background in PixiJS (Lottie's canvas renderer into a texture in a new `src/menu/MenuScene`; no visible change)
   - [x] **Phase 43** — Logo in the menu scene (the logo's pieces drawn by PixiJS with their blink and screen transitions; an invisible DOM box keeps its layout; no visible change)
-  - [ ] **Phase 44** — CRT on the menus (the menu scene through `CrtEffect` with its own brightness and vignette, following OLD TV, live on Settings; new configurable glass-edge color, black by default)
+  - [x] **Phase 44** — CRT on the menus (the menu scene through `CrtEffect` with its own brightness and vignette, following OLD TV, live on Settings; new configurable glass-edge color, black by default)

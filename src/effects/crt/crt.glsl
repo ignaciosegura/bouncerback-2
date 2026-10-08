@@ -3,7 +3,7 @@
 //
 // For each screen point, it bends the coordinates like a CRT's curved glass, reads the image there
 // (red and blue slightly apart), then darkens it with scanlines, a phosphor mask and a vignette,
-// and makes up for that with a brightness gain. Outside the glass it's black.
+// and makes up for that with a brightness gain. Outside the glass it's the edge color.
 //
 // Its uniforms and helper functions start with crt / uCrt, so they can't clash with another
 // effect's in the same shader.
@@ -13,6 +13,7 @@ uniform float uCrtCurvature;
 uniform float uCrtZoom;
 uniform float uCrtCornerRadius; // share of the screen height
 uniform float uCrtEdgeSoftness; // share of the screen height
+uniform vec3 uCrtEdgeColor; // outside the glass
 uniform float uCrtAberration;
 uniform float uCrtScanlineCount;
 uniform float uCrtScanlineIntensity; // already faded out by CrtEffect.js on small screens
@@ -57,9 +58,9 @@ vec3 crt(vec2 uv) {
   float r2 = crtRadius2(c);
   vec2 p = crtWarp(c);
 
-  // 2. Outside the glass: black, and nothing else to compute
+  // 2. Outside the glass: the edge color, and nothing else to compute
   float inside = crtGlass(p);
-  if (inside <= 0.0) return vec3(0.0);
+  if (inside <= 0.0) return uCrtEdgeColor;
 
   // 3. Chromatic aberration: red read a little farther out, blue a little closer in, green in
   // place. The gap grows with the distance from the center, like a lens.
@@ -88,6 +89,6 @@ vec3 crt(vec2 uv) {
   color *= 1.0 - uCrtVignette * r2;
   color *= uCrtBrightness;
 
-  // Fades the glass's edge to black
-  return color * inside;
+  // Fades the glass's edge to the edge color
+  return mix(uCrtEdgeColor, color, inside);
 }

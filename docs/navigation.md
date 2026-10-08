@@ -21,7 +21,7 @@ Every change from one screen to another plays the screen transition (see "Screen
 - **Settings Screen**
   - Music Volume dual-button
   - Sound FX Volume dual-button
-  - OLD TV switch (the CRT layers on the game arena; off by default). Shows its current state: OLD TV ON / OLD TV OFF.
+  - OLD TV switch (the CRT layers on the game arena and on the menu screens' background animation and logo; off by default). Shows its current state: OLD TV ON / OLD TV OFF.
   - Back Button
 - **Game Screen** *(During gameplay)*
   - HUD (score, time, hi-score, lives)

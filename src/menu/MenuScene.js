@@ -1,9 +1,11 @@
-import { Application, CanvasSource, Sprite, Texture } from 'pixi.js'
+import { Application, CanvasSource, Container, Sprite, Texture } from 'pixi.js'
 // The canvas player with expression support: the animation uses loopOut('cycle') on two layers
 // (lottie_light_canvas has no expressions)
 import lottie from 'lottie-web/build/player/esm/lottie_canvas.min.js'
 import animationData from '../../assets/motion/intro_animation.json'
-import { MENU_SETTINGS } from './menuSettings.js'
+import PostProcessing from '../effects/PostProcessing.js'
+import CrtEffect from '../effects/crt/CrtEffect.js'
+import { MENU_CRT_OVERRIDES, MENU_SETTINGS } from './menuSettings.js'
 import MenuLogo from './MenuLogo.js'
 
 // The content ends at frame 7485; the file's empty tail is cut to 5 s (300 frames at 60 fps)
@@ -13,8 +15,10 @@ const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen 
 /**
  * The menu screens' PixiJS scene, behind the menus' HTML layer: the menu background animation and
  * the Main Menu logo. Lottie draws the animation into an off-screen canvas with its own frame loop;
- * that canvas is a texture, uploaded to the GPU each time Lottie draws a new frame. Mounted by
- * MenuBackground.jsx, which also passes the logo's state and box on (setLogo, setLogoRect).
+ * that canvas is a texture, uploaded to the GPU each time Lottie draws a new frame. With the
+ * Settings "OLD TV" switch on, the scene is shown through the CRT effect of src/effects/, like the
+ * game arena. Mounted by MenuBackground.jsx, which also passes the logo's state and box and the
+ * OLD TV switch on (setLogo, setLogoRect, setOldTv).
  */
 export default class MenuScene {
   constructor () {
@@ -22,6 +26,8 @@ export default class MenuScene {
     this.mounted = false
     this.destroyed = false
     this.dirty = false // Lottie drew a frame that isn't uploaded yet
+    this.oldTv = false
+    this.post = null
 
     // Created now rather than on mount, so play() can start it before PixiJS is ready. PixiJS sizes
     // the canvas on mount; Lottie is then given the same size in canvas pixels (dpr 1).
@@ -70,13 +76,17 @@ export default class MenuScene {
 
     this.mounted = true
     container.appendChild(this.app.canvas)
+    this.backgroundColor = cssColor('--color-white-bg')
 
     const { width, height } = this.app.screen
     this.source = new CanvasSource({ resource: this.canvas, width, height, resolution })
     // Dynamic: the sprite follows the texture's size when the canvas is resized (otherwise it
     // keeps drawing at the size it had when it was created)
     this.background = new Sprite(new Texture({ source: this.source, dynamic: true }))
-    this.app.stage.addChild(this.background, this.logo)
+    // Everything the CRT effect processes. Its root is rendered as is: no position or scale on it.
+    this.scene = new Container()
+    this.scene.addChild(this.background, this.logo)
+    this.buildPostProcessing()
     this.onResize(width, height)
 
     this.app.renderer.on('resize', this.onResize)
@@ -86,6 +96,35 @@ export default class MenuScene {
   // Starts the animation from the beginning, looping over its content and the empty tail
   play () {
     this.animation.playSegments([0, LOOP_END_FRAME], true)
+  }
+
+  // The Settings "OLD TV" switch: the CRT effect on or off, changed at once (also before mounting)
+  setOldTv (on) {
+    if (on === this.oldTv) return
+    this.oldTv = on
+    if (this.mounted) this.buildPostProcessing()
+  }
+
+  // Puts the scene on the stage, through the CRT effect or straight. Called again when the OLD TV
+  // switch changes, so it first takes down the previous effect.
+  buildPostProcessing () {
+    const { renderer, stage } = this.app
+    this.post?.destroy()
+    this.post = null
+    stage.removeChildren()
+    if (this.oldTv) {
+      // Only the processed image goes on the stage; the scene is drawn into it by update()
+      this.post = new PostProcessing(renderer, [new CrtEffect(renderer, MENU_CRT_OVERRIDES)])
+      stage.addChild(this.post.view)
+      this.renderScene()
+    } else {
+      stage.addChild(this.scene)
+    }
+  }
+
+  // Draws the scene through the effect, which the stage then shows
+  renderScene () {
+    this.post?.render(this.scene, { background: this.backgroundColor })
   }
 
   // The logo's state in the screen transitions: 'hidden', 'in', 'shown' or 'out' (MenuLogo.js)
@@ -107,6 +146,9 @@ export default class MenuScene {
     // Losing the WebGL context while the canvas is still on screen flashes it white: wait until
     // the next screen has been painted (two frames), then until the GPU has put it on screen
     requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => {
+      // Off the stage with the effect on, so app.destroy() wouldn't reach them
+      this.post?.destroy()
+      this.scene.destroy({ children: true })
       this.app.destroy(true, { children: true, texture: true })
     }, TEARDOWN_DELAY)))
   }
@@ -117,20 +159,25 @@ export default class MenuScene {
 
   // The off-screen canvas follows the screen (resizing it empties it), Lottie redraws the current
   // frame into it at the new size, and it's uploaded at once: PixiJS draws the stage right after
-  // a resize
+  // a resize. The effect's textures are reallocated empty, so the scene is drawn into them again.
   onResize = (width, height) => {
     this.source.resize(width, height, this.app.renderer.resolution)
     this.animation.resize(this.source.pixelWidth, this.source.pixelHeight)
     this.background.setSize(width, height)
     this.source.update()
     this.dirty = false
+    this.post?.resize(width, height)
+    this.renderScene()
   }
 
+  // Before PixiJS draws the stage, every frame
   update = () => {
     this.logo.update()
-    if (!this.dirty) return
-    this.source.update()
-    this.dirty = false
+    if (this.dirty) {
+      this.source.update()
+      this.dirty = false
+    }
+    this.renderScene()
   }
 }
 

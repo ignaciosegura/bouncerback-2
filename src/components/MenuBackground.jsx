@@ -8,8 +8,9 @@ import { MENU_TRACK, isTrackPlaying, onTrackStart } from '../audio/soundManager.
 // The animation was made together with the menu track: it holds on frame 0 until the track actually
 // starts playing.
 // `logo`: the logo's state in the screen transitions ('hidden', 'in', 'shown' or 'out');
-// `logoRect`: its box in the Main Menu's layout. Both change only on screen changes and resizes.
-export default function MenuBackground ({ logo, logoRect }) {
+// `logoRect`: its box in the Main Menu's layout; `oldTv`: the Settings switch, the CRT effect on the
+// scene. They change only on screen changes, resizes and the switch.
+export default function MenuBackground ({ logo, logoRect, oldTv }) {
   const containerRef = useRef(null)
   const sceneRef = useRef(null)
 
@@ -39,6 +40,10 @@ export default function MenuBackground ({ logo, logoRect }) {
   useEffect(() => {
     if (logoRect) sceneRef.current.setLogoRect(logoRect)
   }, [logoRect])
+
+  useEffect(() => {
+    sceneRef.current.setOldTv(oldTv)
+  }, [oldTv])
 
   return <div ref={containerRef} className="menu-background" aria-hidden="true" />
 }
