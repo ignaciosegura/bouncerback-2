@@ -73,8 +73,34 @@ adb shell am start -n com.bouncerback.app/.MainActivity
 adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
+**Choose the target device**
+
+`adb devices` lists the connected devices and emulators. The first column is the serial (for example `R58M123ABC` or `emulator-5554`).
+
+- Gradle has no device flag. `installDebug` reads the `ANDROID_SERIAL` environment variable:
+
+  ```
+  ANDROID_SERIAL=R58M123ABC ./gradlew installDebug
+  ```
+
+  Or set it for the whole shell session: `export ANDROID_SERIAL=emulator-5554`.
+- With one device connected, nothing needs setting. With several and no `ANDROID_SERIAL`, `installDebug` installs on all of them.
+- `adb` commands take `-s <serial>` instead (for example `adb -s emulator-5554 install -r ...`). With more than one device listed, add it to every `adb` command.
+- Capacitor can pick the target too: `npx cap run android --list` shows the targets and `npx cap run android --target <serial>` runs on one.
+- Wireless devices: run `adb pair <ip:port>`, then `adb connect <ip:port>`. They then show up in `adb devices` like any other.
+
+**Device shows `unauthorized` in `adb devices`**
+
+The device has not accepted this computer's ADB key yet.
+
+1. Unlock the device and accept the "Allow USB debugging?" dialog. Tick "Always allow from this computer".
+2. No dialog: `adb kill-server`, then `adb start-server`, then `adb devices`. Unplug and replug the cable if needed.
+3. Still no dialog: Settings > Developer options > "Revoke USB debugging authorizations", replug the cable and accept the new prompt.
+4. Some phones only show the prompt in "File transfer" USB mode, not "Charging only". Switching USB debugging off and on in Developer options also re-triggers it.
+
+When the list shows `device` instead of `unauthorized`, the device is ready.
+
 Notes:
-- With more than one device or emulator listed in `adb devices`, add `-s <serial>` to every `adb` command (for example `adb -s emulator-5554 install -r ...`). Gradle's `installDebug` also needs a single device.
 - Stop the app: `adb shell am force-stop com.bouncerback.app`.
 - Console messages: `adb logcat -s chromium Capacitor`.
 - The first time the system bars hide, Android shows a "Viewing full screen" hint: tap "Got it".
