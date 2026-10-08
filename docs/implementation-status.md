@@ -58,3 +58,7 @@ Legend: `[x]` done · `[ ]` pending
   - [x] **Phase 38** — CRT layers & input mapping (curved glass, chromatic aberration, scanlines, phosphor mask, vignette; touch and mouse follow the curved image)
   - [x] **Phase 39** — Old TV setting (Settings switch for the CRT layers, off by default and saved; the zoom blur stays on)
   - [x] **Phase 40** — Effects split (`zoomBlur/` and `crt/` each with their own settings, GLSL chunk and code; `PostProcessing` composes the chunks into one final pass, so no extra GPU time)
+- CRT on the menus (the OLD TV switch also covers the menu background animation and the Main Menu logo on Main Menu, Level Select and Settings; buttons and texts stay flat in React):
+  - [ ] **Phase 41** — Menu background in PixiJS (Lottie's canvas renderer into a texture in a new `src/menu/MenuScene`; no visible change)
+  - [ ] **Phase 42** — Logo in the menu scene (the logo's pieces drawn by PixiJS with their blink and screen transitions; an invisible DOM box keeps its layout; no visible change)
+  - [ ] **Phase 43** — CRT on the menus (the menu scene through `CrtEffect` with its own brightness and vignette, following OLD TV, live on Settings; new configurable glass-edge color, black by default)
