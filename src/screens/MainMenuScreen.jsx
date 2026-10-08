@@ -4,7 +4,7 @@ import Button from '../components/Button.jsx'
 import Logo from '../components/Logo.jsx'
 import TextBox from '../components/TextBox.jsx'
 
-export default function MainMenuScreen ({ onPlay, onSettings }) {
+export default function MainMenuScreen ({ onPlay, onSettings, onHowTo }) {
   return (
     <Screen variant="light" transparent className="main-menu-screen">
       {/* Drawn in the foreground color (currentColor fill), so it tints with the buttons in screen transitions */}
@@ -12,6 +12,7 @@ export default function MainMenuScreen ({ onPlay, onSettings }) {
       <Menu>
         <Button onClick={onPlay}>PLAY</Button>
         <Button onClick={onSettings}>SETTINGS</Button>
+        <Button onClick={onHowTo}>HOW TO</Button>
       </Menu>
       {/* Mixed case on purpose (MAIN MENU mockup); pinned to the bottom, outside the centered logo + buttons group */}
       <div className="main-menu__credits">

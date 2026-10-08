@@ -10,10 +10,17 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 ## Menu background animation
 
-* The Main Menu, Level Select and Settings screens show the vector animation `assets/motion/intro_animation.json` (Lottie) on top of the white (#D8D8D8) background and behind the text and buttons. Its light-grey and white lines are meant to be subtle, tone on tone. The Intro screen (ENTER BOUNCERBACK) doesn't show it: it's a plain white (#D8D8D8) background.
+* The Main Menu, Level Select, Settings and How To Play screens show the vector animation `assets/motion/intro_animation.json` (Lottie) on top of the white (#D8D8D8) background and behind the text and buttons. Its light-grey and white lines are meant to be subtle, tone on tone. The Intro screen (ENTER BOUNCERBACK) doesn't show it: it's a plain white (#D8D8D8) background.
 * It starts at the same moment as the menu music (they were made together), and stays still until the music starts.
-* It plays continuously while the player moves between those three screens: changing screens never restarts or pauses it. It starts again from the beginning when the player comes back to the menus after playing a level.
+* It plays continuously while the player moves between those four screens: changing screens never restarts or pauses it. It starts again from the beginning when the player comes back to the menus after playing a level.
 * It covers the whole screen (cropped at the top and bottom on screens wider than 16:9) and loops: the content (about 125 s) plus 5 seconds of empty background, then back to the start.
+
+## How To Play screen
+
+* Opened by the Main Menu's HOW TO button (see the HOW TO PLAY and MAIN MENU mockups). Light layout over the menu background animation, like Settings.
+* Left: the instructions, the text of `docs/game-instructions.md`, in mixed case (the `MOUSE` and `GAMEPAD` headings are uppercase), 24px, left-aligned, no border, wrapped at 38 characters, with one blank line between paragraphs. The single-line rule is unbreakable for buttons only: this text is exempt.
+* Right: the example drawing (`assets/images/HOW TO PLAY example vector.svg`, text converted to paths) in the foreground color, with the Back button below it, centered under the ring. At the 1920x1080 reference size the text starts at x = 202, the drawing's left edge is at x = 1083, and the Back button's top is at y = 903.
+* It's one of the screens' elements, so the text, the drawing and the button take part in the screen transitions (see "Screen transitions").
 
 ## Intro screen note
 
@@ -53,7 +60,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * Font weight normal/regular in all cases (no bold or italic).
 * All texts will be uppercase, except the Intro screen note and the Main Menu credits, which are written in mixed case (see "Intro screen note" and "Main Menu credits").
 * The font used will be "C64 Angled", a monospaced font: `assets/fonts/c64_angled.ttf`.
-* All text boxes should put all the text in one line (no line-breaks).
+* All text boxes and buttons should put all the text in one line (no line-breaks). The only exception is the How To Play screen's instructions (see "How To Play screen").
 
 ## Pause overlay
 
