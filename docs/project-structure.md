@@ -14,6 +14,7 @@ root/
 └── docs/                           # Documentation for the implementation
     ├── mockups/                    # Reference images for layout and style
     ├── tech-stack.md               # Tech stack & architectural boundaries
+    ├── game-instructions.md        # The How To Play screen's text (the screen renders it)
     ├── navigation.md               # Navigation flow
     ├── game-controller.md          # Game controller terms, controls and input reading
     ├── graphical-specs.md          # Graphical specifications
@@ -29,6 +30,7 @@ root/
     ├── components/                 # React UI components (HUD, Menus, Modals)
     │   ├── Button.jsx              # Reusable button component
     │   ├── HUD.jsx                 # Heads-Up Display for in-game information
+    │   ├── HowToPlayDiagram.jsx    # Inline SVG example drawing of the arena for the How To Play screen
     │   ├── Logo.jsx                # Inline SVG game logo (Main Menu), paths inlined for segment animation
     │   ├── Menu.jsx                # Generic menu container component
     │   ├── MenuBackground.jsx      # Lottie animation behind the menu screens (mounted in App.jsx, persists across them)
@@ -79,6 +81,7 @@ root/
     │   ├── IntroScreen.jsx         # First screen: ENTER BOUNCERBACK button (unlocks audio)
     │   ├── MainMenuScreen.jsx      # Main menu screen with the game logo (menu music and background animation start here)
     │   ├── SettingsMenuScreen.jsx  # Settings menu screen
+    │   ├── HowToPlayScreen.jsx     # How To Play screen: instructions text, example drawing, Back
     │   ├── LevelSelectionMenuScreen.jsx  # Level selection menu screen
     │   ├── GameScreen.jsx          # Houses the PixiCanvas component & HUD overlay
     │   ├── GameOverScreen.jsx      # Game over screen (replaces the Game Screen)

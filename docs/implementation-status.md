@@ -58,3 +58,4 @@ Legend: `[x]` done · `[ ]` pending
   - [x] **Phase 38** — CRT layers & input mapping (curved glass, chromatic aberration, scanlines, phosphor mask, vignette; touch and mouse follow the curved image)
   - [x] **Phase 39** — Old TV setting (Settings switch for the CRT layers, off by default and saved; the zoom blur stays on)
   - [x] **Phase 40** — Effects split (`zoomBlur/` and `crt/` each with their own settings, GLSL chunk and code; `PostProcessing` composes the chunks into one final pass, so no extra GPU time)
+- [x] **Phase 41** — How To Play screen (`HOW TO` button on the Main Menu below SETTINGS; opens a screen with the instructions from `docs/game-instructions.md`, the example drawing and Back, over the menu background animation like the other menu screens)
