@@ -23,7 +23,7 @@ export const CRT_SETTINGS = Object.freeze({
   // Chromatic aberration: red is read this share farther from the center at the corners, blue
   // this share closer (e.g. 0.002 = 0.2%, about 2 px at the corners of a 1080p screen), less
   // toward the center, none at the center. Range: 0–0.01.
-  ABERRATION: 0.025,
+  ABERRATION: 0.015,
 
   // Scanlines: horizontal lines across the screen, whatever its size or pixel density (e.g.
   // 270 is about a 240p arcade screen). They fade out by themselves when a line would be under about
