@@ -17,6 +17,7 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 | `docs/game-rules.md` | Game mechanics, scoring, win/loss conditions |
 | `docs/audio-map.md` | Which sound effect each game event triggers |
 | `docs/game-controller.md` | Game controller: button terms (by position), controls, how controllers are read, supported controllers |
+| `docs/mobile-build.md` | Where the iOS and Android test builds are, and how to build and launch them from the command line |
 | `docs/implementation-guidelines.md` | Summary of architectural and implementation rules |
 | `docs/implementation-plan.md` | Design decisions and the phase-by-phase implementation plan |
 | `docs/implementation-status.md` | Which implementation phases are completed and which are pending |
