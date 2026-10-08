@@ -1,4 +1,4 @@
-Keep the atoms inside the containment ring at all costs until time runs out and the core collapses.
+Keep the atoms inside the containment ring until time runs out and the core collapses.
 
 Use the two paddles to make them bounce back. A paddle only lasts for three seconds before decaying.
 
