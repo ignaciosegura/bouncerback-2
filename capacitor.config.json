@@ -1,5 +1,19 @@
 {
   "appId": "com.bouncerback.app",
   "appName": "Bouncerback",
-  "webDir": "dist"
+  "webDir": "dist",
+  "backgroundColor": "#000000",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "backgroundColor": "#000000",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_CROP"
+    },
+    "SystemBars": {
+      "insetsHandling": "native",
+      "initialViewportFitValueHint": "cover",
+      "hidden": true
+    }
+  }
 }

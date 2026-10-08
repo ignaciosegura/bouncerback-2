@@ -7,6 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "cap:sync": "vite build && cap sync",
+    "cap:ios": "npm run cap:sync && cap open ios",
+    "cap:android": "npm run cap:sync && cap open android",
+    "cap:assets": "capacitor-assets generate --ios --android --assetPath assets/native --iconBackgroundColor \"#000000\" --iconBackgroundColorDark \"#000000\" --splashBackgroundColor \"#000000\" --splashBackgroundColorDark \"#000000\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "deploy:ftp": "node --env-file=.env.ftp scripts/deploy-ftp.js",
@@ -14,9 +18,11 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.5.2",
     "@capacitor/ios": "^8.5.2",
     "@capacitor/screen-orientation": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.2",
     "howler": "^2.2.4",
     "lottie-web": "^5.13.0",
     "pixi.js": "^8.21.0",
@@ -24,6 +30,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.5.2",
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
