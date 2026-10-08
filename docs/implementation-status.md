@@ -21,7 +21,7 @@ Legend: `[x]` done · `[ ]` pending
 
 - [x] **Phase 8** — Pause functionality (`PauseOverlay` over the frozen game: MUSIC / SFX / OLD TV, EXIT TO MENU, RESUME, on a panel in the gameplay background's color; `P` or the controller's menu button toggles it, only while playing; auto-pause when the tab is hidden or the window loses focus; music and SFX pause with the game. The on-screen Pause button for touch-only devices is left for a later phase)
 - [x] **Phase 9** — Screen transitions (old-TV effect on every screen change, pure CSS, on the screen's elements only — backgrounds, the menu animation and the game canvas stay still: 1 s screen-out — fade out, color blends to transition dark yellow `#666600` then transition dark red `#660000`, vertical shake at the end — then 0.5 s fade-in)
-- [ ] **Phase 10** — Mobile packaging (Capacitor iOS/Android, orientation lock, icons/splash)
+- [x] **Phase 10** — Mobile packaging (Capacitor `ios/` and `android/` added; landscape-only in `Info.plist` and the Android manifest plus a runtime lock; icons and a logo-on-black splash generated from `assets/native/`; Android fullscreen with the system bars hidden; the game pauses when the app goes to the background; `npm run cap:*` scripts. Checked on the Android emulator, and on the iOS simulator up to the splash and Intro; the iOS credit links and background pause still need a manual check)
 - [ ] **Phase 11** — Rotate-device overlay
 - [ ] **Phase 12** — Optional visual effects (`palette_invert`, `glow_pulse`, level `vfx` timelines)
 - [ ] **Phase 13** — Level unlocking

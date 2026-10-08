@@ -10,6 +10,7 @@ root/
     ├── audio/                      # Sound effects & music files for Howler.js
     ├── images/                     # SVG vector assets and mobile app icon
     ├── motion/                     # Lottie animations (menu background)
+    ├── native/                     # Sources for the native icons and splash (`npm run cap:assets` generates them into android/ and ios/)
     └── fonts/                      # Font files for the game (TTF and OTF formats).
 └── docs/                           # Documentation for the implementation
     ├── mockups/                    # Reference images for layout and style

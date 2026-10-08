@@ -16,7 +16,7 @@ This document defines the core technology stack, architectural boundaries, proje
 | **Post-processing** | **Custom GLSL shaders** on PixiJS full-screen meshes (WebGL only) | The zoom blur and CRT effects on the game arena, and the CRT on the menu screens (`src/effects/`, see `docs/post-processing.md`). |
 | **Menu Background Animation** | **lottie-web** (canvas player) | Draws the Lottie vector animation behind the menu screens into an off-screen canvas, shown by the menus' own PixiJS application as a texture (`src/menu/`). |
 | **Audio** | Manages cross-platform sound effects and background music playback. |
-| **Mobile Packaging** | **Capacitor** | Wraps the web application into native iOS and Android packages. |
+| **Mobile Packaging** | **Capacitor** | Wraps the web application into native iOS and Android packages. Native-only setup (landscape lock, splash, background pause) lives in `src/native.js` and does nothing in the browser. |
 
 ---
 
@@ -58,8 +58,10 @@ To maintain high performance (60 FPS) and clean code organization, a **strict se
 | :--- | :--- | :--- |
 | **Web dev (Vite)** | Node.js + npm | No Docker, VMs, or background daemons needed. `npm run dev` is a plain foreground process. |
 | **iOS packaging (Capacitor)** | Full **Xcode** app (from the App Store), not just Xcode Command Line Tools | `npx cap add ios` and running/building in the iOS Simulator require the full Xcode app. CLI tools alone are insufficient — `xcodebuild` fails if `xcode-select` still points at a Command Line Tools-only install. After installing Xcode, run `xcode-select -s /Applications/Xcode.app`. |
-| **Android packaging (Capacitor)** | Android Studio + Android SDK | Separate toolchain from iOS; not needed for the iOS path. |
+| **Android packaging (Capacitor)** | Android Studio + Android SDK (API 36, Build-Tools 36.0.0) + **JDK 21** | Separate toolchain from iOS; not needed for the iOS path. Android Studio's bundled JDK may be newer (25) and Gradle 8.14 can't run on it ("Unsupported class file major version"): install a JDK 21 (`brew install openjdk@21`) and set `JAVA_HOME` to it for terminal builds. Set `ANDROID_HOME` to the SDK folder. |
 
-Web development (Vite dev server, Phases 0–7) does not require any of the mobile toolchains above. They are only needed starting at mobile packaging (second development cycle).
+Web development (Vite dev server, Phases 0–7) does not require any of the mobile toolchains above. They are only needed for mobile packaging (Phase 10).
+
+**Mobile commands:** `npm run cap:sync` (build the web app and copy it into `ios/` and `android/`), `npm run cap:ios` / `npm run cap:android` (sync and open Xcode / Android Studio), `npm run cap:assets` (regenerate the native icons and splash from `assets/native/`). After changing web code, run `cap:sync` and rebuild from the IDE. The native config changes made by hand: landscape-only orientation (`Info.plist`, `AndroidManifest.xml`), the Android theme in `res/values/styles.xml` (black window, drawn into the camera cutout, black system splash) and the adaptive icon files in `res/`; keep them when regenerating.
 
 ---
