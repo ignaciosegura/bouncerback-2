@@ -33,6 +33,7 @@ It runs `vite build` and `cap sync` (copies `dist/` into `android/` and `ios/` a
 | :--- | :--- |
 | `npm run cap:ios` | Sync, then open the project in Xcode |
 | `npm run cap:android` | Sync, then open the project in Android Studio |
+| `npm run build:android-install` | Sync, then build the debug APK and install it on the running emulator or connected device (`./gradlew installDebug`) |
 | `npm run cap:assets` | Regenerate the native icons and splash from `assets/native/` |
 
 ---
