@@ -50,7 +50,7 @@ Every doc, all seven mockups and the level schema were reviewed against each oth
 - **Score** (`level` = the level's number, 1–5):
   - Bounce: `10 × level × charge`, using the charge the atom has as it hits (before the bounce adds one).
   - Capture (tap-destroy at the core): `100 × level × charge`.
-  - Containment at level end: `200 × level × charge × remaining lives` for every atom taken by the core collapse.
+  - Containment at level end: `200 × level × charge` for every atom taken by the core collapse, plus `500 × level × remaining lives`.
   - Time bonus at level end: `initial timer value (tenths of a second) × level`. Example: a 2-minute level 3 gives `1200 × 3 = 3600`.
 - **Charge:** atoms start at 1, gain +1 per bounce, capped at 10; they can be tap-destroyed at the core once charge ≥ 3.
 - **High score:** common to all levels, updated and saved the moment it's beaten, visible on the HUD, Game Over and You Win! screens.
