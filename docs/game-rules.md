@@ -69,7 +69,8 @@ The player will get:
 
 * 10 points * level * atom charge value every time it bounces back an atom using a paddle. 
 * 100 points * level * atom charge value for every atom captured
-* 200 points * level * atom charge value * remaining lives for every atom contained at the end of the level, when the core collapse takes all remaining atoms.
+* 200 points * level * atom charge value for every atom contained at the end of the level, when the core collapse takes all remaining atoms.
+* 500 points * level * remaining lives.
 * Additional time bonus after the core collapse has taken all remaining atoms (the player needs to pass the level): 1 point * level for every 0.1 seconds of the level's total duration. In other words, the level's initial timer value (in tenths of a second) * level. For example, a 2-minute level 3 gives 1200 * 3 = 3600 points.
  
 # High Score

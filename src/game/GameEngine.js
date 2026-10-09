@@ -1,6 +1,6 @@
 import { Application, Container } from 'pixi.js'
 import * as soundManager from '../audio/soundManager.js'
-import { bouncePoints, capturePoints, containmentPoints, timeBonus } from './scoring.js'
+import { bouncePoints, capturePoints, containmentPoints, livesBonus, timeBonus } from './scoring.js'
 import { lerpColor } from './color.js'
 import { easeInOutQuad, easeInQuad, easeOutQuad } from './easing.js'
 import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
@@ -655,9 +655,10 @@ export default class GameEngine {
   }
 
   win () {
-    let bonus = timeBonus(this.level.number, this.level.timerTenths)
+    let { number, timerTenths, lives } = this.level
+    let bonus = timeBonus(number, timerTenths) + livesBonus(number, lives)
     for (const atom of this.atoms.filter((a) => a.state === ATOM_STATE.COLLAPSING)) {
-      bonus += containmentPoints(this.level.number, atom.charge, this.lives)
+      bonus += containmentPoints(number, atom.charge)
       this.releaseAtom(atom)
     }
     this.addScore(bonus)
