@@ -4,7 +4,7 @@ import HUD from '../components/HUD.jsx'
 import PauseOverlay from './PauseOverlay.jsx'
 import GameEngine from '../game/GameEngine.js'
 
-export default function GameScreen ({ level, hiScore, settings, onScoreChange, onGameOver, onLevelWin, onExitToMenu }) {
+export default function GameScreen ({ level, hiScore, settings, onScoreChange, onGameOver, onLevelWin, onExitToMenu, backRef }) {
   const canvasContainerRef = useRef(null)
   const engineRef = useRef(null)
   const [score, setScore] = useState(0)
@@ -33,6 +33,16 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
     engine.mount(canvasContainerRef.current)
     return () => engine.destroy()
   }, [level])
+
+  // The mobile back button pauses, or resumes when paused (the engine ignores a pause outside play)
+  useEffect(() => {
+    backRef.current = () => {
+      const engine = engineRef.current
+      if (engine.paused) engine.resume()
+      else engine.pause()
+    }
+    return () => { backRef.current = null }
+  }, [backRef])
 
   useEffect(() => {
     engineRef.current.setOldTv(settings.oldTv)
