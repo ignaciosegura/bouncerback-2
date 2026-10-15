@@ -63,3 +63,4 @@ Legend: `[x]` done · `[ ]` pending
   - [x] **Phase 42** — Menu background in PixiJS (Lottie's canvas renderer into a texture in a new `src/menu/MenuScene`; no visible change)
   - [x] **Phase 43** — Logo in the menu scene (the logo's pieces drawn by PixiJS with their blink and screen transitions; an invisible DOM box keeps its layout; no visible change)
   - [x] **Phase 44** — CRT on the menus (the menu scene through `CrtEffect` with its own brightness and vignette, following OLD TV, live on Settings; new configurable glass-edge color, black by default)
+- [ ] **Phase 45** — Mobile back button (Android back goes to the Main Menu from Level Select, How To Play, Settings, Game Over and You Win!; it opens the Pause Overlay during play and resumes from it; leaves the app on Intro and Main Menu; does nothing while the game can't be paused or during transitions)
