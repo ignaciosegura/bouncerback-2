@@ -6,6 +6,7 @@ import { easeInOutQuad, easeInQuad, easeOutQuad } from './easing.js'
 import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
 import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
 import Atom, { ATOM_RADIUS, ATOM_STATE, CAPTURE_MIN_CHARGE } from './entities/Atom.js'
+import CaptureCircle from './entities/CaptureCircle.js'
 import Paddle, { PADDLE_THICKNESS } from './entities/Paddle.js'
 import { BUTTONS, GamepadReader } from '../input/gamepad.js'
 import PostProcessing from '../effects/PostProcessing.js'
@@ -115,6 +116,7 @@ export default class GameEngine {
     this.activePaddles = []
     this.draggedPaddles = new Map() // input (pointerId, or a controller stick: 'left' / 'right') → inactive paddle
     this.paddlePool = []
+    this.captureCircles = [] // capture bursts in progress
     this.paddles = [] // every paddle instance, active or pooled, to update their flashes
     this.gamepad = new GamepadReader()
   }
@@ -181,11 +183,12 @@ export default class GameEngine {
     this.playfield = new Container()
     this.ring = new ContainmentRing()
     this.emitter = new AtomEmitter(this.level.spawnInterval)
+    this.captureCircleLayer = new Container() // behind everything
     this.flashLayer = new Container()
     this.paddleLayer = new Container()
     this.pulseLayer = new Container() // over the core, behind every atom
     this.atomLayer = new Container()
-    this.playfield.addChild(this.ring.view, this.flashLayer, this.paddleLayer, this.emitter.view, this.pulseLayer, this.atomLayer)
+    this.playfield.addChild(this.captureCircleLayer, this.ring.view, this.flashLayer, this.paddleLayer, this.emitter.view, this.pulseLayer, this.atomLayer)
     // Everything the post-processing processes. Its root is rendered as is, so the playfield's
     // layout (position, scale) goes on a child.
     this.arena = new Container()
@@ -427,6 +430,7 @@ export default class GameEngine {
     this.updateBackground(dt)
     // Flashes outlive their paddles and finish during the core collapse
     for (const paddle of this.paddles) paddle.flash.update(dt)
+    this.updateCaptureCircles(dt)
 
     switch (this.state) {
     case STATE.STARTING:
@@ -570,6 +574,22 @@ export default class GameEngine {
     }
   }
 
+  startCaptureCircle (color) {
+    const circle = new CaptureCircle(color)
+    this.captureCircleLayer.addChild(circle.view)
+    this.captureCircles.push(circle)
+  }
+
+  // Bursts outlive the capture and finish in any state; finished ones are destroyed
+  updateCaptureCircles (dt) {
+    for (let i = this.captureCircles.length - 1; i >= 0; i--) {
+      const circle = this.captureCircles[i]
+      if (circle.update(dt)) continue
+      this.captureCircles.splice(i, 1)
+      circle.view.destroy()
+    }
+  }
+
   // Destroys the charged atom crossing the core, if any; returns whether one was captured
   captureAtCore () {
     let target = null
@@ -580,6 +600,7 @@ export default class GameEngine {
 
     this.addScore(capturePoints(this.level.number, target.charge))
     target.startCapture()
+    this.startCaptureCircle(target.color)
     soundManager.playSfx('capture')
     return true
   }
