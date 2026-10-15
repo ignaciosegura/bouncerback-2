@@ -81,6 +81,7 @@ export function loadLevel (data, number) {
     name: data.name,
     soundTrack: data.soundTrack,
     lives: data.lives,
+    tip: data.tip ?? null,
     secondsPerBeat,
     // Initial timer value, in tenths of a second
     timerTenths: Math.round(data.duration * secondsPerBar * 10),

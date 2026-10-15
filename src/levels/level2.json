@@ -15,5 +15,10 @@
     "angle": 30,
     "duration": 3
   },
-  "lives": 5
+  "lives": 5,
+  "tip": [
+    "You can capture charged atoms",
+    "while they’re crossing the emitter.",
+    "Charged atoms are very valuable."
+  ]
 }

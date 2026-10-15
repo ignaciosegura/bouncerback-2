@@ -2,6 +2,7 @@ import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import Screen from '../components/Screen.jsx'
 import HUD from '../components/HUD.jsx'
 import PauseOverlay from './PauseOverlay.jsx'
+import GameplayTips from './GameplayTips.jsx'
 import GameEngine from '../game/GameEngine.js'
 
 export default function GameScreen ({ level, hiScore, settings, onScoreChange, onGameOver, onLevelWin, onExitToMenu, backRef }) {
@@ -12,6 +13,8 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
   const [timeTenths, setTimeTenths] = useState(level.timerTenths)
   // null while playing; { backgroundColor } while paused
   const [pause, setPause] = useState(null)
+  // The level's tip stays up until READY; levels without one start straight away
+  const [tipShown, setTipShown] = useState(level.tip !== null)
   const handleScoreChange = useEffectEvent((value) => onScoreChange(value))
   const handleGameOver = useEffectEvent((result) => onGameOver(result))
   const handleLevelWin = useEffectEvent((result) => onLevelWin(result))
@@ -28,7 +31,7 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
       onPauseChange: ({ paused, backgroundColor }) => setPause(paused ? { backgroundColor } : null),
       onGameOver: (result) => handleGameOver(result),
       onLevelWin: (result) => handleLevelWin(result)
-    }, { oldTv: getOldTv() })
+    }, { oldTv: getOldTv(), waitForBegin: level.tip !== null })
     engineRef.current = engine
     engine.mount(canvasContainerRef.current)
     return () => engine.destroy()
@@ -57,6 +60,12 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
     <Screen variant="dark" className="game-screen">
       <div ref={canvasContainerRef} className="game-screen__canvas" />
       <HUD score={score} timeTenths={timeTenths} hiScore={Math.max(hiScore, score)} lives={lives} />
+      {tipShown && (
+        <GameplayTips
+          lines={level.tip}
+          onReady={() => { setTipShown(false); engineRef.current.begin() }}
+        />
+      )}
       {pause && (
         <PauseOverlay
           settings={settings}

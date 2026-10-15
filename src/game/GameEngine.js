@@ -67,6 +67,7 @@ const BACKGROUND_COLORS = {
 const BACKGROUND_TRANSITION_TIME = 0.5
 
 const STATE = {
+  WAITING: 'waiting', // the gameplay tip is on screen: nothing is drawn until begin()
   STARTING: 'starting',
   PLAYING: 'playing',
   COLLAPSING: 'collapsing',
@@ -81,7 +82,7 @@ const STATE = {
  */
 export default class GameEngine {
   // `oldTv`: the Settings "OLD TV" switch (the CRT layers); changed mid-level with setOldTv()
-  constructor (level, callbacks, { oldTv = false } = {}) {
+  constructor (level, callbacks, { oldTv = false, waitForBegin = false } = {}) {
     this.oldTv = oldTv
     this.postProcessing = POST_PROCESSING_ENABLED && (ZOOM_BLUR_ENABLED || oldTv)
     this.level = level
@@ -92,7 +93,7 @@ export default class GameEngine {
     this.paused = false
     this.leaving = false // EXIT TO MENU pressed: stays paused until unmounted
 
-    this.state = STATE.STARTING
+    this.state = waitForBegin ? STATE.WAITING : STATE.STARTING
     this.time = 0
     this.stateTime = 0
     this.score = 0
@@ -330,6 +331,11 @@ export default class GameEngine {
     this.emit('onPauseChange', { paused: false })
   }
 
+  // READY on the gameplay tip: the start delay (and its ring and core animation) begins
+  begin () {
+    if (this.state === STATE.WAITING) this.state = STATE.STARTING
+  }
+
   // EXIT TO MENU: the game stays paused until it's unmounted, so it can't resume during the screen-out
   leave () {
     this.leaving = true
@@ -433,6 +439,8 @@ export default class GameEngine {
     this.updateCaptureCircles(dt)
 
     switch (this.state) {
+    case STATE.WAITING:
+      break
     case STATE.STARTING:
       this.updateStarting(dt)
       break

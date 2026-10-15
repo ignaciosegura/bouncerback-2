@@ -104,6 +104,13 @@
         "lives": {
             "type": "integer",
             "description": "Number of lives the player starts the level with."
+        },
+        "tip": {
+            "type": "array",
+            "description": "Optional gameplay tip shown, one array item per line, with a READY button before the level starts. If missing, the level starts straight away.",
+            "items": {
+                "type": "string"
+            }
         }
     },
     "additionalProperties": false

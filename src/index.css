@@ -490,6 +490,40 @@ button {
   margin-top: calc(64 * var(--u));
 }
 
+/* Gameplay tips (GAMEPLAY TIPS mockup): the tip's top edge 359px from the top, 54px between the
+   tip and READY. The content takes the foreground color itself so the screen-out's tint (animated
+   on it, see below) reaches the text and the button; its animations are the screen-out's. */
+
+.gameplay-tips {
+  display: flex;
+  justify-content: center;
+}
+
+.gameplay-tips__content {
+  --fg: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(54 * var(--u));
+  margin-top: calc(359 * var(--u));
+  height: min-content;
+  color: var(--fg);
+  font-size: var(--font-menu);
+  line-height: 1;
+  text-align: center;
+}
+
+.gameplay-tips--out .gameplay-tips__content {
+  animation:
+    screen-out 1s linear forwards,
+    screen-shake 125ms linear 0.875s,
+    screen-tint 0.5s linear 0.5s forwards;
+}
+
+.gameplay-tips__text {
+  text-transform: none;
+}
+
 /* Game */
 
 .game-screen__canvas {
