@@ -410,6 +410,7 @@ button {
   justify-content: space-between;
   row-gap: calc(56 * var(--u));
   width: calc(398 * var(--u));
+  min-width: 17ch;
   margin: calc(84 * var(--u)) 0 calc(139 * var(--u));
   font-size: var(--font-menu);
 }
