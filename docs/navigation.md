@@ -42,6 +42,19 @@ Every change from one screen to another plays the screen transition (see "Screen
   - Try Again Button (restarts the same level from scratch: score reset to 0, lives reset to the level file's value)
   - Main Menu Button
 
+## Mobile back button
+
+The Android system back button (and its gesture) follows the navigation below. It is ignored while a screen transition runs, like taps. iOS has no such button.
+
+| Screen | Back button |
+| :--- | :--- |
+| Level Selection, How To Play, Settings, Game Over, You Win! | → Main Menu |
+| Game Screen | Opens the Pause Overlay (never leaves the game) |
+| Pause Overlay | Resumes the game (same as `<<< RESUME`) |
+| Intro, Main Menu | Leaves the app (the system default) |
+
+The Game Screen and the Pause Overlay are the exceptions on purpose: a player who taps the back button by mistake must not lose the current game. Leaving a level takes the deliberate EXIT TO MENU button of the Pause Overlay. While the game can't be paused (the 3-second start delay, the core collapse, the Game Over delay), the back button does nothing.
+
 ## Game controller
 
 The menus can also be navigated with a game controller, except on the Intro. The controls are in `docs/game-controller.md`; the selected button's look is in `graphical-specs.md` ("Game controller selection").

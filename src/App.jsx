@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import * as soundManager from './audio/soundManager.js'
 import { levels } from './game/levelLoader.js'
 import { getHiScore, beatHiScore } from './game/highScore.js'
@@ -13,6 +13,7 @@ import GameOverScreen from './screens/GameOverScreen.jsx'
 import YouWinScreen from './screens/YouWinScreen.jsx'
 import MenuBackground from './components/MenuBackground.jsx'
 import { startMenuNavigation } from './input/menuNavigation.js'
+import { onBackButton, exitApp } from './native.js'
 
 const SCREENS = {
   INTRO: 'intro',
@@ -90,6 +91,25 @@ export default function App () {
   }
 
   const goToMainMenu = () => navigate(SCREENS.MAIN_MENU)
+
+  // The Android back button (see "Mobile back button" in docs/navigation.md). The Game screen sets
+  // `gameBackRef`: back pauses the game or resumes it, and never leaves the level.
+  const gameBackRef = useRef(null)
+  const handleBackButton = useEffectEvent(() => {
+    if (transition) return
+    switch (screen) {
+    case SCREENS.INTRO:
+    case SCREENS.MAIN_MENU:
+      exitApp()
+      return
+    case SCREENS.GAME:
+      gameBackRef.current?.()
+      return
+    default:
+      goToMainMenu()
+    }
+  })
+  useEffect(() => onBackButton(() => handleBackButton()), [])
 
   // The unlock must happen inside the button's click; the menu track starts when the Main Menu appears
   const enter = () => {
@@ -179,6 +199,7 @@ export default function App () {
           onGameOver={endLevel(SCREENS.GAME_OVER)}
           onLevelWin={endLevel(SCREENS.YOU_WIN)}
           onExitToMenu={goToMainMenu}
+          backRef={gameBackRef}
         />
       )
 

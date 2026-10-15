@@ -68,6 +68,12 @@ adb wait-for-device
 adb shell am start -n com.bouncerback.app/.MainActivity
 ```
 
+**Press the back button** (to test Phase 45 without a gesture)
+
+```
+adb shell input keyevent KEYCODE_BACK
+```
+
 **Install an existing APK without building**
 
 ```

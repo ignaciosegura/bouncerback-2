@@ -21,3 +21,15 @@ export function initNative () {
     if (!isActive) window.dispatchEvent(new Event('blur'))
   })
 }
+
+export const exitApp = () => {
+  if (isNative) App.exitApp()
+}
+
+// The Android back button (and gesture). Once a listener is registered, Capacitor no longer leaves
+// the app by itself, so the handler decides every case. Returns the cleanup; a no-op in the browser.
+export function onBackButton (handler) {
+  if (!isNative) return () => {}
+  const listener = App.addListener('backButton', handler)
+  return () => { listener.then((l) => l.remove()) }
+}
