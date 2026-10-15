@@ -1,6 +1,6 @@
 import { Graphics } from 'pixi.js'
 import { lerpColor } from '../color.js'
-import { easeInQuad } from '../easing.js'
+import { easeInQuad, shakeOffset } from '../easing.js'
 import { circlePoints } from '../geometry.js'
 import AtomPulse from './AtomPulse.js'
 
@@ -16,6 +16,16 @@ export const ATOM_STATE = {
 }
 
 const ESCAPE_FADE_TIME = 0.5
+// Escape shake: the atom vibrates vertically, up then down like the menus' screen-shake, a few
+// times in a row, while it keeps moving out
+const SHAKE_COUNT = 3
+const SHAKE_CYCLE_TIME = 0.1
+const SHAKE_DISTANCE = 2 // px at the 1080px reference
+// Escape tint, as the screen-out's (index.css, --color-tint-yellow and --color-tint-red): the
+// atom's color blends to transition dark yellow, then to transition dark red, one half of the
+// fade each
+const ESCAPE_TINT_YELLOW = 0x666600
+const ESCAPE_TINT_RED = 0x660000
 const CAPTURE_TIME = 0.5
 const COLOR_TRANSITION_TIME = 0.5
 
@@ -51,6 +61,7 @@ export default class Atom {
     this.charge = 1
     this.state = ATOM_STATE.MOVING
     this.escapeTime = 0
+    this.shakeTime = 0
     this.view.alpha = 1
     this.view.scale.set(1)
     this.view.visible = true
@@ -105,6 +116,7 @@ export default class Atom {
   escape () {
     this.state = ATOM_STATE.ESCAPING
     this.escapeTime = 0
+    this.shakeTime = 0
   }
 
   // Keeps its speed and direction while fading out; returns false once it has vanished
@@ -148,7 +160,23 @@ export default class Atom {
     this.view.scale.set(1 - collapse)
   }
 
-  // `dt` advances the charge color transition
+  escapeTint () {
+    const t = Math.min(1, this.escapeTime / ESCAPE_FADE_TIME)
+    return t < 0.5
+      ? lerpColor(this.color, ESCAPE_TINT_YELLOW, t * 2)
+      : lerpColor(ESCAPE_TINT_YELLOW, ESCAPE_TINT_RED, t * 2 - 1)
+  }
+
+  // Vertical offset of the escape shake; `dt` advances it
+  shakeY (dt) {
+    if (this.state !== ATOM_STATE.ESCAPING) return 0
+    this.shakeTime += dt
+    const cycles = this.shakeTime / SHAKE_CYCLE_TIME
+    if (cycles >= SHAKE_COUNT) return 0
+    return shakeOffset(cycles % 1) * SHAKE_DISTANCE
+  }
+
+  // `dt` advances the charge color transition and the escape shake
   render (dt = 0) {
     if (this.colorTime < COLOR_TRANSITION_TIME) {
       this.colorTime = Math.min(COLOR_TRANSITION_TIME, this.colorTime + dt)
@@ -156,7 +184,8 @@ export default class Atom {
       this.view.tint = this.color
     }
     const x = Math.cos(this.angle) * this.distance
-    const y = Math.sin(this.angle) * this.distance
+    const y = Math.sin(this.angle) * this.distance + this.shakeY(dt)
+    if (this.state === ATOM_STATE.ESCAPING && this.escapeTime > 0) this.view.tint = this.escapeTint()
     this.view.position.set(x, y)
     this.pulse.update(dt, x, y, this.color)
   }

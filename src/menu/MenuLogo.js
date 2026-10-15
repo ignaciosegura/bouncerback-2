@@ -1,5 +1,6 @@
 import { Container, Graphics, GraphicsPath } from 'pixi.js'
 import { lerpColor } from '../game/color.js'
+import { shakeOffset } from '../game/easing.js'
 import { LOGO_PIECES, LOGO_VIEWBOX } from './logoPieces.js'
 
 // Blink: a random piece turns white, then fades back to the logo's color. The wait must stay
@@ -138,12 +139,4 @@ function contains (outer, inner) {
 
 function clamp (t) {
   return Math.min(1, Math.max(0, t))
-}
-
-// screen-shake's keyframes (0 → up at 25% → down at 75% → 0), as −1…1, for t from 0 to 1
-function shakeOffset (t) {
-  if (t <= 0 || t >= 1) return 0
-  if (t < 0.25) return -t / 0.25
-  if (t < 0.75) return -1 + (t - 0.25) / 0.25
-  return 1 - (t - 0.75) / 0.25
 }
