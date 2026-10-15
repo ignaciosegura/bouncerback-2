@@ -28,7 +28,7 @@ export const CRT_SETTINGS = Object.freeze({
   // Scanlines: horizontal lines across the screen, whatever its size or pixel density (e.g.
   // 270 is about a 240p arcade screen). They fade out by themselves when a line would be under about
   // 2 device pixels (a small window), where they'd shimmer. Range: 120–540.
-  SCANLINE_COUNT: 360,
+  SCANLINE_COUNT: 270,
   // How dark the gap between two lines gets: 0 no scanlines, 1 black gaps. Range: 0–0.6.
   SCANLINE_INTENSITY: 0.25,
 
