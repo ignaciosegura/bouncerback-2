@@ -27,6 +27,9 @@ Every change from one screen to another plays the screen transition (see "Screen
   - HUD (score, time, hi-score, lives)
   - Game Canvas
   - Pause Button (top‑right) *(second development cycle)*
+- **Gameplay Tips** *(shown on top of the Game Screen, with the HUD visible, before the level starts, only for levels whose file has a `tip`; see the GAMEPLAY TIPS mockup)*
+  - The level's tip text
+  - READY Button (fades the tip out, then the level starts as usual). Not a screen change.
 - **Pause Overlay** *(second development cycle; shown on top of the frozen Game Screen, see the GAMEPLAY PAUSE MENU mockup)*
   - The same controls as the Settings Screen (Music Volume, Sound FX Volume, Old TV toggle), so there's no separate Settings button
   - Exit To Menu Button (leaves the level → Main Menu; the level's progress is lost)
@@ -53,7 +56,7 @@ The Android system back button (and its gesture) follows the navigation below. I
 | Pause Overlay | Resumes the game (same as `<<< RESUME`) |
 | Intro, Main Menu | Leaves the app (the system default) |
 
-The Game Screen and the Pause Overlay are the exceptions on purpose: a player who taps the back button by mistake must not lose the current game. Leaving a level takes the deliberate EXIT TO MENU button of the Pause Overlay. While the game can't be paused (the 3-second start delay, the core collapse, the Game Over delay), the back button does nothing.
+The Game Screen and the Pause Overlay are the exceptions on purpose: a player who taps the back button by mistake must not lose the current game. Leaving a level takes the deliberate EXIT TO MENU button of the Pause Overlay. While the game can't be paused (the 3-second start delay, the core collapse, the Game Over delay, the Gameplay Tips), the back button does nothing.
 
 ## Game controller
 
