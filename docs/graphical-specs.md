@@ -71,6 +71,13 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * Behind the buttons there's an opaque panel that hides the part of the game under the menu (in the mockup the ring is cut at its edges). It covers all the buttons together plus 64px of padding on every side (top, bottom, left and right). Its color is the gameplay area's current background: black (#000000), or dark red (#550000) when the player has only one life left.
 * It isn't a screen change, so it doesn't play the screen transitions (see "Screen transitions"). EXIT TO MENU does: it leaves the Game Screen for the Main Menu.
 
+## Gameplay tips
+
+* Shown over the Game Screen right after a level is selected (or TRY AGAIN is pressed), before the level starts, if the level file has a `tip` (see the GAMEPLAY TIPS mockup). Levels without a tip start straight away.
+* The HUD is already visible (score 0, full time, hi-score, all the lives). The arena is empty: the ring and the core don't grow in until READY is pressed.
+* The tip is mixed case, 32px, centered, no border, one line per `tip` item. Below it, 54px under its last line, a READY button (32px, the usual button look), centered. At the 1920x1080 reference size the tip's top edge is 359px from the top of the screen.
+* It isn't a screen change, but READY plays a screen-out on the tip and the button (see "Screen transitions"), then the level starts as usual (start animation and 3-second start delay). Taps are ignored while it fades.
+
 ## Game controller selection
 
 * When the menus are navigated with a game controller, the selected item is marked with a double border: its own border, a gap, and a second line outside it, all three as thick as the border (like CSS's `double` border style). The second line is drawn with `outline`, so nothing moves.

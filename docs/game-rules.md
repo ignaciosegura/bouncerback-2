@@ -4,6 +4,8 @@ The objective of the game is to keep the atoms inside the containment ring for a
 
 ## Level start
 
+If the level file has a `tip`, the Gameplay Tips (see `graphical-specs.md`) come first: the level waits, with an empty arena, until READY is pressed, and what follows starts then. Nothing can be paused or played meanwhile.
+
 When the level starts, the containment ring and then the core grow in from nothing (a 0.75-second animation, see "Level start" in `graphical-specs.md`), but the game waits **3 seconds** before it begins: the timer doesn't count, no atoms are emitted, the level's music hasn't started yet and player input is disabled. This gives the previous screen's music time to fade out and the player time to get ready. After the delay, the timer, the atom emitter and the level's music all start at the same moment.
 
 ## Core mechanics
