@@ -1,6 +1,6 @@
 # Post-processing — How It Works
 
-This document explains the post-processing in `src/effects/`, step by step: the pipeline, and the two effects it chains today, the **zoom blur** and the **CRT**. It's written as a learning resource: it assumes you know JavaScript and the basics of PixiJS, but not shaders. What the effects must look like is in `docs/graphical-specs.md` ("CRT effect"); this document is about how they're built.
+This document explains the post-processing in `src/effects/`, step by step: the pipeline, and the three effects it chains today, the **zoom blur**, the **bloom** and the **CRT**. It's written as a learning resource: it assumes you know JavaScript and the basics of PixiJS, but not shaders. What the effects must look like is in `docs/graphical-specs.md` ("CRT effect"); this document is about how they're built.
 
 It covers Phases 37–38 (the zoom blur, the CRT layers and input mapping), 39 (the OLD TV switch), 40 (one folder per effect, composed into one final pass) and 44 (the CRT on the menu screens, and the glass-edge color).
 
@@ -34,6 +34,11 @@ src/effects/
 │   ├── zoomBlurSettings.js    Its values
 │   ├── zoomBlur.frag.glsl     Its own pass: the blurred copy, at low resolution
 │   └── zoomBlurMix.glsl       Its chunk of the final pass: the blur mixed over the image
+├── bloom/
+│   ├── BloomEffect.js         The bloom effect
+│   ├── bloomSettings.js       Its values
+│   ├── bloom.frag.glsl        Its own passes: one direction of a blur, run twice, at low resolution
+│   └── bloom.glsl             Its chunk of the final pass: the glow added over the image
 └── crt/
     ├── CrtEffect.js           The CRT effect
     ├── crtSettings.js         Its values
@@ -53,6 +58,7 @@ A **render texture** (`RenderTexture` in PixiJS) is an image that lives on the G
 | :--- | :--- | :--- | :--- |
 | Scene texture | `PostProcessing` | The screen's size, at the canvas resolution (capped by `MAX_RESOLUTION`) | Holds the scene exactly as it would have looked on the canvas. It's **antialiased (MSAA)**, like the canvas, so thin lines stay smooth. Without it, lines drawn into a texture come out jagged. |
 | Blur texture | `ZoomBlurEffect` | `TEXTURE_HEIGHT` pixels tall, whatever the device | Holds the blurred copy. A blur is soft by nature, so a low resolution doesn't show, and it's much cheaper (see "Performance"). |
+| Bloom textures (two) | `BloomEffect` | Its own `TEXTURE_HEIGHT` pixels tall | The horizontal blur's result, and the vertical blur's: the glow |
 
 They're all the screen's size in PixiJS units (CSS pixels); what differs is their **resolution**, the number of real pixels per unit. That keeps every pass in the same coordinate space.
 
@@ -149,9 +155,9 @@ On a resize the textures are reallocated (and emptied), so the engine redraws th
 
 ### The chain in the game
 
-`GameEngine` builds the chain from two switches: the zoom blur (`ZOOM_BLUR_ENABLED`, always on) and the CRT (the Settings **OLD TV** switch, off by default). The order is blur, then CRT. Neither: no pipeline at all, the arena goes back on the stage (`POST_PROCESSING_ENABLED = false` does the same, to compare).
+`GameEngine` builds the chain from two switches: the zoom blur (`ZOOM_BLUR_ENABLED`, always on) and the OLD TV switch in Settings (off by default), which adds the bloom and the CRT. The order is zoom blur, bloom, CRT. The menus' chain has no bloom: it would wash out their light picture. Neither: no pipeline at all, the arena goes back on the stage (`POST_PROCESSING_ENABLED = false` does the same, to compare).
 
-**The order matters.** The CRT comes last because it plays the screen: its curvature bends the blur's streaks with everything else, and its scanlines and mask sit on top of the whole picture, like a real CRT showing an image.
+**The order matters.** The bloom comes before the CRT so that the CRT's chromatic aberration reads the glow too and fringes it, like a lens would. The CRT comes last because it plays the screen: its curvature bends the blur's streaks with everything else, and its scanlines and mask sit on top of the whole picture, like a real CRT showing an image.
 
 ### The chain on the menus
 
@@ -218,7 +224,29 @@ Its own pass blurs the **scene**, not its input: a pass that runs before the fin
 
 The streaks must come from the core, also during the last life zoom, when the camera moves it across the screen. Each frame the engine sets `zoomBlur.center` to the core's screen position (`playfield.position`); `prepare()` divides it by the screen size to get UV (`uCenter`). Left `null`, it's the screen's center.
 
-## 6. CRT
+## 6. Bloom
+
+`src/effects/bloom/`. The look: bright shapes get a soft halo, so they look a bit bigger, shinier and less sharp. Only with OLD TV on. Like the zoom blur it has two parts: in `prepare()`, its own passes draw a blurred copy of the scene into a low-resolution texture; then its chunk of the final pass adds it over the image (`bloom.glsl`).
+
+```glsl
+vec3 bloom(vec2 uv) {
+  return INPUT(uv) + texture(uBloomTexture, uv).rgb * uBloomIntensity;
+}
+```
+
+It **adds** rather than mixes: light adds up, so the sharp image stays as bright as it was and the halo is extra. Where the sum goes past 1 it clips to white, which is the "shiny" part. On a black background the glow only shows around lit shapes.
+
+### A blur in two passes
+
+A blur averages each pixel with its neighbors. Doing it in 2D takes `n × n` reads per pixel; a Gaussian blur is **separable**, so a horizontal blur followed by a vertical one gives the same result with `2n` reads. `bloom.frag.glsl` is one direction (`uStep` is the distance between taps, along it); `BloomEffect` runs it twice, into two low-resolution textures: scene → horizontal result → glow. The weights follow a Gaussian curve (`exp(−i² / 2σ²)`), normalized so the blur doesn't change the brightness.
+
+Each tap averages two points half a pixel apart across the blur's direction. The first pass shrinks the scene (for example, 1080 px tall to 270), and a 2 px line could slip between the sample points and flicker as it moves; the extra point keeps it caught.
+
+### Why before the CRT, and what it blurs
+
+The CRT reads its input three times, one per color channel, each at a slightly different point. Because the bloom is in its input, each of the three reads includes the glow, so the halo gets the red and blue fringes too. The bloom's passes blur the **scene**, not the zoom blur's output (as the zoom blur's own pass, they run before the final pass and can't see the effects inside it): the zoom blur's streaks get no halo of their own.
+
+## 7. CRT
 
 `src/effects/crt/`. Its chunk, `crt.glsl`, defines `vec3 crt(vec2 uv)`, run once for every screen pixel in the final pass. It does six steps, in this order; the order matters, as explained after them. Its uniforms and helpers are prefixed (`uCrtCurvature`, `crtWarp()`…); the snippets below drop the prefixes to stay readable.
 
@@ -318,7 +346,7 @@ The shader already answers, for every pixel, "which image point do I show?": `cr
 
 `curvature.js` and the chunk's `crtWarp()` must stay identical: each one names the other in a comment.
 
-## 7. Using it elsewhere
+## 8. Using it elsewhere
 
 `src/effects/` doesn't know about the game. Anything drawn with a PixiJS v8 **WebGL** renderer can use it:
 
@@ -366,7 +394,7 @@ Things to know:
 - **The scene isn't on the stage**, so `app.destroy()` doesn't reach it: destroy it yourself. Pointer events still work on the stage (the game listens on the stage with a `hitArea`); converting a pointer position with `toLocal()` works on containers off the stage too.
 - **WebGL only:** the shaders are GLSL. Ask for `preference: 'webgl'`.
 
-## 8. Adding an effect
+## 9. Adding an effect
 
 1. A folder `src/effects/<name>/` with:
    - `<name>Settings.js`: one frozen object; each value with its unit, what it does on screen and a range.
@@ -375,7 +403,7 @@ Things to know:
 2. Add it to the chain in `GameEngine.buildScene()`, in the right place (before the CRT, unless it's meant to sit on top of the screen).
 3. Document it here, with its own section and tuning table.
 
-## 9. Tuning
+## 10. Tuning
 
 Each value lives only in its effect's settings file, with its unit and range in a comment; the tables below say what each one does, not its value. Change it and reload (the dev server reloads on save); it applies from the next level started. To tune the CRT, switch **OLD TV** on in Settings.
 
@@ -394,6 +422,14 @@ Each value lives only in its effect's settings file, with its unit and range in 
 | `TEXTURE_HEIGHT` | Softness of the streaks | Lower is blurrier and cheaper; below ~180 the streaks start to look blocky |
 | `SAMPLES` | Smoothness of the streaks | Each extra sample costs a texture read per blur pixel. A few are enough with a low `MIX`; raise it (16–24, for example) if you see copies or grain along the streaks with a stronger `MIX` or `STRENGTH` |
 | `JITTER` | Stepping vs. fine noise | 0 shows the separate sample copies |
+
+`src/effects/bloom/bloomSettings.js`:
+
+| Setting | What you'll see | Notes |
+| :--- | :--- | :--- |
+| `INTENSITY` | How bright the glow is | A thin line spreads its light over a wide area, so the glow is faint unless this is well above 1 |
+| `RADIUS` | How far the glow spreads | Distance between blur taps, in blur-texture pixels. Above ~2 the taps show as separate copies |
+| `TEXTURE_HEIGHT` | Softness of the glow | Lower is blurrier and cheaper |
 
 `src/effects/crt/crtSettings.js`:
 
@@ -421,7 +457,7 @@ Each value lives only in its effect's settings file, with its unit and range in 
 | `BRIGHTNESS` | Overall brightness of the menus' picture | The menus' picture is light grey with lighter lines: too high clips the brightest parts of the background (the middle of a scanline, on its phosphor stripe) and the lines to white, and the lines disappear into the background. Too low darkens it away from `#D8D8D8` |
 | `VIGNETTE` | Darkening toward the corners of the menus | Much more visible on a light picture than on the arena's black |
 
-## 10. Performance
+## 11. Performance
 
 GPU cost depends on **pixels × texture reads per pixel**; the CPU only sets a few uniforms and issues a handful of draws per frame.
 
@@ -432,13 +468,14 @@ Example figures, for a 1080p screen at resolution 2, a 360 px tall blur texture 
 | Scene | Full resolution, MSAA | (the scene's own drawing) | ~0.3–1 ms, mostly the MSAA resolve |
 | Zoom blur's own pass | 640 × 360 ≈ 230,000 | `SAMPLES` (8) | ~0.1–0.3 ms (it grows with `SAMPLES` and `TEXTURE_HEIGHT`) |
 | Final pass, OLD TV off (blur mix) | Full resolution | 2 | ~0.3–0.8 ms |
-| Final pass, OLD TV on (blur mix + CRT) | Full resolution (minus the black outside the glass) | 6 (the CRT's three reads, each with the blur's two) | ~1–2 ms |
+| Bloom's own passes (OLD TV on) | 480 × 270 ≈ 130,000, twice | 18 each (9 taps, two points per tap) | ~0.1–0.3 ms |
+| Final pass, OLD TV on (blur mix + bloom + CRT) | Full resolution (minus the black outside the glass) | 9 (the CRT's three reads, each with the blur's two and the bloom's one) | ~1–2.5 ms |
 
 That's why the blur runs at a fixed low resolution, the resolution is capped at 2×, and the effects share one final pass instead of each adding its own.
 
 On the menus with OLD TV on there's no zoom blur: the scene render (the background animation's texture and the logo) and a final pass with the CRT's 3 reads per pixel. On top of that, with OLD TV on or off, the animation's off-screen canvas is drawn by the CPU and uploaded to the GPU each time it changes (every frame while it plays); `MAX_RESOLUTION` in `src/menu/menuSettings.js` caps its size.
 
-## 11. Pitfalls met along the way
+## 12. Pitfalls met along the way
 
 - **Lost antialiasing:** drawing into a plain render texture loses the canvas' MSAA, and the 2 px ring turns jagged. The scene texture is created with `antialias: true`.
 - **Upside-down passes:** WebGL's render textures and the canvas use opposite vertical directions. Using PixiJS's projection in the vertex shader keeps every pass the right way up.

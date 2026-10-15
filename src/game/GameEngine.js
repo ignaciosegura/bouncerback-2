@@ -11,6 +11,7 @@ import { BUTTONS, GamepadReader } from '../input/gamepad.js'
 import PostProcessing from '../effects/PostProcessing.js'
 import { POST_PROCESSING_SETTINGS } from '../effects/postProcessingSettings.js'
 import ZoomBlurEffect from '../effects/zoomBlur/ZoomBlurEffect.js'
+import BloomEffect from '../effects/bloom/BloomEffect.js'
 import CrtEffect from '../effects/crt/CrtEffect.js'
 
 // The playfield is laid out in mockup pixels for a 1080px-tall screen, then scaled to fit
@@ -207,7 +208,11 @@ export default class GameEngine {
         this.zoomBlur = new ZoomBlurEffect(renderer)
         effects.push(this.zoomBlur)
       }
-      if (this.oldTv) effects.push(new CrtEffect(renderer))
+      if (this.oldTv) {
+        // The bloom goes before the CRT, so the chromatic aberration fringes the glow too
+        effects.push(new BloomEffect(renderer))
+        effects.push(new CrtEffect(renderer))
+      }
       // Only the processed image goes on the stage; the arena is drawn into it by renderArena()
       this.post = new PostProcessing(renderer, effects)
       stage.addChild(this.post.view)
