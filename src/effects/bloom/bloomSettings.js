@@ -11,5 +11,5 @@ export const BLOOM_SETTINGS = Object.freeze({
   RADIUS: 0.75,
   // How much glow is added to the image: 0 is none. A thin line spreads its light over a wide
   // area, so the glow is faint unless this is well above 1. Range: 0–4.
-  INTENSITY: 1.75
+  INTENSITY: 1.5
 })
