@@ -59,7 +59,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
     * 64px for the texts "GAME OVER" and "YOU WIN!" texts in those screens.
 * Line height will be exactly 1.
 * Font weight normal/regular in all cases (no bold or italic).
-* All texts will be uppercase, except the Intro screen note and the Main Menu credits, which are written in mixed case (see "Intro screen note" and "Main Menu credits").
+* All texts will be uppercase, except the non-interactive informative texts, which are written in mixed case: the Intro screen note, the Main Menu credits, the How To Play instructions and the Gameplay tips (see "Intro screen note", "Main Menu credits", "How To Play screen" and "Gameplay tips"). Buttons, including READY, are always uppercase.
 * The font used will be "C64 Angled", a monospaced font: `assets/fonts/c64_angled.ttf`.
 * All text boxes and buttons should put all the text in one line (no line-breaks). The only exception is the How To Play screen's instructions (see "How To Play screen").
 
@@ -75,7 +75,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 * Shown over the Game Screen right after a level is selected (or TRY AGAIN is pressed), before the level starts, if the level file has a `tip` (see the GAMEPLAY TIPS mockup). Levels without a tip start straight away.
 * The HUD is already visible (score 0, full time, hi-score, all the lives). The arena is empty: the ring and the core don't grow in until READY is pressed.
-* The tip is mixed case, 32px, centered, no border, one line per `tip` item. Below it, 54px under its last line, a READY button (32px, the usual button look), centered. At the 1920x1080 reference size the tip's top edge is 359px from the top of the screen.
+* The tip is informative text, so it's written in mixed case exactly as in the level file (not all uppercase, like the Intro screen note), 32px, centered, no border, one line per `tip` item. Below it, 54px under its last line, a READY button (32px, the usual button look), centered. At the 1920x1080 reference size the tip's top edge is 359px from the top of the screen.
 * It isn't a screen change, but READY plays a screen-out on the tip and the button (see "Screen transitions"), then the level starts as usual (start animation and 3-second start delay). Taps are ignored while it fades.
 
 ## Game controller selection
