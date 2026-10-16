@@ -16,5 +16,12 @@
     "duration": 3
   },
   "lives": 4,
-  "additionalGameMechanics": ["atom capture"]
+  "additionalGameMechanics": [
+    "atom capture"
+  ],
+  "tip": [
+    "You can catch charged atoms for extra points.",
+    "Keep the capture button pressed for extra points.",
+    "The atom will be captured when you release it."
+  ]
 }
