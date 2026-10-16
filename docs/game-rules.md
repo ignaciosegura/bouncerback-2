@@ -1,10 +1,24 @@
-The objective of the game is to keep the atoms inside the containment ring for a specific amount of time. Optionally, the player can destroy atoms using a mechanic specified below.
+The objective of the game is to keep the atoms inside the containment ring for a specific amount of time. The core mechanic, which every level has, is using paddles to bounce the atoms back. Every other mechanic is optional and each level chooses which ones it uses (see "Optional game mechanics" below).
 
 # Game mechanics
 
 ## Optional game mechanics
 
-Besides the core mechanics, each level can enable optional game mechanics through the `optionalGameMechanics` array in its level file. Each item is the name of a mechanic (a string, e.g. `["catchAndCapture", "superchargedAtom"]`). The array is required; an empty one means the level only uses the core mechanics. The list of valid mechanic names is still to be defined.
+The core mechanic is using paddles to bounce atoms back (see "Core mechanics"). It is not optional: every level has it, and it is never listed in the level file.
+
+Every other mechanic is optional. Each level enables the ones it uses through the `optionalGameMechanics` array in its level file. The array is required; an empty one means the level only uses the core mechanic. Each item is the name of a mechanic, one of the following (lowercase text, spaces included, exactly as written; any other name makes the level file invalid):
+
+| Name | What it does | Status |
+| :--- | :--- | :--- |
+| `atom capture` | Atoms get charged on every bounce and can be captured (see "Atom capture") | Defined |
+| `supercharged atom` | Not defined yet | Reserved name |
+| `charged atom catch` | Not defined yet | Reserved name |
+
+The names live in one constant in the code (an enum), and the level file schema lists the same names.
+
+**A level's optional mechanics are fixed for the whole level.** They are read when the level starts and can't be switched on or off while it is being played: the rules in force at the start stay in force until the level ends, through pauses and resumes, and TRY AGAIN starts the level again with the same ones.
+
+Currently only level 1 plays without `atom capture`; levels 2 to 5 include it.
 
 ## Level start
 
@@ -51,13 +65,15 @@ While the player is placing a new paddle and the two-paddle limit means an exist
 
 ## Atom capture
 
-Every time an atom is blocked by a paddle, its direction will be reversed and it will gain a "charge". The reversal is exact: the atom travels straight back through the core and out toward the opposite side of the ring. When the atom has three chargers, the player can destroy it by tapping on it (the capture happens when the tap is released) while crossing the core, that is, while the atom overlaps the core. Capturable atoms change color, and while one is crossing the core it emits a pulse on every beat, so the player can see when it can be captured (see "Visual feedback" in `graphical-specs.md`. A captured atom is pulled into the center of the core while shrinking, and then disappears.
+This section applies only to levels that include the `atom capture` optional mechanic (see "Optional game mechanics"). Without it, atoms don't get a charge when they bounce back: they keep their initial charge of 1 for as long as they live, they never change color, and they can't be captured (a tap on the core or a controller capture button does nothing). They are still bounced back, and still score points for bouncing and for being contained (see "Score").
+
+Every time an atom is blocked by a paddle, its direction will be reversed and it will gain a "charge". The reversal is exact: the atom travels straight back through the core and out toward the opposite side of the ring. When the atom has three chargers, the player can destroy it by tapping on it (the capture happens when the tap is released) while crossing the core, that is, while the atom overlaps the core. Capturable atoms change color, and while one is crossing the core it emits a pulse on every beat, so the player can see when it can be captured (see "Visual feedback for optional game mechanics" in `graphical-specs.md`. A captured atom is pulled into the center of the core while shrinking, and then disappears.
 
 Destroying atoms is optional, the player can keep bouncing them for extra points and charges, up to a limit of ten charges. At ten charges, the atom will not gain charges, but otherwise it will behave as a normal atom.
 
 ## Game controller
 
-The game can also be played with a game controller, alongside mouse and touch: either stick places a paddle, and buttons capture atoms. The controls are in `docs/game-controller.md`.
+The game can also be played with a game controller, alongside mouse and touch: either stick places a paddle, and buttons capture atoms (in levels with `atom capture`). The controls are in `docs/game-controller.md`.
 
 # Lives
 
@@ -74,8 +90,10 @@ The level file will specify the length of the level in musical notation format: 
 The player will get:
 
 * 10 points * level * atom charge value every time it bounces back an atom using a paddle. 
-* 100 points * level * atom charge value for every atom captured
+* 100 points * level * atom charge value for every atom captured (only with `atom capture`, since without it nothing can be captured)
 * 200 points * level * atom charge value for every atom contained at the end of the level, when the core collapse takes all remaining atoms.
+
+Without `atom capture`, the charge value of every atom is always 1, so those two formulas become 10 points * level per bounce and 200 points * level per contained atom.
 * 500 points * level * remaining lives.
 * Additional time bonus after the core collapse has taken all remaining atoms (the player needs to pass the level): 1 point * level for every 0.1 seconds of the level's total duration. In other words, the level's initial timer value (in tenths of a second) * level. For example, a 2-minute level 3 gives 1200 * 3 = 3600 points.
  

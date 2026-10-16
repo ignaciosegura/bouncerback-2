@@ -5,7 +5,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 ## The background
 
 * The background will always be black, except in the inverted menu layouts, where the background will be white, and during gameplay when the player has only one life left, where it turns dark red (see "Visual feedback" below).
-    * During the game, black background, white lines and full circles only (except for the color changes in "Visual feedback" below). No textures. The vector assets provided will also be in black and white.
+    * During the game, black background, white lines and full circles only (except for the color changes in "Visual feedback" and "Visual feedback for optional game mechanics" below). No textures. The vector assets provided will also be in black and white.
     * During the menus, the same font and visual style will be used. The background will be black, with white text. In some cases, the layout will be inverted, white background, black texts and outlines.
 
 ## Menu background animation
@@ -135,13 +135,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 Note: All color changes use a transition time of 0.5 seconds unless otherwise specified.
 
 * Level start: the containment ring and the core aren't simply shown, they grow in. First the ring grows from radius zero to its full size in 0.25 seconds (ease-out), then the core grows from radius zero to its full size in 0.5 seconds (ease-out). Their outlines keep their normal width while they grow. It plays at the start of every level, Try Again included, during the first 0.75 seconds of the 3-second start delay, so the delay doesn't get longer.
-* Every time an atom bounces back, it gets a charged.
-    - At 3 charges, the atom should transition to yellow (#FFFF00)
-    - For every charge from 3 onwards, the atom should transition its color until the tenth charge, to get closer to red (#FF0000) for every additional charge.
-* Draw order: every new atom is drawn behind all the atoms already on screen, so fresh (uncharged) atoms never hide charged ones that the player may want to capture.
-* Capture window: while an atom that can be captured (3 or more charges) is crossing the core, it emits a pulse on every beat of the music, up to 3 pulses per crossing (later beats would come as the atom is leaving the core, so most of the pulse would play after it can no longer be captured): a filled circle of the atom's current color that grows outward from the atom while fading from 50% to 0% opacity over one beat. The pulse follows the atom and is drawn behind it. Pulses only start while the atom overlaps the core (the moment a released tap captures it); a pulse that has already started finishes its fade even if the atom leaves the core. Atoms with fewer than 3 charges never pulse.
-* Capture: when the player captures an atom, it stops and is pulled into the center of the core while shrinking to radius zero, in 0.5 seconds with an ease-in curve (slow at first, fast at the end). It keeps its current color. Any pulse it was emitting stops at the moment of capture.
-* Capture burst: at the moment of capture a second animation plays together with the pull-in, lasting the same 0.5 seconds: a circle in the captured atom's color (the color it has at that moment) at the exact center of the scene, drawn behind everything else in the arena (the containment ring, the paddles, the core and the atoms are all on top of it). Its line is as thick as the core's radius, and it starts at radius zero and opacity zero. First, over 0.1 seconds, its opacity rises to 50% (linear). Then, over the remaining 0.4 seconds, its radius grows to 1.25 times the containment ring's radius (ease-out) while its opacity falls to 0 (linear). The circle is removed when it ends. Each capture gets its own circle, so several captures close in time show as many circles, and a new one never interrupts the previous one.
+* Draw order: every new atom is drawn behind all the atoms already on screen, so fresh atoms never hide older ones.
 * The core (atom emitter) is 25% larger than in the first cycle (radius 20 → 25 at the reference size, now slightly bigger than the atoms), so the moment an atom crosses it is easier to see.
 * When the player has only one life, turn the background dark red (#550000)
 * Paddle lifetime: once set, a paddle stays at full opacity for the first half of its lifetime, then fades steadily to 20% opacity over the second half, and disappears when it expires. This fade lasts half the paddle's lifetime and doesn't follow the 0.5 s default above. While the player is still dragging it, the paddle is shown at full opacity.
@@ -152,6 +146,22 @@ Note: All color changes use a transition time of 0.5 seconds unless otherwise sp
     - 1.85 → 2 s: the core collapses to radius zero (ease-in) and takes every atom with it: all atoms move to the center while shrinking to radius zero, at the same time as the core.
 * Atom escape shake: when an atom escapes the containment ring, only that atom vibrates vertically, 3 times in a row and fast (each vibration is the screen transitions' up-then-down shake, 0.1 s long, so 0.3 s in all), while it keeps moving out and fading. Its color blends gradually from its own color to transition dark yellow (#666600) and then to transition dark red (#660000, see "Colors"), half of the 0.5 s fade each, like the screen transitions' tint. The last atom doesn't fade or tint. It's subtle on purpose: a few pixels at the 1080px reference. It doesn't follow the 0.5 s default above.
 * Last life lost: when an atom takes the player's last life, every other atom freezes where it is at once. The escaping atom keeps moving out at its normal speed for 0.5 seconds, without fading out, then freezes too. Then the view zooms in on the point midway between where the atom crossed the containment ring and where it stopped: the zoom lasts 0.5 seconds (ease-out) and goes up to 8×; that point moves to the center of the screen while everything grows around it, so line widths grow too (the ring's outline ends 8× thicker). The zoomed view holds, with the atom fully visible, until the Game Over screen-out starts, 2 seconds after the loss. Circles stay round at 8×. The HUD doesn't zoom. The escaping atom also does the atom escape shake during those first 0.5 seconds, so it's over before the zoom starts. It doesn't follow the 0.5 s default above.
+
+## Visual feedback for optional game mechanics
+
+Each optional game mechanic (see "Optional game mechanics" in `game-rules.md`) has its own visual feedback, listed here under its name. It only applies to levels that include that mechanic: in the others, none of it is shown. The same 0.5 seconds default color transition as in "Visual feedback" applies. The visuals that don't depend on any optional mechanic (the draw order, the paddles, the lives, the level start and end) stay in "Visual feedback".
+
+### `atom capture`
+
+Without this mechanic atoms never get charged, so they always stay white and nothing pulses or is captured.
+
+* Every time an atom bounces back, it gets a charged.
+    - At 3 charges, the atom should transition to yellow (#FFFF00)
+    - For every charge from 3 onwards, the atom should transition its color until the tenth charge, to get closer to red (#FF0000) for every additional charge.
+* Capture window: while an atom that can be captured (3 or more charges) is crossing the core, it emits a pulse on every beat of the music, up to 3 pulses per crossing (later beats would come as the atom is leaving the core, so most of the pulse would play after it can no longer be captured): a filled circle of the atom's current color that grows outward from the atom while fading from 50% to 0% opacity over one beat. The pulse follows the atom and is drawn behind it. Pulses only start while the atom overlaps the core (the moment a released tap captures it); a pulse that has already started finishes its fade even if the atom leaves the core. Atoms with fewer than 3 charges never pulse.
+* Capture: when the player captures an atom, it stops and is pulled into the center of the core while shrinking to radius zero, in 0.5 seconds with an ease-in curve (slow at first, fast at the end). It keeps its current color. Any pulse it was emitting stops at the moment of capture.
+* Capture burst: at the moment of capture a second animation plays together with the pull-in, lasting the same 0.5 seconds: a circle in the captured atom's color (the color it has at that moment) at the exact center of the scene, drawn behind everything else in the arena (the containment ring, the paddles, the core and the atoms are all on top of it). Its line is as thick as the core's radius, and it starts at radius zero and opacity zero. First, over 0.1 seconds, its opacity rises to 50% (linear). Then, over the remaining 0.4 seconds, its radius grows to 1.25 times the containment ring's radius (ease-out) while its opacity falls to 0 (linear). The circle is removed when it ends. Each capture gets its own circle, so several captures close in time show as many circles, and a new one never interrupts the previous one.
+* Colors used here: yellow and red, see "Colors".
 
 # Colors
 
