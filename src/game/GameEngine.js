@@ -118,6 +118,8 @@ export default class GameEngine {
     this.draggedPaddles = new Map() // input (pointerId, or a controller stick: 'left' / 'right') → inactive paddle
     this.paddlePool = []
     this.captureCircles = [] // capture bursts in progress
+    this.corePresses = new Set() // pointers pressed on a capturable atom: they capture on release
+    this.heldCaptureButtons = new Set() // controller capture buttons pressed during play: they capture on release
     this.paddles = [] // every paddle instance, active or pooled, to update their flashes
     this.gamepad = new GamepadReader()
   }
@@ -310,6 +312,9 @@ export default class GameEngine {
     if (this.state !== STATE.PLAYING || this.paused || this.leaving) return
 
     this.paused = true
+    // A press held into the pause doesn't capture when released
+    this.corePresses.clear()
+    this.heldCaptureButtons.clear()
     this.app.ticker.stop()
     soundManager.pauseTrack()
     soundManager.pauseSfx()
@@ -345,7 +350,11 @@ export default class GameEngine {
     if (this.state !== STATE.PLAYING || this.paused) return
 
     const { x, y } = this.playfield.toLocal(this.scenePoint(event.global))
-    if (Math.hypot(x, y) <= CAPTURE_TAP_RADIUS && this.captureAtCore()) return
+    // A press on a capturable atom captures it on release, and places no paddle
+    if (Math.hypot(x, y) <= CAPTURE_TAP_RADIUS && this.atoms.some((atom) => this.isCapturable(atom))) {
+      this.corePresses.add(event.pointerId)
+      return
+    }
 
     this.startPaddleDrag(event.pointerId, Math.atan2(y, x))
   }
@@ -364,12 +373,16 @@ export default class GameEngine {
   }
 
   onPointerUp = (event) => {
+    if (this.corePresses.delete(event.pointerId)) {
+      if (!this.paused) this.captureAtCore()
+      return
+    }
     this.setPaddle(event.pointerId)
   }
 
   // Controller: a stick pushed past its engage threshold drags a paddle, released it sets it
   // (the angle maps straight to the paddle: both have y pointing down). A capture button captures
-  // like a tap at the core, but a press with nothing to capture does nothing. The menu button pauses.
+  // when released, like a tap at the core, but a press with nothing to capture does nothing. The menu button pauses.
   handleGamepad () {
     // Resuming goes through the Pause overlay's RESUME button: the ticker (and this poll) is stopped
     if (this.gamepad.wasPressed(BUTTONS.MENU)) {
@@ -377,7 +390,13 @@ export default class GameEngine {
       return
     }
 
-    if (CAPTURE_BUTTONS.some((button) => this.gamepad.wasPressed(button))) this.captureAtCore()
+    // A button already held when play starts never captures: only one pressed during play does
+    let released = false
+    for (const button of CAPTURE_BUTTONS) {
+      if (this.gamepad.wasPressed(button)) this.heldCaptureButtons.add(button)
+      else if (this.gamepad.wasReleased(button) && this.heldCaptureButtons.delete(button)) released = true
+    }
+    if (released) this.captureAtCore()
 
     for (const stick of STICKS) {
       const { engaged, angle } = this.gamepad.stick(stick)
