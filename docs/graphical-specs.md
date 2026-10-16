@@ -163,6 +163,15 @@ Without this mechanic atoms never get charged, so they always stay white and not
 * Capture burst: at the moment of capture a second animation plays together with the pull-in, lasting the same 0.5 seconds: a circle in the captured atom's color (the color it has at that moment) at the exact center of the scene, drawn behind everything else in the arena (the containment ring, the paddles, the core and the atoms are all on top of it). Its line is as thick as the core's radius, and it starts at radius zero and opacity zero. First, over 0.1 seconds, its opacity rises to 50% (linear). Then, over the remaining 0.4 seconds, its radius grows to 1.25 times the containment ring's radius (ease-out) while its opacity falls to 0 (linear). The circle is removed when it ends. Each capture gets its own circle, so several captures close in time show as many circles, and a new one never interrupts the previous one.
 * Colors used here: yellow and red, see "Colors".
 
+### `charged atom catch`
+
+Without this mechanic nothing is caught. It builds on `atom capture`, so everything in the previous section still applies, and the release of a caught atom plays that section's capture, pull-in and burst unchanged.
+
+* Catch: when the player catches an atom, it stops where it is, with its current color. Any pulse it was emitting stops at that moment, like at a capture, and it emits no more while caught.
+* Caught shake: for as long as the atom is caught, it vibrates vertically exactly like the atom escape shake (the screen transitions' up-then-down shake, same duration of each vibration and same distance, see "Atom escape shake" in "Visual feedback"), but the vibrations repeat without limit from the moment of the catch until the release. Unlike the escape, there's no fade and no tint: the atom keeps its color and opacity. When it's released, the shake stops at once and the capture pull-in starts from the atom's resting position.
+* Score: every increment of the caught-atom score appears on the HUD as soon as it's paid, with no animation of its own (see "Charged atom catch" in `game-rules.md`).
+* Nothing else is drawn for the catch: no extra ring, color or sound.
+
 # Colors
 
 * Black background: #000000

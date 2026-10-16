@@ -68,6 +68,7 @@ root/
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
     │   ├── levelLoader.js          # Validates level JSON and derives runtime values (timer, speeds, intervals)
     │   ├── additionalMechanics.js    # Enum constant with the names of the additional game mechanics
+    │   ├── chargedAtomCatchSettings.js # Its tunable values (points per second while an atom is caught, size of each score step)
     │   ├── scoring.js              # Pure score formulas and high-score persistence
     │   ├── oldTv.js                # The Settings "OLD TV" switch (the CRT effect), persisted
     │   ├── color.js                # Color helpers (interpolation for the gameplay color transitions)
