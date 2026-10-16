@@ -67,7 +67,7 @@ root/
     ├── game/                       # Pure game logic & PixiJS implementation
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
     │   ├── levelLoader.js          # Validates level JSON and derives runtime values (timer, speeds, intervals)
-    │   ├── optionalMechanics.js    # Enum constant with the names of the optional game mechanics
+    │   ├── additionalMechanics.js    # Enum constant with the names of the additional game mechanics
     │   ├── scoring.js              # Pure score formulas and high-score persistence
     │   ├── oldTv.js                # The Settings "OLD TV" switch (the CRT effect), persisted
     │   ├── color.js                # Color helpers (interpolation for the gameplay color transitions)

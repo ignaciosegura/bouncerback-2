@@ -16,5 +16,5 @@
     "duration": 5
   },
   "lives": 8,
-  "optionalGameMechanics": []
+  "additionalGameMechanics": []
 }

@@ -5,7 +5,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 ## The background
 
 * The background will always be black, except in the inverted menu layouts, where the background will be white, and during gameplay when the player has only one life left, where it turns dark red (see "Visual feedback" below).
-    * During the game, black background, white lines and full circles only (except for the color changes in "Visual feedback" and "Visual feedback for optional game mechanics" below). No textures. The vector assets provided will also be in black and white.
+    * During the game, black background, white lines and full circles only (except for the color changes in "Visual feedback" and "Visual feedback for additional game mechanics" below). No textures. The vector assets provided will also be in black and white.
     * During the menus, the same font and visual style will be used. The background will be black, with white text. In some cases, the layout will be inverted, white background, black texts and outlines.
 
 ## Menu background animation
@@ -147,9 +147,9 @@ Note: All color changes use a transition time of 0.5 seconds unless otherwise sp
 * Atom escape shake: when an atom escapes the containment ring, only that atom vibrates vertically, 3 times in a row and fast (each vibration is the screen transitions' up-then-down shake, 0.1 s long, so 0.3 s in all), while it keeps moving out and fading. Its color blends gradually from its own color to transition dark yellow (#666600) and then to transition dark red (#660000, see "Colors"), half of the 0.5 s fade each, like the screen transitions' tint. The last atom doesn't fade or tint. It's subtle on purpose: a few pixels at the 1080px reference. It doesn't follow the 0.5 s default above.
 * Last life lost: when an atom takes the player's last life, every other atom freezes where it is at once. The escaping atom keeps moving out at its normal speed for 0.5 seconds, without fading out, then freezes too. Then the view zooms in on the point midway between where the atom crossed the containment ring and where it stopped: the zoom lasts 0.5 seconds (ease-out) and goes up to 8×; that point moves to the center of the screen while everything grows around it, so line widths grow too (the ring's outline ends 8× thicker). The zoomed view holds, with the atom fully visible, until the Game Over screen-out starts, 2 seconds after the loss. Circles stay round at 8×. The HUD doesn't zoom. The escaping atom also does the atom escape shake during those first 0.5 seconds, so it's over before the zoom starts. It doesn't follow the 0.5 s default above.
 
-## Visual feedback for optional game mechanics
+## Visual feedback for additional game mechanics
 
-Each optional game mechanic (see "Optional game mechanics" in `game-rules.md`) has its own visual feedback, listed here under its name. It only applies to levels that include that mechanic: in the others, none of it is shown. The same 0.5 seconds default color transition as in "Visual feedback" applies. The visuals that don't depend on any optional mechanic (the draw order, the paddles, the lives, the level start and end) stay in "Visual feedback".
+Each additional game mechanic (see "Additional game mechanics" in `game-rules.md`) has its own visual feedback, listed here under its name. It only applies to levels that include that mechanic: in the others, none of it is shown. The same 0.5 seconds default color transition as in "Visual feedback" applies. The visuals that don't depend on any additional mechanic (the draw order, the paddles, the lives, the level start and end) stay in "Visual feedback".
 
 ### `atom capture`
 

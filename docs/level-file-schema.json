@@ -10,7 +10,7 @@
         "atoms",
         "paddles",
         "lives",
-        "optionalGameMechanics"
+        "additionalGameMechanics"
     ],
     "properties": {
         "name": {
@@ -106,9 +106,9 @@
             "type": "integer",
             "description": "Number of lives the player starts the level with."
         },
-        "optionalGameMechanics": {
+        "additionalGameMechanics": {
             "type": "array",
-            "description": "Names of the optional game mechanics active in this level. Required; if empty, the level only uses the core mechanics.",
+            "description": "Names of the additional game mechanics active in this level. Required; if empty, the level only uses the core mechanics.",
             "items": {
                 "type": "string"
             }
