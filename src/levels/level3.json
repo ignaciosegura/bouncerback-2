@@ -17,7 +17,8 @@
   },
   "lives": 4,
   "additionalGameMechanics": [
-    "atom capture"
+    "atom capture",
+    "charged atom catch"
   ],
   "tip": [
     "You can catch charged atoms for extra points.",

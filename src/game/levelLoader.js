@@ -65,6 +65,10 @@ function checkRanges (level) {
   }
   if (level.paddles.angle >= 360) problems.push('level.paddles.angle must be less than 360')
   if (level.name.trim() === '') problems.push('level.name must not be empty')
+  const mechanics = level.additionalGameMechanics
+  if (mechanics.includes(ADDITIONAL_MECHANICS.CHARGED_ATOM_CATCH) && !mechanics.includes(ADDITIONAL_MECHANICS.ATOM_CAPTURE)) {
+    problems.push(`level.additionalGameMechanics: "${ADDITIONAL_MECHANICS.CHARGED_ATOM_CATCH}" requires "${ADDITIONAL_MECHANICS.ATOM_CAPTURE}"`)
+  }
   return problems
 }
 
@@ -97,6 +101,7 @@ export function loadLevel (data, number) {
     // Fixed when the level is loaded: mechanics never change while a level is played
     additionalGameMechanics: Object.freeze([...data.additionalGameMechanics]),
     atomCapture: data.additionalGameMechanics.includes(ADDITIONAL_MECHANICS.ATOM_CAPTURE),
+    chargedAtomCatch: data.additionalGameMechanics.includes(ADDITIONAL_MECHANICS.CHARGED_ATOM_CATCH),
     secondsPerBeat,
     // Initial timer value, in tenths of a second
     timerTenths: Math.round(data.duration * secondsPerBar * 10),

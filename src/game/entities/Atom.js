@@ -12,12 +12,13 @@ export const ATOM_STATE = {
   MOVING: 'moving',
   ESCAPING: 'escaping',
   COLLAPSING: 'collapsing',
-  CAPTURING: 'capturing'
+  CAPTURING: 'capturing',
+  CAUGHT: 'caught' // held by the player (charged atom catch): stopped, shaking
 }
 
 const ESCAPE_FADE_TIME = 0.5
 // Escape shake: the atom vibrates vertically, up then down like the menus' screen-shake, a few
-// times in a row, while it keeps moving out
+// times in a row, while it keeps moving out. A caught atom shakes the same way, without limit
 const SHAKE_COUNT = 3
 const SHAKE_CYCLE_TIME = 0.1
 const SHAKE_DISTANCE = 2 // px at the 1080px reference
@@ -129,6 +130,13 @@ export default class Atom {
     return this.escapeTime < ESCAPE_FADE_TIME
   }
 
+  // Caught (charged atom catch): stops where it is and shakes until it is captured
+  startCatch () {
+    this.state = ATOM_STATE.CAUGHT
+    this.shakeTime = 0
+    this.pulse.hide()
+  }
+
   // Captured: stops and is pulled into the center of the core, shrinking to 0
   startCapture () {
     this.state = ATOM_STATE.CAPTURING
@@ -169,16 +177,17 @@ export default class Atom {
       : lerpColor(ESCAPE_TINT_YELLOW, ESCAPE_TINT_RED, t * 2 - 1)
   }
 
-  // Vertical offset of the escape shake; `dt` advances it
+  // Vertical offset of the escape shake (limited to SHAKE_COUNT vibrations) or of the caught
+  // shake (without limit); `dt` advances it
   shakeY (dt) {
-    if (this.state !== ATOM_STATE.ESCAPING) return 0
+    if (this.state !== ATOM_STATE.ESCAPING && this.state !== ATOM_STATE.CAUGHT) return 0
     this.shakeTime += dt
     const cycles = this.shakeTime / SHAKE_CYCLE_TIME
-    if (cycles >= SHAKE_COUNT) return 0
+    if (this.state === ATOM_STATE.ESCAPING && cycles >= SHAKE_COUNT) return 0
     return shakeOffset(cycles % 1) * SHAKE_DISTANCE
   }
 
-  // `dt` advances the charge color transition and the escape shake
+  // `dt` advances the charge color transition and the shake
   render (dt = 0) {
     if (this.colorTime < COLOR_TRANSITION_TIME) {
       this.colorTime = Math.min(COLOR_TRANSITION_TIME, this.colorTime + dt)
