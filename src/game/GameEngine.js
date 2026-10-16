@@ -552,7 +552,7 @@ export default class GameEngine {
     if (paddle) {
       paddle.bounce()
       this.addScore(bouncePoints(this.level.number, atom.charge))
-      atom.bounce(CONTACT_DISTANCE)
+      atom.bounce(CONTACT_DISTANCE, this.level.atomCapture)
       soundManager.playSfx('bounce')
     } else if (Math.abs(atom.distance) >= ESCAPE_DISTANCE) {
       atom.escape()
@@ -579,7 +579,8 @@ export default class GameEngine {
   // A charged atom overlapping the core. Shared by the capture and its pulse, so the cue always
   // matches what a tap does
   isCapturable (atom) {
-    return atom.state === ATOM_STATE.MOVING &&
+    return this.level.atomCapture &&
+      atom.state === ATOM_STATE.MOVING &&
       atom.charge >= CAPTURE_MIN_CHARGE &&
       Math.abs(atom.distance) <= CORE_CROSSING_DISTANCE
   }

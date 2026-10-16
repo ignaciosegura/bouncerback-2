@@ -1,12 +1,17 @@
 import schema from '../../docs/level-file-schema.json'
+import { ADDITIONAL_MECHANICS } from './additionalMechanics.js'
 
 /**
  * Checks a value against the subset of JSON Schema used by docs/level-file-schema.json
- * (type, required, properties, additionalProperties, items). Returns a list of problems.
+ * (type, enum, required, properties, additionalProperties, items). Returns a list of problems.
  */
 function checkSchema (value, rule, path) {
   const problems = []
   const type = Array.isArray(value) ? 'array' : typeof value
+
+  if (rule.enum && !rule.enum.includes(value)) {
+    return [`${path} must be one of: ${rule.enum.map((name) => `"${name}"`).join(', ')}`]
+  }
 
   switch (rule.type) {
   case 'object':
@@ -33,6 +38,13 @@ function checkSchema (value, rule, path) {
   default:
     return type === rule.type ? [] : [`${path} must be a ${rule.type}`]
   }
+}
+
+// The schema's list of mechanic names and the code's constant must be the same
+const schemaMechanics = schema.properties.additionalGameMechanics.items.enum
+const codeMechanics = Object.values(ADDITIONAL_MECHANICS)
+if (schemaMechanics.length !== codeMechanics.length || !codeMechanics.every((name) => schemaMechanics.includes(name))) {
+  throw new Error('level-file-schema.json and additionalMechanics.js list different additional game mechanics')
 }
 
 // Rules the schema doesn't express but the game needs
@@ -82,7 +94,9 @@ export function loadLevel (data, number) {
     soundTrack: data.soundTrack,
     lives: data.lives,
     tip: data.tip ?? null,
-    additionalGameMechanics: data.additionalGameMechanics,
+    // Fixed when the level is loaded: mechanics never change while a level is played
+    additionalGameMechanics: Object.freeze([...data.additionalGameMechanics]),
+    atomCapture: data.additionalGameMechanics.includes(ADDITIONAL_MECHANICS.ATOM_CAPTURE),
     secondsPerBeat,
     // Initial timer value, in tenths of a second
     timerTenths: Math.round(data.duration * secondsPerBar * 10),

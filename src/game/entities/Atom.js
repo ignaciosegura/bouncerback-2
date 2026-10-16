@@ -99,11 +99,13 @@ export default class Atom {
     this.distance += this.direction * step
   }
 
-  // Exact reversal at `contact` distance: the atom heads straight back through the core
-  bounce (contact) {
+  // Exact reversal at `contact` distance: the atom heads straight back through the core. With
+  // `charges` (the atom capture mechanic) it also gains a charge and starts its color change
+  bounce (contact, charges) {
     const overshoot = Math.abs(this.distance) - contact
     this.distance = Math.sign(this.distance) * (contact - overshoot)
     this.direction = -this.direction
+    if (!charges) return
     this.charge = Math.min(MAX_CHARGE, this.charge + 1)
     const target = chargeColor(this.charge)
     if (target !== this.colorTo) {
