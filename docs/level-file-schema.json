@@ -9,7 +9,8 @@
         "soundTrack",
         "atoms",
         "paddles",
-        "lives"
+        "lives",
+        "optionalGameMechanics"
     ],
     "properties": {
         "name": {
@@ -104,6 +105,13 @@
         "lives": {
             "type": "integer",
             "description": "Number of lives the player starts the level with."
+        },
+        "optionalGameMechanics": {
+            "type": "array",
+            "description": "Names of the optional game mechanics active in this level. Required; if empty, the level only uses the core mechanics.",
+            "items": {
+                "type": "string"
+            }
         },
         "tip": {
             "type": "array",

@@ -2,6 +2,10 @@ The objective of the game is to keep the atoms inside the containment ring for a
 
 # Game mechanics
 
+## Optional game mechanics
+
+Besides the core mechanics, each level can enable optional game mechanics through the `optionalGameMechanics` array in its level file. Each item is the name of a mechanic (a string, e.g. `["catchAndCapture", "superchargedAtom"]`). The array is required; an empty one means the level only uses the core mechanics. The list of valid mechanic names is still to be defined.
+
 ## Level start
 
 If the level file has a `tip`, the Gameplay Tips (see `graphical-specs.md`) come first: the level waits, with an empty arena, until READY is pressed, and what follows starts then. Nothing can be paused or played meanwhile.

@@ -16,6 +16,7 @@
     "duration": 3
   },
   "lives": 5,
+  "optionalGameMechanics": [],
   "tip": [
     "You can capture charged atoms",
     "while they’re crossing the emitter.",

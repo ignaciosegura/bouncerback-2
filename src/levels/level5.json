@@ -15,5 +15,6 @@
     "angle": 30,
     "duration": 3
   },
-  "lives": 3
+  "lives": 3,
+  "optionalGameMechanics": []
 }
