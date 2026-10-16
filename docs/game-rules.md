@@ -11,8 +11,8 @@ Every other mechanic is an additional one, and the player can't switch it off. E
 | Name | What it does | Status |
 | :--- | :--- | :--- |
 | `atom capture` | Atoms get charged on every bounce and can be captured (see "Atom capture") | Defined |
-| `supercharged atom` | Not defined yet | Reserved name |
-| `charged atom catch` | Not defined yet | Reserved name |
+| `supercharged atom` | Halfway through the level, an additional atom is generated that travels at double the speed of all other atoms in that level and it already has ten charges | Defined |
+| `charged atom catch` | The atoms that can be captured can also be retained. They score 60 points per second while retained (button press) and they are captured as usual upon release (button release) | Defined |
 
 The names live in one constant in the code (an enum), and the level file schema lists the same names.
 
