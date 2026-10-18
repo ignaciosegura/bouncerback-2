@@ -790,6 +790,12 @@ A larger task, done in steps: bouncing atoms back with paddles is the only core 
 - `src/levels/`: `level4.json` and `level5.json` get `"supercharged atom"` after `"atom capture"`. The schema already lists the name.
 - Docs (as part of the implementation): `docs/game-rules.md`, `docs/graphical-specs.md` and `docs/audio-map.md` (written together with this plan), `docs/implementation-status.md` (Phase 50 ticked once the code is done). `docs/game-instructions.md` (How To Play) is not touched; it is updated by hand.
 
+### Phase 51 — Supercharged and catch sound effects
+- Four new sound effects (see `docs/audio-map.md`): `launch_supercharged` and `capture_supercharged` (one-shots, MP3, WAV or FLAC) and `catch` and `catch_supercharged` (looped WAV or FLAC, trimmed to loop from the first to the last sample; the files are supplied separately). Catching an atom was silent until now.
+- `src/audio/soundManager.js`: the `import.meta.glob` for effects takes `*.{mp3,wav,flac}`. New `startLoopSfx(name)` plays the effect with `loop(true, id)` and returns the voice id; it is tracked in `liveVoices`, so pausing the game pauses it like any other effect. New `stopLoopSfx(id)` fades the voice out and stops it through the existing `stealVoice`, with the existing `STEAL_FADE_MS` (15 ms): no new constant.
+- `src/game/GameEngine.js`: `spawnAtom(supercharged)` plays `launch_supercharged` instead of `launch` for the supercharged atom. `captureAtom(atom)` plays `capture_supercharged` or `capture` by `atom.supercharged`. `catchNearest(input)` starts `catch_supercharged` or `catch` and keeps the voice id in `held`. Every place a hold ends stops the loop: release (`finishCatch`), `pause()`, the core collapse and the last life lost. A small helper picks the standard or supercharged name, so the choice is made in one place.
+- Docs (as part of the implementation): `docs/audio-map.md` and `docs/game-rules.md` (written together with this plan), `docs/implementation-status.md` (Phase 51 ticked once the code is done). `docs/game-instructions.md` (How To Play) is not touched; it is updated by hand.
+
 ---
 
 ## Verification
