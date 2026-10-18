@@ -65,10 +65,6 @@ function checkRanges (level) {
   }
   if (level.paddles.angle >= 360) problems.push('level.paddles.angle must be less than 360')
   if (level.name.trim() === '') problems.push('level.name must not be empty')
-  const mechanics = level.additionalGameMechanics
-  if (mechanics.includes(ADDITIONAL_MECHANICS.CHARGED_ATOM_CATCH) && !mechanics.includes(ADDITIONAL_MECHANICS.ATOM_CAPTURE)) {
-    problems.push(`level.additionalGameMechanics: "${ADDITIONAL_MECHANICS.CHARGED_ATOM_CATCH}" requires "${ADDITIONAL_MECHANICS.ATOM_CAPTURE}"`)
-  }
   return problems
 }
 

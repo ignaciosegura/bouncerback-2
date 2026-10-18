@@ -12,13 +12,13 @@ Every other mechanic is an additional one, and the player can't switch it off. E
 | :--- | :--- | :--- |
 | `atom capture` | Atoms get charged on every bounce and can be captured (see "Atom capture") | Defined |
 | `supercharged atom` | Halfway through the level, an additional atom is generated that travels at double the speed of all other atoms in that level and it already has ten charges | Defined |
-| `charged atom catch` | The atoms that can be captured can also be retained. Pressing a capture button catches the atom, which scores at a fixed rate per second while the button is held, and it is captured as usual upon release (see "Charged atom catch"). Requires `atom capture` | Defined |
+| `charged atom catch` | The atoms that can be captured can also be retained. Pressing a capture button catches the atom, which scores at a fixed rate per second while the button is held, and it is captured as usual upon release (see "Charged atom catch") | Defined |
 
 The names live in one constant in the code (an enum), and the level file schema lists the same names.
 
 **A level's additional mechanics are fixed for the whole level.** They are read when the level starts and can't be switched on or off while it is being played: the rules in force at the start stay in force until the level ends, through pauses and resumes, and TRY AGAIN starts the level again with the same ones.
 
-Currently only level 1 plays without `atom capture`; levels 2 to 5 include it. `charged atom catch` is in levels 3 to 5. A level that lists `charged atom catch` without `atom capture` is invalid, since there would be nothing to catch.
+Currently only level 1 plays without `atom capture`; levels 2 to 5 include it. `charged atom catch` is in levels 3 to 5.
 
 ## Level start
 
