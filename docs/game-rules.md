@@ -11,7 +11,7 @@ Every other mechanic is an additional one, and the player can't switch it off. E
 | Name | What it does | Status |
 | :--- | :--- | :--- |
 | `atom capture` | Atoms get charged on every bounce and can be captured (see "Atom capture") | Defined |
-| `supercharged atom` | Halfway through the level, an additional atom is generated that travels at double the speed of all other atoms in that level and it already has ten charges | Defined |
+| `supercharged atom` | Halfway through the level, an additional atom is generated that travels at double the speed of all other atoms in that level and it already has twenty charges | Defined |
 | `charged atom catch` | The atoms that can be captured can also be retained. Pressing a capture button catches the atom, which scores at a fixed rate per second while the button is held, and it is captured as usual upon release (see "Charged atom catch") | Defined |
 
 The names live in one constant in the code (an enum), and the level file schema lists the same names.
@@ -69,7 +69,7 @@ This section applies only to levels that include the `atom capture` additional m
 
 Every time an atom is blocked by a paddle, its direction will be reversed and it will gain a "charge". The reversal is exact: the atom travels straight back through the core and out toward the opposite side of the ring. When the atom has three chargers, the player can destroy it by tapping on it (the capture happens when the tap is released) while crossing the core, that is, while the atom overlaps the core. Capturable atoms change color, and while one is crossing the core it emits a pulse on every beat, so the player can see when it can be captured (see "Visual feedback for additional game mechanics" in `graphical-specs.md`. A captured atom is pulled into the center of the core while shrinking, and then disappears.
 
-Destroying atoms is optional, the player can keep bouncing them for extra points and charges, up to a limit of ten charges. At ten charges, the atom will not gain charges, but otherwise it will behave as a normal atom.
+Destroying atoms is optional, the player can keep bouncing them for extra points and charges, up to a limit of ten charges. At ten charges, the atom will not gain charges, but otherwise it will behave as a normal atom. (The supercharged atom is the exception: it has twenty, see "Supercharged atom".)
 
 ## Supercharged atom
 
@@ -77,9 +77,9 @@ This section applies only to levels that include the `supercharged atom` additio
 
 * **One extra atom, halfway.** When half of the level's time has elapsed (half of the timer's initial value, counted in game time, so pauses don't count), one additional atom is generated, once per level. It is separate from the core's regular emission (it doesn't replace or delay any of its atoms) and it plays the same `launch` sound. TRY AGAIN starts the level again, so it is generated again at the halfway point.
 * **Double speed.** It travels at double the speed of all other atoms in the level (the level's speed from the level settings file; the factor is `SUPERCHARGED_SPEED_FACTOR` in `src/game/entities/Atom.js`, the only place that holds it). Every other atom keeps the level's speed. The atom's own speed applies to everything it does: travelling, escaping, the last life zoom and the core collapse. Since it is faster, the time it spends crossing the core (the capture window) is shorter.
-* **Ten charges from the start.** It is generated with the maximum charge (see "Atom capture"), so it never gains more. Its charge value is 10 for the score: every bounce scores 10 points * level * 10, and, if it is still inside the ring when the core collapses, 200 points * level * 10 (see "Score").
+* **Twenty charges from the start.** It is generated with twenty charges, double the ten limit of the other atoms (see "Atom capture"; the value is `SUPERCHARGED_CHARGE` in `src/game/entities/Atom.js`, the only place that holds it), and it never gains or loses any: its charge value is always 20. In the score, every bounce scores 10 points * level * 20, a capture 100 points * level * 20, and, if it is still inside the ring when the core collapses, 200 points * level * 20 (see "Score").
 * **Otherwise a normal atom.** Paddles bounce it back, and it costs a life if it escapes. In levels with `atom capture` it can be captured as soon as it crosses the core, and, with `charged atom catch`, caught (see "Atom capture" and "Charged atom catch").
-* **Without `atom capture`.** Its ten charges still count for the score, but charges do nothing else without that mechanic: the atom can't be captured or caught, and it doesn't pulse.
+* **Without `atom capture`.** Its twenty charges still count for the score, but charges do nothing else without that mechanic: the atom can't be captured or caught, and it doesn't pulse.
 
 ## Charged atom catch
 

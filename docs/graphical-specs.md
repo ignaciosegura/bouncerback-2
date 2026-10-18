@@ -167,10 +167,10 @@ Without this mechanic atoms never get charged, so they always stay white and not
 
 Without this mechanic there is no supercharged atom.
 
-* The supercharged atom appears at the core at the halfway point of the level (see "Supercharged atom" in `game-rules.md`) already red (#FF0000), the color of the maximum charge, with no color transition. It is the same size as every other atom.
+* The supercharged atom appears at the core at the halfway point of the level (see "Supercharged atom" in `game-rules.md`) already in its own color, supercharged purple (#BB00FF), with no color transition. It keeps that color for as long as it lives: it never goes through the white, yellow and red of the charge colors, and bouncing doesn't change it. Everything that uses an atom's current color (the capture window pulse, the capture burst, the escape tint) uses the purple. It is the same size as every other atom.
 * Besides the color, its speed is what sets it apart (see "Supercharged atom" in `game-rules.md`). It has no extra effect, aura or sound.
-* Without `atom capture` it is red too, but it never pulses, since it can't be captured.
-* Colors used here: red, see "Colors".
+* Without `atom capture` it is purple too, but it never pulses, since it can't be captured.
+* Colors used here: supercharged purple, see "Colors".
 
 ### `charged atom catch`
 
@@ -192,6 +192,7 @@ Without this mechanic nothing is caught. It builds on `atom capture`, so everyth
 * Grey (core fill and outline during the level-end core collapse): #888888
 * Transition dark yellow (screen-out tint, halfway): #666600
 * Transition dark red (screen-out tint, end): #660000. It's slightly lighter than the dark red background (#550000) on purpose: they're separate colors, so changing one doesn't change the other.
+* Supercharged purple (supercharged atom): #BB00FF
 
 # Mockups
 
