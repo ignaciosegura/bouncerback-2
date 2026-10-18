@@ -13,7 +13,7 @@ Music tracks are **not** listed here — they are mapped per-level inside each `
 | `bounce.mp3` | An atom is deflected by a paddle | Plays every time a paddle successfully reverses an atom's direction. |
 | `capture.mp3` | An atom is captured (tap released) and destroyed at the core | Plays when the player destroys a charged atom by tapping it while it crosses the core. Only in levels with the `atom capture` additional mechanic; elsewhere it never plays. With `charged atom catch` it plays when a caught atom is released, not when it's caught: catching and holding make no sound. |
 | `destroy.mp3` | An atom escapes the containment ring | Plays when an atom exits the ring and the player loses a life. |
-| `launch.mp3` | An atom is emitted from the core | Plays each time the atom emitter spawns a new atom. |
+| `launch.mp3` | An atom is emitted from the core | Plays each time the atom emitter spawns a new atom, and when the supercharged atom is generated halfway through the level (only in levels with the `supercharged atom` additional mechanic). |
 | `vortex_creation.mp3` | Level end — core collapse takes all remaining atoms | Plays once when the timer runs out and the core begins attracting all atoms. |
 | `silence.mp3` | Reserved / fallback | A near-silent stub used to unlock the audio context on first user interaction (mobile browsers). Must be played on the first tap/click before any other sound. |
 

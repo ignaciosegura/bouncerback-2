@@ -163,6 +163,15 @@ Without this mechanic atoms never get charged, so they always stay white and not
 * Capture burst: at the moment of capture a second animation plays together with the pull-in, lasting the same 0.5 seconds: a circle in the captured atom's color (the color it has at that moment) at the exact center of the scene, drawn behind everything else in the arena (the containment ring, the paddles, the core and the atoms are all on top of it). Its line is as thick as the core's radius, and it starts at radius zero and opacity zero. First, over 0.1 seconds, its opacity rises to 50% (linear). Then, over the remaining 0.4 seconds, its radius grows to 1.25 times the containment ring's radius (ease-out) while its opacity falls to 0 (linear). The circle is removed when it ends. Each capture gets its own circle, so several captures close in time show as many circles, and a new one never interrupts the previous one.
 * Colors used here: yellow and red, see "Colors".
 
+### `supercharged atom`
+
+Without this mechanic there is no supercharged atom.
+
+* The supercharged atom appears at the core at the halfway point of the level (see "Supercharged atom" in `game-rules.md`) already red (#FF0000), the color of the maximum charge, with no color transition. It is the same size as every other atom.
+* Besides the color, its speed is what sets it apart (see "Supercharged atom" in `game-rules.md`). It has no extra effect, aura or sound.
+* Without `atom capture` it is red too, but it never pulses, since it can't be captured.
+* Colors used here: red, see "Colors".
+
 ### `charged atom catch`
 
 Without this mechanic nothing is caught. It builds on `atom capture`, so everything in the previous section still applies, and the release of a caught atom plays that section's capture, pull-in and burst unchanged.
