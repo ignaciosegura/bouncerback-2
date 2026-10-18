@@ -124,7 +124,7 @@ export default class GameEngine {
     this.heldCaptureButtons = new Set() // controller capture buttons pressed during play: they capture on release
     // Charged atom catch: only one atom can be held at a time. `input` ('pointer:<id>' or
     // 'button:<button>') is what holds it, `owed` the points earned and not paid yet
-    this.held = null // { input, atom, owed }
+    this.held = null // { input, atom, owed, loop } (loop: the catch loop's sound voice)
     this.pausedHeld = null // the hold cancelled by the pause: its atom is captured on resume
     this.paddles = [] // every paddle instance, active or pooled, to update their flashes
     this.gamepad = new GamepadReader()
@@ -173,6 +173,7 @@ export default class GameEngine {
     window.removeEventListener('blur', this.onAutoPause)
     document.removeEventListener('visibilitychange', this.onVisibilityChange)
     if (this.paused) soundManager.stopPausedSfx()
+    this.stopCatchLoop(this.held)
     this.app.ticker.stop()
     // Losing the WebGL context while the canvas is still on screen flashes it white: wait until
     // the next screen has been painted (two frames), then until the GPU has put it on screen
@@ -321,6 +322,7 @@ export default class GameEngine {
     // A press held into the pause doesn't capture when released
     this.corePresses.clear()
     this.heldCaptureButtons.clear()
+    this.stopCatchLoop(this.held)
     this.pausedHeld = this.held
     this.held = null
     this.app.ticker.stop()
@@ -687,7 +689,9 @@ export default class GameEngine {
     if (!atom) return false
 
     atom.startCatch()
-    this.held = { input, atom, owed: 0 }
+    // The trigger and the loop are made to fit together and start at the same moment
+    soundManager.playSfx('catch_trigger')
+    this.held = { input, atom, owed: 0, loop: soundManager.startLoopSfx('catch_loop') }
     return true
   }
 
@@ -703,6 +707,7 @@ export default class GameEngine {
 
   // Ends a hold with a capture: pays what is left, then the capture
   finishCatch (held) {
+    this.stopCatchLoop(held)
     this.payRemainder(held)
     this.captureAtom(held.atom)
   }
@@ -732,7 +737,16 @@ export default class GameEngine {
   // The level is over for the player (core collapse, last life lost): the hold ends without a capture
   endHold () {
     if (this.held) this.payRemainder(this.held)
+    this.stopCatchLoop(this.held)
     this.held = null
+  }
+
+  // The catch loop fades out; safe to call again once it has stopped
+  stopCatchLoop (held) {
+    if (!held?.loop) return
+
+    soundManager.stopLoopSfx(held.loop)
+    held.loop = null
   }
 
   // The zoom frames both the frozen atom and the exact point where its center crossed the ring

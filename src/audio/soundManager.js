@@ -20,13 +20,13 @@ const STORAGE_KEYS = {
 
 const baseName = (path) => path.split('/').pop()
 
-const sfxUrls = import.meta.glob('../../assets/audio/*.mp3', { eager: true, query: '?url', import: 'default' })
+const sfxUrls = import.meta.glob('../../assets/audio/*.{mp3,wav,flac}', { eager: true, query: '?url', import: 'default' })
 const trackUrls = import.meta.glob('../../assets/audio/tracks/*.mp3', { eager: true, query: '?url', import: 'default' })
 
 // Sound effects are small: load them all up front, keyed by name without extension ('bounce')
 const sfx = {}
 for (const [path, url] of Object.entries(sfxUrls)) {
-  sfx[baseName(path).replace(/\.mp3$/, '')] = new Howl({ src: [url] })
+  sfx[baseName(path).replace(/\.(mp3|wav|flac)$/, '')] = new Howl({ src: [url] })
 }
 
 // Voice IDs of the voice-limited effects, oldest first, keyed like `sfx`
@@ -122,6 +122,34 @@ function trackVoice (howl, id) {
   const forget = () => liveVoices.delete(voice)
   howl.once('end', forget, id)
   howl.once('stop', forget, id)
+  return voice
+}
+
+/**
+ * Plays a sound effect on a loop until stopLoopSfx, fading it in. Returns the voice to stop.
+ * The file must loop from its first to its last sample: Howler ignores loop regions in files.
+ */
+export function startLoopSfx (name) {
+  const howl = sfx[name]
+  if (!howl) {
+    console.warn(`soundManager: unknown sound effect "${name}"`)
+    return null
+  }
+
+  const id = howl.play()
+  howl.loop(true, id)
+  howl.fade(0, howl.volume(), STEAL_FADE_MS, id)
+  return trackVoice(howl, id)
+}
+
+/**
+ * Fades a loop started by startLoopSfx out and stops it. The voice is forgotten at once, so a game
+ * pause right after doesn't pause it (and resumeSfx doesn't bring it back).
+ */
+export function stopLoopSfx (voice) {
+  if (!voice) return
+  liveVoices.delete(voice)
+  stealVoice(voice.howl, voice.id)
 }
 
 // Quick fade before stopping, so cutting a voice short doesn't click
