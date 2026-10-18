@@ -16,6 +16,10 @@ dist/
 # Node files
 package-lock.json
 
+# Reaper workfiles and backups
+*.reapeaks
+*.rpp-bak
+
 # Local secrets (FTP deploy credentials, etc.) — never commit
 .env
 .env.*
