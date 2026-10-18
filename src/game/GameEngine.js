@@ -121,10 +121,10 @@ export default class GameEngine {
     this.captureCircles = [] // capture bursts in progress
     this.corePresses = new Set() // pointers pressed on a capturable atom: they capture on release
     this.heldCaptureButtons = new Set() // controller capture buttons pressed during play: they capture on release
-    // Charged atom catch: input ('pointer:<id>' or 'button:<button>') → { atom, owed }, the atom it
-    // holds and the points it has earned but not paid yet
-    this.catches = new Map()
-    this.pausedCatches = [] // catches cancelled by the pause: their atoms are captured on resume
+    // Charged atom catch: only one atom can be held at a time. `input` ('pointer:<id>' or
+    // 'button:<button>') is what holds it, `owed` the points earned and not paid yet
+    this.held = null // { input, atom, owed }
+    this.pausedHeld = null // the hold cancelled by the pause: its atom is captured on resume
     this.paddles = [] // every paddle instance, active or pooled, to update their flashes
     this.gamepad = new GamepadReader()
   }
@@ -320,8 +320,8 @@ export default class GameEngine {
     // A press held into the pause doesn't capture when released
     this.corePresses.clear()
     this.heldCaptureButtons.clear()
-    this.pausedCatches = [...this.catches.values()]
-    this.catches.clear()
+    this.pausedHeld = this.held
+    this.held = null
     this.app.ticker.stop()
     soundManager.pauseTrack()
     soundManager.pauseSfx()
@@ -341,9 +341,9 @@ export default class GameEngine {
     soundManager.resumeTrack()
     soundManager.resumeSfx()
     this.emit('onPauseChange', { paused: false })
-    // The holds were cancelled by the pause: the atoms they caught are captured now
-    for (const entry of this.pausedCatches) this.finishCatch(entry)
-    this.pausedCatches = []
+    // The hold was cancelled by the pause: the atom it caught is captured now
+    if (this.pausedHeld) this.finishCatch(this.pausedHeld)
+    this.pausedHeld = null
   }
 
   // READY on the gameplay tip: the start delay (and its ring and core animation) begins
@@ -535,7 +535,7 @@ export default class GameEngine {
     }
     this.updatePaddleWarnings()
 
-    this.payCatches(dt)
+    this.payHeld(dt)
 
     const step = this.atomSpeed * dt
     for (let i = this.atoms.length - 1; i >= 0; i--) {
@@ -674,58 +674,60 @@ export default class GameEngine {
 
   // Charged atom catch
 
-  // `input` presses on the core: catches the capturable atom nearest to its center, if any
+  // `input` presses on the core: catches the capturable atom nearest to its center, if any. Only
+  // one atom can be held at a time, so while one is held other presses catch nothing
   catchNearest (input) {
+    if (this.held) return false
     const atom = this.nearestCapturable()
     if (!atom) return false
 
     atom.startCatch()
-    this.catches.set(input, { atom, owed: 0 })
+    this.held = { input, atom, owed: 0 }
     return true
   }
 
-  // `input` is released: the atom it caught, if any, is captured
+  // `input` is released: if it is the one holding the atom, the atom is captured
   releaseCatch (input) {
-    const entry = this.catches.get(input)
-    if (!entry) return false
+    if (this.held?.input !== input) return false
 
-    this.catches.delete(input)
-    this.finishCatch(entry)
+    const held = this.held
+    this.held = null
+    this.finishCatch(held)
     return true
   }
 
-  // Ends a catch with a capture: pays what is left, then the capture
-  finishCatch (entry) {
-    this.payRemainder(entry)
-    this.captureAtom(entry.atom)
+  // Ends a hold with a capture: pays what is left, then the capture
+  finishCatch (held) {
+    this.payRemainder(held)
+    this.captureAtom(held.atom)
   }
 
-  // Each caught atom earns points at a fixed rate, paid in whole steps (see
+  // The held atom earns points at a fixed rate, paid in whole steps (see
   // chargedAtomCatchSettings.js); the part of a step not reached yet is carried to the next frame
-  payCatches (dt) {
+  payHeld (dt) {
+    if (!this.held) return
+
     const { POINTS_PER_SECOND, SCORE_STEP } = CHARGED_ATOM_CATCH_SETTINGS
-    let paid = 0
-    for (const entry of this.catches.values()) {
-      entry.owed += POINTS_PER_SECOND * dt
-      const steps = Math.floor(entry.owed / SCORE_STEP)
-      entry.owed -= steps * SCORE_STEP
-      paid += steps * SCORE_STEP
-    }
-    if (paid > 0) this.addScore(paid)
+    this.held.owed += POINTS_PER_SECOND * dt
+    const steps = Math.floor(this.held.owed / SCORE_STEP)
+    if (steps === 0) return
+
+    this.held.owed -= steps * SCORE_STEP
+    this.addScore(steps * SCORE_STEP)
   }
 
-  // A catch ends: what it earned since its last step is paid, so the total is the rate times the
+  // A hold ends: what it earned since its last step is paid, so the total is the rate times the
   // time held, whatever the step
-  payRemainder (entry) {
-    const points = Math.round(entry.owed)
-    entry.owed = 0
+  payRemainder (held) {
+    const points = Math.round(held.owed)
+    held.owed = 0
     if (points > 0) this.addScore(points)
   }
 
-  // The level is over for the player (core collapse, last life lost): the holds end without a capture
-  endCatches () {
-    for (const entry of this.catches.values()) this.payRemainder(entry)
-    this.catches.clear()
+  // The level is over for the player (core collapse, last life lost): the hold ends without a capture
+  endHold () {
+    if (this.held) this.payRemainder(this.held)
+    this.held = null
   }
 
   // The zoom frames both the frozen atom and the exact point where its center crossed the ring
@@ -742,7 +744,7 @@ export default class GameEngine {
     this.state = STATE.LOST
     this.stateTime = 0
     this.clearPaddles()
-    this.endCatches()
+    this.endHold()
   }
 
   updateLost (dt) {
@@ -771,7 +773,7 @@ export default class GameEngine {
     this.state = STATE.COLLAPSING
     this.stateTime = 0
     this.clearPaddles()
-    this.endCatches()
+    this.endHold()
     for (const atom of this.atoms) {
       atom.pulse.hide()
       if (atom.state === ATOM_STATE.MOVING || atom.state === ATOM_STATE.CAUGHT) atom.startCollapse(this.atomSpeed, CORE_COLLAPSE_SETTLE_TIME)
