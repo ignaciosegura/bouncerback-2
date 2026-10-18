@@ -2,6 +2,6 @@
 // are exactly what level files list in `additionalGameMechanics`; the schema's enum must match
 export const ADDITIONAL_MECHANICS = Object.freeze({
   ATOM_CAPTURE: 'atom capture',
-  SUPERCHARGED_ATOM: 'supercharged atom', // reserved: no behavior yet
+  SUPERCHARGED_ATOM: 'supercharged atom',
   CHARGED_ATOM_CATCH: 'charged atom catch'
 })

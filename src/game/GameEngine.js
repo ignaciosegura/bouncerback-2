@@ -102,6 +102,7 @@ export default class GameEngine {
     this.timeTenths = level.timerTenths
     this.lastBeat = -1 // last beat of the music on which capturable atoms pulsed
     this.atomSpeed = CONTACT_DISTANCE * level.atomSpeed
+    this.superchargedSpawned = false // the supercharged atom is generated once, halfway
     // Camera for the last life zoom. `offset` is the share of the focus point's normal offset from
     // the screen center still left (1: centered layout, 0: the focus is at the center)
     this.zoom = { scale: 1, focusX: 0, focusY: 0, offset: 1 }
@@ -525,6 +526,10 @@ export default class GameEngine {
     this.time += dt
 
     for (let due = this.emitter.update(this.time); due > 0; due--) this.spawnAtom()
+    if (this.level.superchargedAtom && !this.superchargedSpawned && this.time >= this.level.timerTenths / 20) {
+      this.superchargedSpawned = true
+      this.spawnAtom(true)
+    }
 
     for (let i = this.activePaddles.length - 1; i >= 0; i--) {
       const paddle = this.activePaddles[i]
@@ -552,7 +557,7 @@ export default class GameEngine {
         this.updateCapturingAtom(atom, dt)
         continue
       }
-      atom.move(step)
+      atom.move(step * atom.speedFactor)
       if (atom.movingOutward && Math.abs(atom.distance) >= CONTACT_DISTANCE) this.checkContact(atom)
       atom.render(dt)
     }
@@ -594,7 +599,7 @@ export default class GameEngine {
   }
 
   updateEscapingAtom (atom, dt, step) {
-    if (atom.updateEscape(dt, step)) {
+    if (atom.updateEscape(dt, step * atom.speedFactor)) {
       atom.render(dt)
     } else {
       this.releaseAtom(atom)
@@ -753,7 +758,7 @@ export default class GameEngine {
     if (escapeLeft > 0) {
       // Full speed and opacity, cut at exactly LAST_ESCAPE_TIME
       const escapeDt = Math.min(dt, escapeLeft)
-      this.lastAtom.move(this.atomSpeed * escapeDt)
+      this.lastAtom.move(this.atomSpeed * this.lastAtom.speedFactor * escapeDt)
       this.lastAtom.render(escapeDt)
       if (this.stateTime >= LAST_ESCAPE_TIME) this.focusLastAtom()
       return
@@ -776,7 +781,7 @@ export default class GameEngine {
     this.endHold()
     for (const atom of this.atoms) {
       atom.pulse.hide()
-      if (atom.state === ATOM_STATE.MOVING || atom.state === ATOM_STATE.CAUGHT) atom.startCollapse(this.atomSpeed, CORE_COLLAPSE_SETTLE_TIME)
+      if (atom.state === ATOM_STATE.MOVING || atom.state === ATOM_STATE.CAUGHT) atom.startCollapse(this.atomSpeed * atom.speedFactor, CORE_COLLAPSE_SETTLE_TIME)
     }
     soundManager.playSfx('vortex_creation')
   }
@@ -857,12 +862,12 @@ export default class GameEngine {
 
   // Entity pools
 
-  spawnAtom () {
+  spawnAtom (supercharged = false) {
     const atom = this.atomPool.pop() ?? this.createAtom()
     // New atoms go behind all the others, so fresh atoms never hide charged ones. Pooled atoms
     // keep their old slot in the layer, so they are moved to the back too
     this.atomLayer.addChildAt(atom.view, 0)
-    atom.spawn(Math.random() * 2 * Math.PI)
+    atom.spawn(Math.random() * 2 * Math.PI, supercharged)
     this.atoms.push(atom)
     soundManager.playSfx('launch')
   }

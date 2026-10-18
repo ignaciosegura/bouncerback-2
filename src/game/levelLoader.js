@@ -97,6 +97,7 @@ export function loadLevel (data, number) {
     // Fixed when the level is loaded: mechanics never change while a level is played
     additionalGameMechanics: Object.freeze([...data.additionalGameMechanics]),
     atomCapture: data.additionalGameMechanics.includes(ADDITIONAL_MECHANICS.ATOM_CAPTURE),
+    superchargedAtom: data.additionalGameMechanics.includes(ADDITIONAL_MECHANICS.SUPERCHARGED_ATOM),
     chargedAtomCatch: data.additionalGameMechanics.includes(ADDITIONAL_MECHANICS.CHARGED_ATOM_CATCH),
     secondsPerBeat,
     // Initial timer value, in tenths of a second

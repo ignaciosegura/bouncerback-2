@@ -7,6 +7,9 @@ import AtomPulse from './AtomPulse.js'
 export const ATOM_RADIUS = 20
 export const MAX_CHARGE = 10
 export const CAPTURE_MIN_CHARGE = 3
+// The supercharged atom (supercharged atom mechanic): double the speed, double the maximum charge
+export const SUPERCHARGED_SPEED_FACTOR = 2
+export const SUPERCHARGED_CHARGE = 20
 
 export const ATOM_STATE = {
   MOVING: 'moving',
@@ -33,7 +36,8 @@ const COLOR_TRANSITION_TIME = 0.5
 export const ATOM_COLORS = {
   WHITE: 0xffffff,
   YELLOW: 0xffff00, // charge CAPTURE_MIN_CHARGE
-  RED: 0xff0000 // charge MAX_CHARGE
+  RED: 0xff0000, // charge MAX_CHARGE
+  SUPERCHARGED: 0xbb00ff // the supercharged atom, whatever its charge
 }
 
 // White until capturable; then yellow at CAPTURE_MIN_CHARGE, stepping toward red with each
@@ -55,22 +59,24 @@ export default class Atom {
     this.pulse = new AtomPulse()
   }
 
-  spawn (angle) {
+  spawn (angle, supercharged = false) {
+    this.supercharged = supercharged
     this.angle = angle
     this.distance = 0
     this.direction = 1
-    this.charge = 1
+    this.charge = supercharged ? SUPERCHARGED_CHARGE : 1
+    const startColor = supercharged ? ATOM_COLORS.SUPERCHARGED : ATOM_COLORS.WHITE
     this.state = ATOM_STATE.MOVING
     this.escapeTime = 0
     this.shakeTime = 0
     this.view.alpha = 1
     this.view.scale.set(1)
     this.view.visible = true
-    this.color = ATOM_COLORS.WHITE
-    this.colorFrom = ATOM_COLORS.WHITE
-    this.colorTo = ATOM_COLORS.WHITE
+    this.color = startColor
+    this.colorFrom = startColor
+    this.colorTo = startColor
     this.colorTime = COLOR_TRANSITION_TIME
-    this.view.tint = ATOM_COLORS.WHITE
+    this.view.tint = startColor
     this.pulse.hide()
     this.pulseCount = 0 // pulses emitted during the current core crossing
     this.render()
@@ -87,6 +93,11 @@ export default class Atom {
     this.pulse.update(0, this.view.x, this.view.y, this.color)
   }
 
+  // Multiplies the level's atom speed
+  get speedFactor () {
+    return this.supercharged ? SUPERCHARGED_SPEED_FACTOR : 1
+  }
+
   // Angle of the atom's current position around the core
   get positionAngle () {
     return this.distance >= 0 ? this.angle : this.angle + Math.PI
@@ -101,12 +112,13 @@ export default class Atom {
   }
 
   // Exact reversal at `contact` distance: the atom heads straight back through the core. With
-  // `charges` (the atom capture mechanic) it also gains a charge and starts its color change
+  // `charges` (the atom capture mechanic) it also gains a charge and starts its color change. A
+  // supercharged atom never changes its charge or color
   bounce (contact, charges) {
     const overshoot = Math.abs(this.distance) - contact
     this.distance = Math.sign(this.distance) * (contact - overshoot)
     this.direction = -this.direction
-    if (!charges) return
+    if (!charges || this.supercharged) return
     this.charge = Math.min(MAX_CHARGE, this.charge + 1)
     const target = chargeColor(this.charge)
     if (target !== this.colorTo) {
