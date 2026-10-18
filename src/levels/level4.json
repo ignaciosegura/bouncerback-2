@@ -16,5 +16,13 @@
     "duration": 3
   },
   "lives": 4,
-  "additionalGameMechanics": ["atom capture", "supercharged atom", "charged atom catch"]
+  "additionalGameMechanics": [
+    "atom capture",
+    "supercharged atom",
+    "charged atom catch"
+  ],
+  "tip": [
+    "A supercharged atom will appear.",
+    "It goes faster and it's extremely valuable.",
+  ]
 }
