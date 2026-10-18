@@ -71,4 +71,4 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
   - [x] **Phase 49** — Charged atom catch (pressing a capture input catches a capturable atom: it stops, shakes and scores at a rate set in `chargedAtomCatchSettings.js`, paid in steps also set there; releasing captures it as usual; levels 3–5)
   - [x] **Phase 50** — Supercharged atom (halfway through the level one extra atom is generated, at double the speed of the others, with twenty charges and its own color, supercharged purple; levels 4 and 5)
   - [x] **Phase 51** — Catch sound effects (a catch plays the one-shot `catch_trigger` and starts the looped `catch_loop` at the same moment; the loop fades in and out over 15 ms and stops when the hold ends; the supercharged atom keeps using `launch` and `capture`)
-  - [ ] **Phase 52** — Supercharged launch sound (the supercharged atom plays its own `launch_super` when it is generated, instead of `launch`, never both)
+  - [x] **Phase 52** — Supercharged launch sound (the supercharged atom plays its own `launch_super` when it is generated, instead of `launch`, never both)

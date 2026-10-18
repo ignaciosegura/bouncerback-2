@@ -883,7 +883,7 @@ export default class GameEngine {
     this.atomLayer.addChildAt(atom.view, 0)
     atom.spawn(Math.random() * 2 * Math.PI, supercharged)
     this.atoms.push(atom)
-    soundManager.playSfx('launch')
+    soundManager.playSfx(supercharged ? 'launch_super' : 'launch')
   }
 
   createAtom () {
