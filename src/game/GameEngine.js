@@ -696,8 +696,7 @@ export default class GameEngine {
       input,
       atom,
       // A held atom can't bounce, so its charge, and with it the rate, is fixed for the whole hold
-      atomHoldScoringPerSecond:
-        CHARGED_ATOM_HOLD_SETTINGS.POINTS_PER_SECOND * (this.level.number + atom.charge - CAPTURE_MIN_CHARGE),
+      atomHoldScoringPerSecond: CHARGED_ATOM_HOLD_SETTINGS.POINTS_PER_SECOND * (this.level.number + atom.charge),
       owed: 0,
       loop: soundManager.startLoopSfx('hold_loop')
     }
