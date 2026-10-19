@@ -123,8 +123,9 @@ export default class GameEngine {
     this.corePresses = new Set() // pointers pressed on a capturable atom: they capture on release
     this.heldCaptureButtons = new Set() // controller capture buttons pressed during play: they capture on release
     // Charged atom hold: only one atom can be held at a time. `input` ('pointer:<id>' or
-    // 'button:<button>') is what holds it, `owed` the points earned and not paid yet
-    this.held = null // { input, atom, owed, loop } (loop: the hold loop's sound voice)
+    // 'button:<button>') is what holds it, `atomHoldScoringPerSecond` the points it earns per
+    // second, `owed` the points earned and not paid yet
+    this.held = null // { input, atom, atomHoldScoringPerSecond, owed, loop } (loop: the hold loop's sound voice)
     this.pausedHeld = null // the hold cancelled by the pause: its atom is captured on resume
     this.paddles = [] // every paddle instance, active or pooled, to update their flashes
     this.gamepad = new GamepadReader()
@@ -691,7 +692,15 @@ export default class GameEngine {
     atom.startHold()
     // The trigger and the loop are made to fit together and start at the same moment
     soundManager.playSfx('hold_trigger')
-    this.held = { input, atom, owed: 0, loop: soundManager.startLoopSfx('hold_loop') }
+    this.held = {
+      input,
+      atom,
+      // A held atom can't bounce, so its charge, and with it the rate, is fixed for the whole hold
+      atomHoldScoringPerSecond:
+        CHARGED_ATOM_HOLD_SETTINGS.POINTS_PER_SECOND * (this.level.number + atom.charge - CAPTURE_MIN_CHARGE),
+      owed: 0,
+      loop: soundManager.startLoopSfx('hold_loop')
+    }
     return true
   }
 
@@ -712,13 +721,13 @@ export default class GameEngine {
     this.captureAtom(held.atom)
   }
 
-  // The held atom earns points at a fixed rate, paid in whole steps (see
+  // The held atom earns points at its rate (set when the hold starts), paid in whole steps (see
   // chargedAtomHoldSettings.js); the part of a step not reached yet is carried to the next frame
   payHeld (dt) {
     if (!this.held) return
 
-    const { POINTS_PER_SECOND, SCORE_STEP } = CHARGED_ATOM_HOLD_SETTINGS
-    this.held.owed += POINTS_PER_SECOND * dt
+    const { SCORE_STEP } = CHARGED_ATOM_HOLD_SETTINGS
+    this.held.owed += this.held.atomHoldScoringPerSecond * dt
     const steps = Math.floor(this.held.owed / SCORE_STEP)
     if (steps === 0) return
 
