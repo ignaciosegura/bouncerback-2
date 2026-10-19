@@ -98,7 +98,7 @@ export function loadLevel (data, number) {
     additionalGameMechanics: Object.freeze([...data.additionalGameMechanics]),
     atomCapture: data.additionalGameMechanics.includes(ADDITIONAL_MECHANICS.ATOM_CAPTURE),
     superchargedAtom: data.additionalGameMechanics.includes(ADDITIONAL_MECHANICS.SUPERCHARGED_ATOM),
-    chargedAtomCatch: data.additionalGameMechanics.includes(ADDITIONAL_MECHANICS.CHARGED_ATOM_CATCH),
+    chargedAtomHold: data.additionalGameMechanics.includes(ADDITIONAL_MECHANICS.CHARGED_ATOM_HOLD),
     secondsPerBeat,
     // Initial timer value, in tenths of a second
     timerTenths: Math.round(data.duration * secondsPerBar * 10),

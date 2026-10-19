@@ -108,13 +108,13 @@
         },
         "additionalGameMechanics": {
             "type": "array",
-            "description": "Names of the additional game mechanics active in this level, fixed for the whole level. Required; if empty, the level only uses the core mechanic. Valid names: \"atom capture\", \"supercharged atom\" and \"charged atom catch\".",
+            "description": "Names of the additional game mechanics active in this level, fixed for the whole level. Required; if empty, the level only uses the core mechanic. Valid names: \"atom capture\", \"supercharged atom\" and \"charged atom hold\".",
             "items": {
                 "type": "string",
                 "enum": [
                     "atom capture",
                     "supercharged atom",
-                    "charged atom catch"
+                    "charged atom hold"
                 ]
             }
         },

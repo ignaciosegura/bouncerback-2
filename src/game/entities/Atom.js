@@ -16,12 +16,12 @@ export const ATOM_STATE = {
   ESCAPING: 'escaping',
   COLLAPSING: 'collapsing',
   CAPTURING: 'capturing',
-  CAUGHT: 'caught' // held by the player (charged atom catch): stopped, shaking
+  HELD: 'held' // by the player (charged atom hold): stopped, shaking
 }
 
 const ESCAPE_FADE_TIME = 0.5
 // Escape shake: the atom vibrates vertically, up then down like the menus' screen-shake, a few
-// times in a row, while it keeps moving out. A caught atom shakes the same way, without limit
+// times in a row, while it keeps moving out. A held atom shakes the same way, without limit
 const SHAKE_COUNT = 3
 const SHAKE_CYCLE_TIME = 0.1
 const SHAKE_DISTANCE = 2 // px at the 1080px reference
@@ -142,9 +142,9 @@ export default class Atom {
     return this.escapeTime < ESCAPE_FADE_TIME
   }
 
-  // Caught (charged atom catch): stops where it is and shakes until it is captured
-  startCatch () {
-    this.state = ATOM_STATE.CAUGHT
+  // Held (charged atom hold): stops where it is and shakes until it is captured
+  startHold () {
+    this.state = ATOM_STATE.HELD
     this.shakeTime = 0
     this.pulse.hide()
   }
@@ -189,10 +189,10 @@ export default class Atom {
       : lerpColor(ESCAPE_TINT_YELLOW, ESCAPE_TINT_RED, t * 2 - 1)
   }
 
-  // Vertical offset of the escape shake (limited to SHAKE_COUNT vibrations) or of the caught
+  // Vertical offset of the escape shake (limited to SHAKE_COUNT vibrations) or of the hold
   // shake (without limit); `dt` advances it
   shakeY (dt) {
-    if (this.state !== ATOM_STATE.ESCAPING && this.state !== ATOM_STATE.CAUGHT) return 0
+    if (this.state !== ATOM_STATE.ESCAPING && this.state !== ATOM_STATE.HELD) return 0
     this.shakeTime += dt
     const cycles = this.shakeTime / SHAKE_CYCLE_TIME
     if (this.state === ATOM_STATE.ESCAPING && cycles >= SHAKE_COUNT) return 0

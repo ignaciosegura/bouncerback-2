@@ -172,14 +172,14 @@ Without this mechanic there is no supercharged atom.
 * Without `atom capture` it is purple too, but it never pulses, since it can't be captured.
 * Colors used here: supercharged purple, see "Colors".
 
-### `charged atom catch`
+### `charged atom hold`
 
-Without this mechanic nothing is caught. It builds on `atom capture`, so everything in the previous section still applies, and the release of a caught atom plays that section's capture, pull-in and burst unchanged.
+Without this mechanic nothing is held. It builds on `atom capture`, so everything in the previous section still applies, and the release of a held atom plays that section's capture, pull-in and burst unchanged.
 
-* Catch: when the player catches an atom, it stops where it is, with its current color. Any pulse it was emitting stops at that moment, like at a capture, and it emits no more while caught.
-* Caught shake: for as long as the atom is caught, it vibrates vertically exactly like the atom escape shake (the screen transitions' up-then-down shake, same duration of each vibration and same distance, see "Atom escape shake" in "Visual feedback"), but the vibrations repeat without limit from the moment of the catch until the release. Unlike the escape, there's no fade and no tint: the atom keeps its color and opacity. When it's released, the shake stops at once and the capture pull-in starts from the atom's resting position.
-* Score: every increment of the caught-atom score appears on the HUD as soon as it's paid, with no animation of its own (see "Charged atom catch" in `game-rules.md`).
-* Nothing else is drawn for the catch: no extra ring, color or sound.
+* Hold: when the player holds an atom, it stops where it is, with its current color. Any pulse it was emitting stops at that moment, like at a capture, and it emits no more while held.
+* Hold shake: for as long as the atom is held, it vibrates vertically exactly like the atom escape shake (the screen transitions' up-then-down shake, same duration of each vibration and same distance, see "Atom escape shake" in "Visual feedback"), but the vibrations repeat without limit from the moment it is held until the release. Unlike the escape, there's no fade and no tint: the atom keeps its color and opacity. When it's released, the shake stops at once and the capture pull-in starts from the atom's resting position.
+* Score: every increment of the held-atom score appears on the HUD as soon as it's paid, with no animation of its own (see "Charged atom hold" in `game-rules.md`).
+* Nothing else is drawn for the hold: no extra ring, color or sound.
 
 # Colors
 

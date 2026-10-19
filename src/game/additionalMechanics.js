@@ -3,5 +3,5 @@
 export const ADDITIONAL_MECHANICS = Object.freeze({
   ATOM_CAPTURE: 'atom capture',
   SUPERCHARGED_ATOM: 'supercharged atom',
-  CHARGED_ATOM_CATCH: 'charged atom catch'
+  CHARGED_ATOM_HOLD: 'charged atom hold'
 })

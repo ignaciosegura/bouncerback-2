@@ -426,7 +426,7 @@
     >
   >
   <TRACK {A545E980-9D6E-0842-8BF1-99CD3B825211}
-    NAME catch_trigger
+    NAME hold_trigger
     PEAKCOL 16576
     BEAT -1
     AUTOMODE 0
@@ -3556,7 +3556,7 @@
     >
   >
   <TRACK {B2A18E32-AE95-F14D-A0D0-B00A106C203E}
-    NAME catch_loop
+    NAME hold_loop
     PEAKCOL 16576
     BEAT -1
     AUTOMODE 0

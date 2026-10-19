@@ -12,13 +12,13 @@ Every other mechanic is an additional one, and the player can't switch it off. E
 | :--- | :--- | :--- |
 | `atom capture` | Atoms get charged on every bounce and can be captured (see "Atom capture") | Defined |
 | `supercharged atom` | Halfway through the level, an additional atom is generated that travels at double the speed of all other atoms in that level and it already has twenty charges | Defined |
-| `charged atom catch` | The atoms that can be captured can also be retained. Pressing a capture button catches the atom, which scores at a fixed rate per second while the button is held, and it is captured as usual upon release (see "Charged atom catch") | Defined |
+| `charged atom hold` | The atoms that can be captured can also be held. Pressing a capture button holds the atom, which scores at a fixed rate per second while the button stays pressed, and it is captured as usual upon release (see "Charged atom hold") | Defined |
 
 The names live in one constant in the code (an enum), and the level file schema lists the same names.
 
 **A level's additional mechanics are fixed for the whole level.** They are read when the level starts and can't be switched on or off while it is being played: the rules in force at the start stay in force until the level ends, through pauses and resumes, and TRY AGAIN starts the level again with the same ones.
 
-Currently only level 1 plays without `atom capture`; levels 2 to 5 include it. `charged atom catch` is also in level 3 onwards. `supercharged atom` is added at levels 4 and 5. 
+Currently only level 1 plays without `atom capture`; levels 2 to 5 include it. `charged atom hold` is also in level 3 onwards. `supercharged atom` is added at levels 4 and 5. 
 
 ## Level start
 
@@ -78,27 +78,27 @@ This section applies only to levels that include the `supercharged atom` additio
 * **One extra atom, halfway.** When half of the level's time has elapsed (half of the timer's initial value, counted in game time, so pauses don't count), one additional atom is generated, once per level. It is separate from the core's regular emission (it doesn't replace or delay any of its atoms) and it plays its own launch sound (`launch_super`) instead of the regular `launch`, never both (see `audio-map.md`). TRY AGAIN starts the level again, so it is generated again at the halfway point.
 * **Double speed.** It travels at double the speed of all other atoms in the level (the level's speed from the level settings file; the factor is `SUPERCHARGED_SPEED_FACTOR` in `src/game/entities/Atom.js`, the only place that holds it). Every other atom keeps the level's speed. The atom's own speed applies to everything it does: travelling, escaping, the last life zoom and the core collapse. Since it is faster, the time it spends crossing the core (the capture window) is shorter.
 * **Twenty charges from the start.** It is generated with twenty charges, double the ten limit of the other atoms (see "Atom capture"; the value is `SUPERCHARGED_CHARGE` in `src/game/entities/Atom.js`, the only place that holds it), and it never gains or loses any: its charge value is always 20. In the score, every bounce scores 10 points * level * 20, a capture 100 points * level * 20, and, if it is still inside the ring when the core collapses, 200 points * level * 20 (see "Score").
-* **Otherwise a normal atom.** Paddles bounce it back, and it costs a life if it escapes. In levels with `atom capture` it can be captured as soon as it crosses the core, and, with `charged atom catch`, caught (see "Atom capture" and "Charged atom catch").
-* **Without `atom capture`.** Its twenty charges still count for the score, but charges do nothing else without that mechanic: the atom can't be captured or caught, and it doesn't pulse.
+* **Otherwise a normal atom.** Paddles bounce it back, and it costs a life if it escapes. In levels with `atom capture` it can be captured as soon as it crosses the core, and, with `charged atom hold`, held (see "Atom capture" and "Charged atom hold").
+* **Without `atom capture`.** Its twenty charges still count for the score, but charges do nothing else without that mechanic: the atom can't be captured or held, and it doesn't pulse.
 
-## Charged atom catch
+## Charged atom hold
 
-This section applies only to levels that include the `charged atom catch` additional mechanic (see "Additional game mechanics"), which builds on `atom capture`. Without it, a capture happens on release, as described in "Atom capture": the press does nothing to the atom.
+This section applies only to levels that include the `charged atom hold` additional mechanic (see "Additional game mechanics"), which builds on `atom capture`. Without it, a capture happens on release, as described in "Atom capture": the press does nothing to the atom.
 
-With it, the press matters too. Pressing a capture input (a click or touch on the core, or a controller capture button, see `game-controller.md`) while a capturable atom is crossing the core **catches** it, and releasing the input **captures** it.
+With it, the press matters too. Pressing a capture input (a click or touch on the core, or a controller capture button, see `game-controller.md`) while a capturable atom is crossing the core **holds** it, and releasing the input **captures** it.
 
-* **Catch (press).** The atom stops travelling at once, where it is, and stays there for as long as it is caught: it can't bounce, escape or be hit by a paddle. The other atoms carry on. If several capturable atoms are crossing the core, the one nearest to its center is caught, the same one a capture would take. It shakes while it's caught (see "Visual feedback for additional game mechanics" in `graphical-specs.md`) and sound plays: a one-shot (`catch_trigger`) at the catch, and a loop (`catch_loop`) for as long as it is held, the same for any atom (see `audio-map.md`).
-* **Score while caught.** A caught atom scores at a fixed rate per second, paid in fixed steps so the score and the HUD don't have to change on every frame. Each increment shows on the HUD as soon as it is paid. The rate does not depend on the level or the atom's charge. Whatever is left unpaid (less than one step) is paid when the catch ends, so the total for a catch is always the rate times the time it lasted, rounded to a whole number of points. Both the rate and the step are in `src/game/chargedAtomCatchSettings.js`, the only place that holds their values.
-* **Release.** Releasing the input captures the atom it caught, exactly as a capture does without the mechanic: the capture points (see "Score"), the pull-in animation, the capture burst and the `capture` sound. The catch loop fades out. The points scored while holding are on top of them.
-* **One atom at a time.** Only one atom can be caught at once, and only one is captured at a time. The input that caught it (a pointer or a capture button) is the only one whose release captures it. While an atom is caught, pressing any other input catches nothing: a click or touch places a paddle, and a controller capture button does nothing, and neither captures anything on release. Once the atom is captured, the next press can catch another.
-* **A press that catches nothing.** If no capturable atom is crossing the core when the input is pressed, nothing is caught. A click or touch places a paddle, as always. A controller capture button does nothing, and its release captures nothing either, even if an atom is crossing the core by then: only a press that caught an atom can capture it. (This is different from levels without the mechanic, where the release captures whatever is in the core.)
-* **Pause.** Pausing cancels the hold. The caught atom is captured as soon as the game resumes, so it never stays caught for good. The catch sound stops when the hold is cancelled.
-* **End of the level.** If the timer runs out while an atom is caught, the core collapse takes it like any other atom still inside the ring, and it scores the containment points (see "Score"). Its input's release then does nothing. The catch sound stops.
-* **Last life lost.** If the last life is lost while an atom is caught, everything freezes as usual (see "Lives"), and the release does nothing. The catch sound stops.
+* **Hold (press).** The atom stops travelling at once, where it is, and stays there for as long as it is held: it can't bounce, escape or be hit by a paddle. The other atoms carry on. If several capturable atoms are crossing the core, the one nearest to its center is held, the same one a capture would take. It shakes while it's held (see "Visual feedback for additional game mechanics" in `graphical-specs.md`) and sound plays: a one-shot (`hold_trigger`) when the hold starts, and a loop (`hold_loop`) for as long as it is held, the same for any atom (see `audio-map.md`).
+* **Score while held.** A held atom scores at a fixed rate per second, paid in fixed steps so the score and the HUD don't have to change on every frame. Each increment shows on the HUD as soon as it is paid. The rate does not depend on the level or the atom's charge. Whatever is left unpaid (less than one step) is paid when the hold ends, so the total for a hold is always the rate times the time it lasted, rounded to a whole number of points. Both the rate and the step are in `src/game/chargedAtomHoldSettings.js`, the only place that holds their values.
+* **Release.** Releasing the input captures the atom it held, exactly as a capture does without the mechanic: the capture points (see "Score"), the pull-in animation, the capture burst and the `capture` sound. The hold loop fades out. The points scored while holding are on top of them.
+* **One atom at a time.** Only one atom can be held at once, and only one is captured at a time. The input that holds it (a pointer or a capture button) is the only one whose release captures it. While an atom is held, pressing any other input holds nothing: a click or touch places a paddle, and a controller capture button does nothing, and neither captures anything on release. Once the atom is captured, the next press can hold another.
+* **A press that holds nothing.** If no capturable atom is crossing the core when the input is pressed, nothing is held. A click or touch places a paddle, as always. A controller capture button does nothing, and its release captures nothing either, even if an atom is crossing the core by then: only a press that held an atom can capture it. (This is different from levels without the mechanic, where the release captures whatever is in the core.)
+* **Pause.** Pausing cancels the hold. The held atom is captured as soon as the game resumes, so it never stays held for good. The hold sound stops when the hold is cancelled.
+* **End of the level.** If the timer runs out while an atom is held, the core collapse takes it like any other atom still inside the ring, and it scores the containment points (see "Score"). Its input's release then does nothing. The hold sound stops.
+* **Last life lost.** If the last life is lost while an atom is held, everything freezes as usual (see "Lives"), and the release does nothing. The hold sound stops.
 
 ## Game controller
 
-The game can also be played with a game controller, alongside mouse and touch: either stick places a paddle, and buttons capture atoms (in levels with `atom capture`), or catch them and capture them on release (in levels with `charged atom catch`). The controls are in `docs/game-controller.md`.
+The game can also be played with a game controller, alongside mouse and touch: either stick places a paddle, and buttons capture atoms (in levels with `atom capture`), or hold them and capture them on release (in levels with `charged atom hold`). The controls are in `docs/game-controller.md`.
 
 # Lives
 
@@ -116,7 +116,7 @@ The player will get:
 
 * 10 points * level * atom charge value every time it bounces back an atom using a paddle. 
 * 100 points * level * atom charge value for every atom captured (only with `atom capture`, since without it nothing can be captured)
-* With `charged atom catch`, additional points while an atom is caught, at the fixed rate set in `chargedAtomCatchSettings.js` (not multiplied by level or charge): see "Charged atom catch".
+* With `charged atom hold`, additional points while an atom is held, at the fixed rate set in `chargedAtomHoldSettings.js` (not multiplied by level or charge): see "Charged atom hold".
 * 200 points * level * atom charge value for every atom contained at the end of the level, when the core collapse takes all remaining atoms.
 
 Without `atom capture`, the charge value of every atom is always 1, so those two formulas become 10 points * level per bounce and 200 points * level per contained atom.

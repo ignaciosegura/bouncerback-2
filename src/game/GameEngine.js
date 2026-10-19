@@ -2,7 +2,7 @@ import { Application, Container } from 'pixi.js'
 import * as soundManager from '../audio/soundManager.js'
 import { bouncePoints, capturePoints, containmentPoints, livesBonus, timeBonus } from './scoring.js'
 import { lerpColor } from './color.js'
-import { CHARGED_ATOM_CATCH_SETTINGS } from './chargedAtomCatchSettings.js'
+import { CHARGED_ATOM_HOLD_SETTINGS } from './chargedAtomHoldSettings.js'
 import { easeInOutQuad, easeInQuad, easeOutQuad } from './easing.js'
 import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
 import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
@@ -122,9 +122,9 @@ export default class GameEngine {
     this.captureCircles = [] // capture bursts in progress
     this.corePresses = new Set() // pointers pressed on a capturable atom: they capture on release
     this.heldCaptureButtons = new Set() // controller capture buttons pressed during play: they capture on release
-    // Charged atom catch: only one atom can be held at a time. `input` ('pointer:<id>' or
+    // Charged atom hold: only one atom can be held at a time. `input` ('pointer:<id>' or
     // 'button:<button>') is what holds it, `owed` the points earned and not paid yet
-    this.held = null // { input, atom, owed, loop } (loop: the catch loop's sound voice)
+    this.held = null // { input, atom, owed, loop } (loop: the hold loop's sound voice)
     this.pausedHeld = null // the hold cancelled by the pause: its atom is captured on resume
     this.paddles = [] // every paddle instance, active or pooled, to update their flashes
     this.gamepad = new GamepadReader()
@@ -173,7 +173,7 @@ export default class GameEngine {
     window.removeEventListener('blur', this.onAutoPause)
     document.removeEventListener('visibilitychange', this.onVisibilityChange)
     if (this.paused) soundManager.stopPausedSfx()
-    this.stopCatchLoop(this.held)
+    this.stopHoldLoop(this.held)
     this.app.ticker.stop()
     // Losing the WebGL context while the canvas is still on screen flashes it white: wait until
     // the next screen has been painted (two frames), then until the GPU has put it on screen
@@ -322,7 +322,7 @@ export default class GameEngine {
     // A press held into the pause doesn't capture when released
     this.corePresses.clear()
     this.heldCaptureButtons.clear()
-    this.stopCatchLoop(this.held)
+    this.stopHoldLoop(this.held)
     this.pausedHeld = this.held
     this.held = null
     this.app.ticker.stop()
@@ -344,8 +344,8 @@ export default class GameEngine {
     soundManager.resumeTrack()
     soundManager.resumeSfx()
     this.emit('onPauseChange', { paused: false })
-    // The hold was cancelled by the pause: the atom it caught is captured now
-    if (this.pausedHeld) this.finishCatch(this.pausedHeld)
+    // The hold was cancelled by the pause: the atom it held is captured now
+    if (this.pausedHeld) this.finishHold(this.pausedHeld)
     this.pausedHeld = null
   }
 
@@ -363,11 +363,11 @@ export default class GameEngine {
     if (this.state !== STATE.PLAYING || this.paused) return
 
     const { x, y } = this.playfield.toLocal(this.scenePoint(event.global))
-    // A press on a capturable atom places no paddle: with the catch mechanic it catches the atom,
+    // A press on a capturable atom places no paddle: with the hold mechanic it holds the atom,
     // otherwise it captures it on release
     if (Math.hypot(x, y) <= CAPTURE_TAP_RADIUS) {
-      if (this.level.chargedAtomCatch) {
-        if (this.catchNearest(`pointer:${event.pointerId}`)) return
+      if (this.level.chargedAtomHold) {
+        if (this.holdNearest(`pointer:${event.pointerId}`)) return
       } else if (this.atoms.some((atom) => this.isCapturable(atom))) {
         this.corePresses.add(event.pointerId)
         return
@@ -395,14 +395,14 @@ export default class GameEngine {
       if (!this.paused) this.captureAtCore()
       return
     }
-    if (this.releaseCatch(`pointer:${event.pointerId}`)) return
+    if (this.releaseHold(`pointer:${event.pointerId}`)) return
     this.setPaddle(event.pointerId)
   }
 
   // Controller: a stick pushed past its engage threshold drags a paddle, released it sets it
   // (the angle maps straight to the paddle: both have y pointing down). A capture button captures
   // when released, like a tap at the core, but a press with nothing to capture does nothing. With
-  // the catch mechanic the press catches the atom and the release captures that same atom. The
+  // the hold mechanic the press holds the atom and the release captures that same atom. The
   // menu button pauses.
   handleGamepad () {
     // Resuming goes through the Pause overlay's RESUME button: the ticker (and this poll) is stopped
@@ -415,10 +415,10 @@ export default class GameEngine {
     let released = false
     for (const button of CAPTURE_BUTTONS) {
       if (this.gamepad.wasPressed(button)) {
-        if (this.level.chargedAtomCatch) this.catchNearest(`button:${button}`)
+        if (this.level.chargedAtomHold) this.holdNearest(`button:${button}`)
         else this.heldCaptureButtons.add(button)
       } else if (this.gamepad.wasReleased(button)) {
-        if (this.level.chargedAtomCatch) this.releaseCatch(`button:${button}`)
+        if (this.level.chargedAtomHold) this.releaseHold(`button:${button}`)
         else if (this.heldCaptureButtons.delete(button)) released = true
       }
     }
@@ -551,7 +551,7 @@ export default class GameEngine {
         this.updateEscapingAtom(atom, dt, step)
         continue
       }
-      if (atom.state === ATOM_STATE.CAUGHT) {
+      if (atom.state === ATOM_STATE.HELD) {
         atom.render(dt)
         continue
       }
@@ -679,45 +679,45 @@ export default class GameEngine {
     soundManager.playSfx('capture')
   }
 
-  // Charged atom catch
+  // Charged atom hold
 
-  // `input` presses on the core: catches the capturable atom nearest to its center, if any. Only
-  // one atom can be held at a time, so while one is held other presses catch nothing
-  catchNearest (input) {
+  // `input` presses on the core: holds the capturable atom nearest to its center, if any. Only
+  // one atom can be held at a time, so while one is held other presses hold nothing
+  holdNearest (input) {
     if (this.held) return false
     const atom = this.nearestCapturable()
     if (!atom) return false
 
-    atom.startCatch()
+    atom.startHold()
     // The trigger and the loop are made to fit together and start at the same moment
-    soundManager.playSfx('catch_trigger')
-    this.held = { input, atom, owed: 0, loop: soundManager.startLoopSfx('catch_loop') }
+    soundManager.playSfx('hold_trigger')
+    this.held = { input, atom, owed: 0, loop: soundManager.startLoopSfx('hold_loop') }
     return true
   }
 
   // `input` is released: if it is the one holding the atom, the atom is captured
-  releaseCatch (input) {
+  releaseHold (input) {
     if (this.held?.input !== input) return false
 
     const held = this.held
     this.held = null
-    this.finishCatch(held)
+    this.finishHold(held)
     return true
   }
 
   // Ends a hold with a capture: pays what is left, then the capture
-  finishCatch (held) {
-    this.stopCatchLoop(held)
+  finishHold (held) {
+    this.stopHoldLoop(held)
     this.payRemainder(held)
     this.captureAtom(held.atom)
   }
 
   // The held atom earns points at a fixed rate, paid in whole steps (see
-  // chargedAtomCatchSettings.js); the part of a step not reached yet is carried to the next frame
+  // chargedAtomHoldSettings.js); the part of a step not reached yet is carried to the next frame
   payHeld (dt) {
     if (!this.held) return
 
-    const { POINTS_PER_SECOND, SCORE_STEP } = CHARGED_ATOM_CATCH_SETTINGS
+    const { POINTS_PER_SECOND, SCORE_STEP } = CHARGED_ATOM_HOLD_SETTINGS
     this.held.owed += POINTS_PER_SECOND * dt
     const steps = Math.floor(this.held.owed / SCORE_STEP)
     if (steps === 0) return
@@ -737,12 +737,12 @@ export default class GameEngine {
   // The level is over for the player (core collapse, last life lost): the hold ends without a capture
   endHold () {
     if (this.held) this.payRemainder(this.held)
-    this.stopCatchLoop(this.held)
+    this.stopHoldLoop(this.held)
     this.held = null
   }
 
-  // The catch loop fades out; safe to call again once it has stopped
-  stopCatchLoop (held) {
+  // The hold loop fades out; safe to call again once it has stopped
+  stopHoldLoop (held) {
     if (!held?.loop) return
 
     soundManager.stopLoopSfx(held.loop)
@@ -795,7 +795,7 @@ export default class GameEngine {
     this.endHold()
     for (const atom of this.atoms) {
       atom.pulse.hide()
-      if (atom.state === ATOM_STATE.MOVING || atom.state === ATOM_STATE.CAUGHT) atom.startCollapse(this.atomSpeed * atom.speedFactor, CORE_COLLAPSE_SETTLE_TIME)
+      if (atom.state === ATOM_STATE.MOVING || atom.state === ATOM_STATE.HELD) atom.startCollapse(this.atomSpeed * atom.speedFactor, CORE_COLLAPSE_SETTLE_TIME)
     }
     soundManager.playSfx('vortex_creation')
   }
