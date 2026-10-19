@@ -77,7 +77,7 @@ This section applies only to levels that include the `supercharged atom` additio
 
 * **One extra atom, halfway.** When half of the level's time has elapsed (half of the timer's initial value, counted in game time, so pauses don't count), one additional atom is generated, once per level. It is separate from the core's regular emission (it doesn't replace or delay any of its atoms) and it plays its own launch sound (`launch_super`) instead of the regular `launch`, never both (see `audio-map.md`). TRY AGAIN starts the level again, so it is generated again at the halfway point.
 * **Double speed.** It travels at double the speed of all other atoms in the level (the level's speed from the level settings file; the factor is `SUPERCHARGED_SPEED_FACTOR` in `src/game/entities/Atom.js`, the only place that holds it). Every other atom keeps the level's speed. The atom's own speed applies to everything it does: travelling, escaping, the last life zoom and the core collapse. Since it is faster, the time it spends crossing the core (the capture window) is shorter.
-* **Twenty charges from the start.** It is generated with twenty charges, double the ten limit of the other atoms (see "Atom capture"; the value is `SUPERCHARGED_CHARGE` in `src/game/entities/Atom.js`, the only place that holds it), and it never gains or loses any: its charge value is always 20. In the score, every bounce scores 10 points * level * 20, a capture 100 points * level * 20, and, if it is still inside the ring when the core collapses, 200 points * level * 20 (see "Score").
+* **Twenty charges from the start.** It is generated with twenty charges, double the ten limit of the other atoms (see "Atom capture"; the value is `SUPERCHARGED_CHARGE` in `src/game/entities/Atom.js`, the only place that holds it), and it never gains or loses any: its charge value is always 20. In the score, every bounce scores 10 points * level * 20, a capture 100 points * level * 20, and, if it is still inside the ring when the core collapses, 500 points * level * 20 (see "Score").
 * **Otherwise a normal atom.** Paddles bounce it back, and it costs a life if it escapes. In levels with `atom capture` it can be captured as soon as it crosses the core, and, with `charged atom hold`, held (see "Atom capture" and "Charged atom hold").
 * **Without `atom capture`.** Its twenty charges still count for the score, but charges do nothing else without that mechanic: the atom can't be captured or held, and it doesn't pulse.
 
@@ -117,9 +117,9 @@ The player will get:
 * 10 points * level * atom charge value every time it bounces back an atom using a paddle. 
 * 100 points * level * atom charge value for every atom captured (only with `atom capture`, since without it nothing can be captured)
 * With `charged atom hold`, additional points while an atom is held, at base points per second * level * atom charge value, with the base set in `chargedAtomHoldSettings.js`: see "Charged atom hold".
-* 200 points * level * atom charge value for every atom contained at the end of the level, when the core collapse takes all remaining atoms.
+* 500 points * level * atom charge value for every atom contained at the end of the level, when the core collapse takes all remaining atoms.
 
-Without `atom capture`, the charge value of every atom is always 1, so those two formulas become 10 points * level per bounce and 200 points * level per contained atom.
+Without `atom capture`, the charge value of every atom is always 1, so those two formulas become 10 points * level per bounce and 500 points * level per contained atom.
 * 500 points * level * remaining lives.
 * Additional time bonus after the core collapse has taken all remaining atoms (the player needs to pass the level): 1 point * level for every 0.1 seconds of the level's total duration. In other words, the level's initial timer value (in tenths of a second) * level. For example, a 2-minute level 3 gives 1200 * 3 = 3600 points.
  

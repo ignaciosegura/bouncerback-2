@@ -12,7 +12,7 @@ export function capturePoints (level, charge) {
 
 // Level end: an atom still inside the ring is taken by the core collapse
 export function containmentPoints (level, charge) {
-  return 200 * level * charge
+  return 500 * level * charge
 }
 
 // Level end: one point per level number for every tenth of a second of the level's initial timer
