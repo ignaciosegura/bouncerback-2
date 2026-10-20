@@ -28,12 +28,15 @@ Music tracks are **not** listed here — they are mapped per-level inside each `
 
 ## Music Tracks (`assets/audio/tracks/`)
 
-Tracks are assigned to screens or levels. Each level's track is declared in its level file (`soundTrack` field). Menu tracks are hardcoded in `soundManager.js`.
+Tracks are assigned to screens or levels. Each level's track is declared in its level file (`soundTrack` field). The menu and result screen tracks are hardcoded in `soundManager.js` (`MENU_TRACK`, `GAME_OVER_TRACK`, `YOU_WIN_TRACK`).
+
+No track loops: each plays once to its end, then leaves silence until the next screen change. Only the MP3 files in `assets/audio/tracks/` are loaded; the FLAC masters and stems kept there are not.
 
 | File | Screen / Level |
 | :--- | :--- |
 | `main_title.mp3` | Main Menu, Settings, Level Selection (the Intro screen is silent) |
-| *(none)* | Game Over, You Win! — the music fades out and the screen is silent. A dedicated ambience track is planned for the second development cycle. |
+| `game_over_lose.mp3` | Game Over — an ambience, played once (no loop); when it ends, the screen is silent |
+| `game_over_win.mp3` | You Win! — an ambience, played once (no loop); when it ends, the screen is silent |
 | `learn.mp3` | Level 1 |
 | `femtocosmos.mp3` | Level 2 |
 | `chronosaedron.mp3` | Level 3 |
@@ -48,7 +51,8 @@ Tracks are assigned to screens or levels. Each level's track is declared in its 
 ## Audio Lifecycle Rules
 
 1. **Unlock on first interaction** — Play `silence.mp3` immediately when the player presses ENTER BOUNCERBACK on the Intro screen. This satisfies the mobile browser audio policy and ensures all subsequent sounds play without delay.
-2. **Music crossfade** — When transitioning between screens, fade out the current track before fading in the new one. When the destination screen has no track (Game Over, You Win!), just fade out. Exception: the menu track's first start, when ENTER BOUNCERBACK takes the player to the Main Menu, has no fade-in (it starts together with the menu background animation).
+2. **Music crossfade** — When transitioning between screens, fade out the current track before fading in the new one. When the destination screen has no track (the Game Screen, until its level track starts), just fade out. Exception: the menu track's first start, when ENTER BOUNCERBACK takes the player to the Main Menu, has no fade-in (it starts together with the menu background animation).
 3. **Level start** — Entering the Game Screen fades the music out. The level's track starts when the level's 3-second start delay ends, at the same moment as the timer (see `game-rules.md`); it is preloaded during the delay so it starts on time.
-4. **Music continuity** — If the destination screen uses the same track as the origin (e.g., navigating Settings → Main Menu), do **not** restart or crossfade the track; let it continue playing seamlessly.
-5. **SFX volume and music volume** — Controlled independently via the Settings screen buttons and persisted in `soundManager.js`. Both are capped at -6 dB (setting 9), so music and SFX at full volume sum to at most 0 dB instead of clipping.
+4. **Result screens** — The Game Over and You Win! ambiences are preloaded as soon as the outcome is known (the last life lost, the core collapse starts), so they start without a loading delay when the screen appears.
+5. **Music continuity** — If the destination screen uses the same track as the origin (e.g., navigating Settings → Main Menu), do **not** restart or crossfade the track; let it continue playing seamlessly.
+6. **SFX volume and music volume** — Controlled independently via the Settings screen buttons and persisted in `soundManager.js`. Both are capped at -6 dB (setting 9), so music and SFX at full volume sum to at most 0 dB instead of clipping.

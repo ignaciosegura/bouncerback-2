@@ -47,8 +47,8 @@ export default function App () {
   // The Main Menu logo's box, measured in the layout, for the menu scene that draws it
   const [logoRect, setLogoRect] = useState(null)
 
-  // Menus play the menu track; Game Over and You Win! are silent. The game screen fades the music
-  // out and the GameEngine starts the level's track when its start delay ends.
+  // Menus play the menu track; Game Over and You Win! play their ambience once. The game screen
+  // fades the music out and the GameEngine starts the level's track when its start delay ends.
   // The music follows the screen actually shown, so it changes when the new screen appears, not on
   // the tap. Nothing plays before the Intro's button unlocks audio. Coming from the Intro, the menu
   // track starts with no fade-in, together with the menu background animation; coming back from
@@ -60,9 +60,13 @@ export default function App () {
     case SCREENS.INTRO:
       return
     case SCREENS.GAME:
-    case SCREENS.GAME_OVER:
-    case SCREENS.YOU_WIN:
       soundManager.stopTrack()
+      return
+    case SCREENS.GAME_OVER:
+      soundManager.playTrack(soundManager.GAME_OVER_TRACK)
+      return
+    case SCREENS.YOU_WIN:
+      soundManager.playTrack(soundManager.YOU_WIN_TRACK)
       return
     default:
       soundManager.playTrack(soundManager.MENU_TRACK, { fadeIn: previousScreen !== SCREENS.INTRO })

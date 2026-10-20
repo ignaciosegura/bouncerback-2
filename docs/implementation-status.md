@@ -25,7 +25,7 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
 - [~] **Phase 11** — Rotate-device overlay — **won't do** (the native apps are locked to landscape in Phase 10; the web build is not a supported play target, so a portrait warning isn't needed)
 - [ ] **Phase 12** — Optional visual effects (`palette_invert`, `glow_pulse`, level `vfx` timelines)
 - [ ] **Phase 13** — Level unlocking
-- [ ] **Phase 14** — Results ambience track
+- [x] **Phase 14** — Results ambience track (Game Over plays `game_over_lose.mp3`, You Win! plays `game_over_win.mp3`, once with no loop; preloaded when the outcome is known)
 - [x] **Phase 15** — Capturable atom cue (charge ≥ 3 yellow → red)
 - [x] **Phase 16** — One-life-left background (fade to dark red `#660000`; `#550000` from Phase 34)
 - [x] **Phase 17** — Late-paddle grace window (atoms escape only once their center crosses the ring)

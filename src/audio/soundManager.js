@@ -5,6 +5,9 @@ export const MAX_VOLUME = 9
 
 // Track played on every screen except gameplay (see docs/audio-map.md)
 export const MENU_TRACK = 'main_title.mp3'
+// Ambiences of the result screens; they play once, with no loop (see docs/audio-map.md)
+export const GAME_OVER_TRACK = 'game_over_lose.mp3'
+export const YOU_WIN_TRACK = 'game_over_win.mp3'
 
 // Gain at the top volume setting: -6 dB, so music and SFX at full volume can sum without clipping
 const MAX_GAIN = 10 ** (-6 / 20)

@@ -772,6 +772,8 @@ export default class GameEngine {
     this.stateTime = 0
     this.clearPaddles()
     this.endHold()
+    // Ready to start when the Game Over screen appears
+    soundManager.preloadTrack(soundManager.GAME_OVER_TRACK)
   }
 
   updateLost (dt) {
@@ -806,6 +808,8 @@ export default class GameEngine {
       if (atom.state === ATOM_STATE.MOVING || atom.state === ATOM_STATE.HELD) atom.startCollapse(this.atomSpeed * atom.speedFactor, CORE_COLLAPSE_SETTLE_TIME)
     }
     soundManager.playSfx('vortex_creation')
+    // Ready to start when the You Win! screen appears
+    soundManager.preloadTrack(soundManager.YOU_WIN_TRACK)
   }
 
   // Settle: the core grows to the ring and turns grey while the atoms slow to a stop (no
