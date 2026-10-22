@@ -3,6 +3,7 @@ import * as soundManager from './audio/soundManager.js'
 import { levels } from './game/levelLoader.js'
 import { getHiScore, beatHiScore } from './game/highScore.js'
 import { getOldTv, setOldTv } from './game/oldTv.js'
+import { getLevelProgress, registerLevelWin } from './game/levelProgress.js'
 import IntroScreen from './screens/IntroScreen.jsx'
 import MainMenuScreen from './screens/MainMenuScreen.jsx'
 import LevelSelectionMenuScreen from './screens/LevelSelectionMenuScreen.jsx'
@@ -41,6 +42,7 @@ export default function App () {
   const [level, setLevel] = useState(null)
   const [score, setScore] = useState(0)
   const [hiScore, setHiScore] = useState(getHiScore)
+  const [levelProgress, setLevelProgress] = useState(getLevelProgress)
   const [musicVolume, setMusicVolume] = useState(soundManager.getMusicVolume)
   const [sfxVolume, setSfxVolume] = useState(soundManager.getSfxVolume)
   const [oldTv, setOldTvState] = useState(getOldTv)
@@ -161,6 +163,12 @@ export default function App () {
     navigate(resultScreen)
   }
 
+  // Saves the win to localStorage as You Win! starts, unlocking the next tier when it completes one
+  const winLevel = (result) => {
+    setLevelProgress(registerLevelWin(level.number))
+    endLevel(SCREENS.YOU_WIN)(result)
+  }
+
   const renderScreen = () => {
     switch (screen) {
     case SCREENS.INTRO:
@@ -180,6 +188,7 @@ export default function App () {
       return (
         <LevelSelectionMenuScreen
           levels={levels}
+          levelProgress={levelProgress}
           onSelectLevel={startLevel}
           onBack={goToMainMenu}
         />
@@ -201,7 +210,7 @@ export default function App () {
           settings={settings}
           onScoreChange={registerScore}
           onGameOver={endLevel(SCREENS.GAME_OVER)}
-          onLevelWin={endLevel(SCREENS.YOU_WIN)}
+          onLevelWin={winLevel}
           onExitToMenu={goToMainMenu}
           backRef={gameBackRef}
         />

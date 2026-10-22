@@ -9,8 +9,8 @@ const SELECTED_CLASS = 'gamepad-selected'
 const PRESSED_CLASS = 'gamepad-pressed'
 const ACTIVATE_BUTTONS = [BUTTONS.A, BUTTONS.RT]
 // Every button of the current screen, except the ones opted out (the Intro's: controller input
-// can't unlock audio)
-const ITEMS_SELECTOR = '.screen button:not([data-gamepad="ignore"])'
+// can't unlock audio) and disabled ones (Level Select's locked levels)
+const ITEMS_SELECTOR = '.screen button:not([data-gamepad="ignore"]):not(:disabled)'
 // `data-gamepad` holds space-separated roles: "back" (right face button), "menu" (menu button)
 const BACK_SELECTOR = '.screen [data-gamepad~="back"]'
 const MENU_SELECTOR = '.screen [data-gamepad~="menu"]'

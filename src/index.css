@@ -199,7 +199,7 @@ button {
   white-space: nowrap;
 }
 
-.button:active,
+.button:enabled:active,
 .button:focus-visible,
 .button.gamepad-pressed,
 .volume-control__step:active,
@@ -237,6 +237,28 @@ button {
 
 .menu__footer {
   margin-top: calc(64 * var(--u));
+}
+
+/* Locked levels: not clickable, no pressed look (see .button:enabled:active) */
+.button:disabled {
+  cursor: default;
+}
+
+/* Level Select: one row per tier, with the menu's gap between buttons too. Every level button
+   and BACK fit the longest level name allowed (--level-label-chars, from LEVEL_NAME_MAX_LENGTH);
+   the font is monospaced, so that's a width in ch */
+.level-select__row {
+  display: flex;
+  justify-content: center;
+  gap: calc(64 * var(--u));
+}
+
+.level-select__button {
+  width: calc(var(--level-label-chars) * 1ch + 1em + 2 * var(--border-width));
+}
+
+.level-select .menu__footer {
+  align-items: center;
 }
 
 /* TextBox */

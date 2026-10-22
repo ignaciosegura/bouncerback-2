@@ -1,6 +1,9 @@
 import schema from '../../docs/level-file-schema.json'
 import { ADDITIONAL_MECHANICS } from './additionalMechanics.js'
 
+// Level Select buttons are sized for names this long (the longest planned: QUANTAMORPHICA)
+export const LEVEL_NAME_MAX_LENGTH = 14
+
 /**
  * Checks a value against the subset of JSON Schema used by docs/level-file-schema.json
  * (type, enum, required, properties, additionalProperties, items). Returns a list of problems.
@@ -65,6 +68,8 @@ function checkRanges (level) {
   }
   if (level.paddles.angle >= 360) problems.push('level.paddles.angle must be less than 360')
   if (level.name.trim() === '') problems.push('level.name must not be empty')
+  if (level.name.length > LEVEL_NAME_MAX_LENGTH) problems.push(`level.name must be at most ${LEVEL_NAME_MAX_LENGTH} characters`)
+  if (level.tier < 0) problems.push('level.tier must be 0 or greater')
   return problems
 }
 
@@ -91,6 +96,7 @@ export function loadLevel (data, number) {
   return {
     number,
     name: data.name,
+    tier: data.tier,
     soundTrack: data.soundTrack,
     lives: data.lives,
     tip: data.tip ?? null,
@@ -126,3 +132,12 @@ export const levels = Object.entries(levelFiles)
   .map(([path, data]) => [Number(path.match(/level(\d+)\.json$/)[1]), data])
   .sort(([a], [b]) => a - b)
   .map(([number, data]) => loadLevel(data, number))
+
+// Tiers unlock one after another, so they must run from 0 with no gaps: a missing tier would keep
+// every tier after it locked forever
+export const highestTier = Math.max(...levels.map((level) => level.tier))
+for (let tier = 0; tier <= highestTier; tier++) {
+  if (!levels.some((level) => level.tier === tier)) {
+    throw new Error(`No level has tier ${tier}: level tiers must run from 0 with no gaps`)
+  }
+}
