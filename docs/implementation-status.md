@@ -72,3 +72,4 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
   - [x] **Phase 50** — Supercharged atom (halfway through the level one extra atom is generated, at double the speed of the others, with twenty charges and its own color, supercharged purple; levels 4 and 5)
   - [x] **Phase 51** — Hold sound effects (a hold plays the one-shot `hold_trigger` and starts the looped `hold_loop` at the same moment; the loop fades in and out over 15 ms and stops when the hold ends; the supercharged atom keeps using `launch` and `capture`)
   - [x] **Phase 52** — Supercharged launch sound (the supercharged atom plays its own `launch_super` when it is generated, instead of `launch`, never both)
+- [x] **Phase 53** — Konami Code (on Level Select, up up down down left right left right on the d-pad unlocks every level, or locks them again as on a fresh install when they're all unlocked; no B A; in every build)

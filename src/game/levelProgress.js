@@ -58,6 +58,20 @@ export function registerLevelWin (levelNumber) {
   return progress
 }
 
+/**
+ * The Konami Code on Level Select (docs/game-controller.md): unlocks every tier, keeping the beaten
+ * levels; with every tier already unlocked, it goes back to a fresh install's progress instead.
+ * Returns the resulting progress, like registerLevelWin.
+ */
+export function toggleAllLevelsUnlocked () {
+  const current = getLevelProgress()
+  const progress = current.unlockedTier >= highestTier
+    ? DEFAULT_PROGRESS
+    : { unlockedTier: highestTier, beatenLevels: current.beatenLevels }
+  setLevelProgress(progress)
+  return progress
+}
+
 export function isLevelUnlocked (level, progress) {
   return level.tier <= progress.unlockedTier
 }

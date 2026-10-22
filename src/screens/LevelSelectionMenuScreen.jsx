@@ -23,6 +23,7 @@ export default function LevelSelectionMenuScreen ({ levels, levelProgress, onSel
       variant="light"
       transparent
       className="level-select"
+      data-konami-code
       style={{ '--level-label-chars': LEVEL_NAME_MAX_LENGTH }}
     >
       <Menu footer={<Button className="level-select__button" data-gamepad="back" onClick={onBack}>&lt;&lt;&lt; BACK</Button>}>

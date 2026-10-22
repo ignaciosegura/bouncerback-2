@@ -3,7 +3,7 @@ import * as soundManager from './audio/soundManager.js'
 import { levels } from './game/levelLoader.js'
 import { getHiScore, beatHiScore } from './game/highScore.js'
 import { getOldTv, setOldTv } from './game/oldTv.js'
-import { getLevelProgress, registerLevelWin } from './game/levelProgress.js'
+import { getLevelProgress, registerLevelWin, toggleAllLevelsUnlocked } from './game/levelProgress.js'
 import IntroScreen from './screens/IntroScreen.jsx'
 import MainMenuScreen from './screens/MainMenuScreen.jsx'
 import LevelSelectionMenuScreen from './screens/LevelSelectionMenuScreen.jsx'
@@ -75,8 +75,11 @@ export default function App () {
     }
   }, [screen])
 
-  // Game controller navigation of the menus: it clicks the screens' buttons, so they need no wiring
-  useEffect(() => startMenuNavigation(transitionRootRef.current), [])
+  // Game controller navigation of the menus: it clicks the screens' buttons, so they need no wiring.
+  // The Konami Code on Level Select unlocks every level, or locks them again if they all are
+  useEffect(() => startMenuNavigation(transitionRootRef.current, {
+    onKonamiCode: () => setLevelProgress(toggleAllLevelsUnlocked())
+  }), [])
 
   // Ignored while a transition runs, so a second tap can't navigate twice
   const navigate = (next) => {

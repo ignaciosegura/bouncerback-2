@@ -38,6 +38,7 @@ Other terms:
 * **Cancelling a press:** like dragging the mouse off a button before releasing it, a held press is cancelled without activating anything if the selection moves, a mouse click or touch happens, the button leaves the screen, or the controller is disconnected or another one takes over.
 * **Selection:** nothing is selected until the controller is used. Connecting a controller counts as using it: browsers only expose a controller after one of its buttons has been pressed. The first push or press on a screen with nothing selected only selects its first button. In controller mode, every new screen arrives with its first button selected. A mouse click, a touch or disconnecting the last controller leaves controller mode and hides the selection.
 * **Screen transitions:** controller input is ignored while a transition runs, like taps and clicks.
+* **Konami Code (Level Select only):** up, up, down, down, left, right, left, right on the d-pad (the classic code without its final B A, since those buttons go back and activate in the menus). Entered with some levels locked, it unlocks every level; entered with every level unlocked, it locks them again as on a fresh install (see "Level unlocking" in `game-rules.md`). The level names show or turn to dashes at once. The d-pad still moves the selection while the code is entered; any other button or a stick push starts the code over, and so does leaving the screen. In every build: a player who knows the code deserves the levels.
 * **Intro:** the controller doesn't work there. Browsers don't count controller input as a user interaction for unlocking audio (only keyboard, mouse and touch count), so pressing `ENTER BOUNCERBACK` with the controller would leave the game silent. The Intro needs a click, tap or key press.
 
 ### Gameplay
@@ -66,10 +67,11 @@ Other terms:
 | File | Role |
 | :--- | :--- |
 | `src/input/gamepad.js` | `GamepadReader` (polling, presses, sticks), `BUTTONS`, thresholds, `watchGamepads` / `hasGamepad` |
-| `src/input/menuNavigation.js` | Menu navigation: marks the selected button with the `gamepad-selected` class and activates it with `click()` |
-| `src/App.jsx` | Starts the menu navigation on the screen-transition wrapper |
+| `src/input/menuNavigation.js` | Menu navigation: marks the selected button with the `gamepad-selected` class and activates it with `click()`; feeds the Konami Code on the screen marked `data-konami-code` |
+| `src/input/konamiCode.js` | `KonamiCode`: detects the code in the d-pad presses |
+| `src/App.jsx` | Starts the menu navigation on the screen-transition wrapper; the Konami Code calls `toggleAllLevelsUnlocked()` (`src/game/levelProgress.js`) |
 | `src/game/GameEngine.js` | `handleGamepad()`: stick paddles and capture during play |
-| Screens | `data-gamepad="ignore"` (Intro button: never selected), `data-gamepad="back"` (the `<<< BACK` buttons) |
+| Screens | `data-gamepad="ignore"` (Intro button: never selected), `data-gamepad="back"` (the `<<< BACK` buttons), `data-konami-code` (Level Select) |
 
 ---
 

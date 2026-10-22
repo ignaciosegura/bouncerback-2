@@ -8,6 +8,14 @@ Useful tricks and information for testing the game.
 
 Only the first tier of levels (LEARN) is unlocked on a fresh install. Each further tier unlocks when every level of the tier before it has been beaten (see "Level unlocking" in `game-rules.md`). The progress is saved on the device, under the `localStorage` key `bouncerback.levelProgress`.
 
+### Konami Code (recommended)
+
+With a game controller connected, go to Level Select and press **up, up, down, down, left, right, left, right** on the d-pad (no B A at the end). Every level unlocks at once. Enter the code again with every level unlocked and the progress goes back to a fresh install's: only the first tier unlocked, no levels beaten (the high score and the settings are kept).
+
+It works the same on the web and on the Android and iOS apps, in every build, and the result is saved like normal progress. If it doesn't react, check that the controller drives the menus (the selection moves with the d-pad) and enter it again: any other button or a stick push starts the code over. See "Menus" in `game-controller.md`.
+
+Without a controller, use the methods below.
+
 ### Web browser
 
 Your own browser starts at tier 0, like a fresh install. To unlock everything for testing, open the browser's developer tools on the game's page and set `bouncerback.levelProgress` to `{"unlockedTier":2,"beatenLevels":[1,2,3,4]}` in local storage. From the console:

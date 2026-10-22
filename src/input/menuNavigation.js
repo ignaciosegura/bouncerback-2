@@ -1,4 +1,5 @@
 import { BUTTONS, GamepadReader, hasGamepad, watchGamepads } from './gamepad.js'
+import { KonamiCode } from './konamiCode.js'
 
 // Game controller navigation of the menu screens. DOM only: it marks the selected button with a
 // class and activates it with click(), so the screens' own onClick handlers run unchanged. Like a
@@ -14,6 +15,8 @@ const ITEMS_SELECTOR = '.screen button:not([data-gamepad="ignore"]):not(:disable
 // `data-gamepad` holds space-separated roles: "back" (right face button), "menu" (menu button)
 const BACK_SELECTOR = '.screen [data-gamepad~="back"]'
 const MENU_SELECTOR = '.screen [data-gamepad~="menu"]'
+// The screen where the Konami Code works (Level Select)
+const KONAMI_SELECTOR = '.screen[data-konami-code]'
 const TRANSITION_CLASSES = ['screen-transition--out', 'screen-transition--in']
 // Moving prefers the items in line with the selected one: the offset across the direction counts double
 const CROSS_AXIS_WEIGHT = 2
@@ -60,9 +63,11 @@ function nearestItem (from, direction, items) {
 /**
  * Starts controller navigation of the screens inside `root` (the screen transition wrapper).
  * Polls only while a controller is connected. Returns a function that stops it.
+ * `onKonamiCode` is called when the Konami Code is entered on a screen marked `data-konami-code`.
  */
-export function startMenuNavigation (root) {
+export function startMenuNavigation (root, { onKonamiCode } = {}) {
   const reader = new GamepadReader()
+  const konamiCode = new KonamiCode()
   let frame = null
   let selected = null
   let press = null // { element, button }: a button held down on a menu button
@@ -106,6 +111,22 @@ export function startMenuNavigation (root) {
     select(null)
   }
 
+  // The d-pad presses feed the Konami Code; any other press or a stick push starts it over.
+  // The d-pad still moves the selection meanwhile
+  const updateKonamiCode = () => {
+    if (!root.querySelector(KONAMI_SELECTOR)) return
+    const otherInput = reader.buttons.some((_, button) =>
+      !DPAD.some(([dpadButton]) => dpadButton === button) && reader.wasPressed(button)) ||
+      reader.stick('left').justEngaged || reader.stick('right').justEngaged
+    if (otherInput) {
+      konamiCode.reset()
+      return
+    }
+    for (const [button] of DPAD) {
+      if (reader.wasPressed(button) && konamiCode.press(button)) onKonamiCode?.()
+    }
+  }
+
   // D-pad, or the left stick reduced to its dominant axis
   const readDirection = () => {
     for (const [button, direction] of DPAD) {
@@ -127,6 +148,8 @@ export function startMenuNavigation (root) {
     // (at the swap, so the selection fades in with its button)
     const items = Array.from(root.querySelectorAll(ITEMS_SELECTOR))
     if (selected && !selected.isConnected) selected = null
+    // A selected button that got disabled (a level locked again by the Konami Code) can't stay selected
+    if (selected?.disabled) select(null)
     if (controllerMode && !selected && items.length > 0) select(items[0])
 
     // A new menu (screen, or the Pause overlay, which opens without a transition): buttons held
@@ -135,6 +158,7 @@ export function startMenuNavigation (root) {
     if ((items[0] ?? null) !== firstItem) {
       firstItem = items[0] ?? null
       cancelPress()
+      konamiCode.reset()
       reader.reset()
       return
     }
@@ -145,6 +169,7 @@ export function startMenuNavigation (root) {
       return
     }
 
+    updateKonamiCode()
     updatePress()
 
     // Back presses the screen's BACK button (RESUME on the Pause overlay), the menu button the
