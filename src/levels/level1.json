@@ -1,5 +1,6 @@
 {
   "name": "LEARN",
+  "tier": 0,
   "duration": 48,
   "timeSignature": {
     "bpm": 130,

@@ -1,5 +1,6 @@
 {
   "name": "FEMTOCOSMOS",
+  "tier": 1,
   "duration": 30,
   "timeSignature": {
     "bpm": 130,

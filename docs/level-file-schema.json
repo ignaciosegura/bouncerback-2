@@ -4,6 +4,7 @@
     "type": "object",
     "required": [
         "name",
+        "tier",
         "duration",
         "timeSignature",
         "soundTrack",
@@ -15,7 +16,11 @@
     "properties": {
         "name": {
             "type": "string",
-            "description": "Name of the level."
+            "description": "Name of the level. At most 14 characters (Level Select buttons are sized for that)."
+        },
+        "tier": {
+            "type": "integer",
+            "description": "The level's tier: Level Select shows one row per tier. Tier 0 is unlocked from the start; each further tier unlocks when every level of the tier before it has been beaten. Tiers must run from 0 with no gaps."
         },
         "duration": {
             "type": "number",

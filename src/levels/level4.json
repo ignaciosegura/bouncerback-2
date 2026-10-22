@@ -1,5 +1,6 @@
 {
   "name": "MEKANOMANCER",
+  "tier": 1,
   "duration": 34,
   "timeSignature": {
     "bpm": 180,
