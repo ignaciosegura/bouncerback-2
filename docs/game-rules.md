@@ -123,6 +123,16 @@ Without `atom capture`, the charge value of every atom is always 1, so those two
 * 500 points * level * remaining lives.
 * Additional time bonus after the core collapse has taken all remaining atoms (the player needs to pass the level): 1 point * level for every 0.1 seconds of the level's total duration. In other words, the level's initial timer value (in tenths of a second) * level. For example, a 2-minute level 3 gives 1200 * 3 = 3600 points.
  
+# Level unlocking
+
+The levels are grouped in tiers, set by the `tier` field of each level file (for example, level 1 is tier 0 and levels 2 to 4 are tier 1: the level files are the source of truth). Tiers run from 0 with no gaps.
+
+* Tier 0 is unlocked from the start; every other tier starts locked.
+* A level is beaten when the player passes it (the You Win! screen). Losing it, or leaving it from the Pause Overlay, doesn't count.
+* When every level of the highest unlocked tier has been beaten, the next tier unlocks. The levels of a tier can be beaten in any order and over several sessions.
+* Unlocked tiers stay unlocked: the progress (the highest unlocked tier and the beaten levels) is saved on the device and survives closing the app or the browser tab. It never goes back.
+* Locked levels can't be played: Level Select shows them, without their name, and they can't be selected (see `navigation.md`).
+
 # High Score
 
 The high score will be visible for the whole game. If the user beats the high score, it will be updated immediately at the same time as the score. The high score is common to all levels.

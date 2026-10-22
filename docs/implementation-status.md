@@ -24,7 +24,7 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
 - [x] **Phase 10** — Mobile packaging (Capacitor `ios/` and `android/` added; landscape-only in `Info.plist` and the Android manifest plus a runtime lock; icons and a logo-on-black splash generated from `assets/native/`; Android fullscreen with the system bars hidden; the game pauses when the app goes to the background; `npm run cap:*` scripts. Checked on the Android emulator, and on the iOS simulator up to the splash and Intro; the iOS credit links and background pause still need a manual check)
 - [~] **Phase 11** — Rotate-device overlay — **won't do** (the native apps are locked to landscape in Phase 10; the web build is not a supported play target, so a portrait warning isn't needed)
 - [ ] **Phase 12** — Optional visual effects (`palette_invert`, `glow_pulse`, level `vfx` timelines)
-- [ ] **Phase 13** — Level unlocking
+- [x] **Phase 13** — Level unlocking (levels grouped in tiers by a required `tier` in the level file; tier 0 is unlocked from the start, beating every level of the highest unlocked tier unlocks the next; progress saved in `localStorage`. Level Select shows one row per tier, equal-width buttons sized for 14-character names, locked levels as 12 dashes that can't be clicked or selected with the controller)
 - [x] **Phase 14** — Results ambience track (Game Over plays `game_over_lose.mp3`, You Win! plays `game_over_win.mp3`, once with no loop; preloaded when the outcome is known)
 - [x] **Phase 15** — Capturable atom cue (charge ≥ 3 yellow → red)
 - [x] **Phase 16** — One-life-left background (fade to dark red `#660000`; `#550000` from Phase 34)

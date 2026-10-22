@@ -63,6 +63,15 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * The font used will be "C64 Angled", a monospaced font: `assets/fonts/c64_angled.ttf`.
 * All text boxes and buttons should put all the text in one line (no line-breaks). The only exception is the How To Play screen's instructions (see "How To Play screen").
 
+## Level Select
+
+See the LEVEL MENU and LEVEL MENU (LOCKED LEVELS) mockups.
+
+* One row of buttons per tier (see "Level unlocking" in `game-rules.md`): tier 0 is the first row, tier 1 the second, and so on. Within a row, the levels go left to right by level number. Each row is centered horizontally, and the rows are centered vertically above the BACK button.
+* The gap between the buttons of a row is the same as the gap between rows, the menus' usual gap between buttons.
+* Every level button and BACK have the same width: room for the longest level name allowed (14 characters), whatever the current names are, so unlocking a level or adding one never changes the layout.
+* A locked level's button shows 12 dashes (`------------`) instead of its name, the same for every locked level. It keeps the border and colors of the other buttons, but it has no pressed look and the game controller never selects it.
+
 ## Pause overlay
 
 * It's shown on top of the Game Screen, which stays as it was when the game was paused: the HUD, the ring, the paddles and the atoms stay visible and frozen, on their black (or one-life-left dark red) background (see the GAMEPLAY PAUSE MENU mockup).
