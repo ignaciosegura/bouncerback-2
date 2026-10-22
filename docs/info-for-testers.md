@@ -1,0 +1,33 @@
+# Info for Testers
+
+Useful tricks and information for testing the game.
+
+---
+
+## Level unlocking
+
+Only the first tier of levels (LEARN) is unlocked on a fresh install. Each further tier unlocks when every level of the tier before it has been beaten (see "Level unlocking" in `game-rules.md`). The progress is saved on the device, under the `localStorage` key `bouncerback.levelProgress`.
+
+### Web browser
+
+Your own browser starts at tier 0, like a fresh install. To unlock everything for testing, open the browser's developer tools on the game's page and set `bouncerback.levelProgress` to `{"unlockedTier":2,"beatenLevels":[1,2,3,4]}` in local storage. From the console:
+
+```js
+localStorage.setItem('bouncerback.levelProgress', '{"unlockedTier":2,"beatenLevels":[1,2,3,4]}')
+```
+
+Then reload the page. The numbers match the current level files (three tiers, 0 to 2, and level 5 alone in the last one): if the tiers change, adjust them.
+
+To start again from a fresh install, delete the key (`localStorage.removeItem('bouncerback.levelProgress')`) and reload.
+
+### Mobile apps (Android and iOS)
+
+This can't be done the same way on the mobile apps: they have no address bar or developer tools of their own, and their storage is separate from any browser's. The options are:
+
+- **Debug builds** (see `mobile-build.md`): the app's web view can be inspected from a computer, which gives you the same console as on the web.
+  - Android (emulator, or a device connected by USB with USB debugging on): open `chrome://inspect` in Chrome on the computer, find the Bouncerback web view and click "inspect".
+  - iOS Simulator: in Safari on the Mac, turn on the Develop menu (Safari > Settings > Advanced > "Show features for web developers"), then choose Develop > the simulator > Bouncerback.
+  - Run the same `localStorage.setItem(...)` line in the console, then reload the web view from the console (`location.reload()`) or close and reopen the app.
+- **Release builds** (store or TestFlight versions): they can't be inspected, so the levels have to be unlocked by playing them.
+
+To start again from a fresh install on mobile, clear the app's data (Android: Settings > Apps > Bouncerback > Storage > Clear storage) or uninstall and reinstall it. Either way, the high score and the settings are reset too.
