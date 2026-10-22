@@ -313,7 +313,59 @@ Builds on top of the playable MVP from the first cycle. Each item below assumes 
 - Fill in the `vfx` arrays in `src/levels/level1.json`…`level5.json`.
 
 ### Phase 13 — Level unlocking
-- Only level 1 is available at first; winning a level unlocks the next, saved in `localStorage`. Needs a visual style for locked buttons on Level Select (to be designed).
+- The levels are grouped in **tiers**, set by a new `tier` field in each level file. Only tier 0 is unlocked on a fresh install. When the player has beaten (reached You Win! on) every level of the highest unlocked tier, the next tier unlocks. Unlocked tiers stay unlocked across launches. *(The first version of this phase unlocked one level per win.)*
+- Current tiers, decided with the user (the level files are the source of truth): level 1 is tier 0; levels 2, 3 and 4 are tier 1; level 5 is tier 2.
+- **Scope:** the unlocking logic, its persistence, and the Level Select redesign: one row per tier (`LEVEL MENU.png`), with locked levels shown as dashes (`LEVEL MENU (LOCKED LEVELS).png`).
+
+#### Level files
+- `docs/level-file-schema.json`: new required property `tier`, `"type": "integer"`, no `default`. Description: the level's tier; tier 0 is unlocked from the start, and each further tier unlocks when every level of the tier before it has been beaten. Added to `required`. The `name` description adds "At most 14 characters (Level Select buttons are sized for that)"; the limit is checked by the loader, not with `maxLength`, which the loader's schema checker doesn't support.
+- `src/levels/level1.json` … `level5.json`: add `"tier"` after `"name"` with the values above.
+- `src/game/levelLoader.js`:
+  - `checkRanges` adds `level.tier must be 0 or greater` (the schema check already rejects non-integers), and `level.name must be at most 14 characters`. The limit is an exported constant, `LEVEL_NAME_MAX_LENGTH = 14`, sized for the longest planned name (QUANTAMORPHICA, a level to be added later); Level Select sizes its buttons from it, so a longer name fails at load instead of overflowing its button.
+  - `loadLevel` returns `tier: data.tier`.
+  - After `levels` is built, a check across all level files, thrown like the mechanics-list check: the tiers must run from 0 with no gaps (every tier from 0 to the highest has at least one level). A gap would leave every tier after it locked forever.
+
+#### Progress persistence
+- New `src/game/levelProgress.js`, in the style of `highScore.js` and `oldTv.js` (every `localStorage` access in `try`/`catch`; storage unavailable means progress just won't persist).
+- One key, `bouncerback.levelProgress`, holding JSON `{ "unlockedTier": n, "beatenLevels": [numbers] }`. Both are needed: `unlockedTier` is what the user asked to persist, and `beatenLevels` lets a tier be finished over several sessions (beat level 2, close the app, come back and beat 3 and 4). Levels are identified by their number (`levelN.json`), as everywhere else.
+- `getLevelProgress()`: reads and sanitizes the stored value. Missing or malformed → `{ unlockedTier: 0, beatenLevels: [] }`; `unlockedTier` is clamped to 0 … highest tier; `beatenLevels` keeps only the numbers of existing levels.
+- `registerLevelWin(levelNumber)`: adds the level to `beatenLevels` (no duplicates), then, while every level of `unlockedTier` is beaten and a higher tier exists, raises `unlockedTier` by one. Saves and returns the new progress. Beating a level again, or one from a lower tier, changes nothing else. The tier never goes down.
+- `isLevelUnlocked(level, progress)`: `level.tier <= progress.unlockedTier`.
+- The unlock rule is a pure function of `levels` and the progress (taking `levels` as an argument), so it's easy to reason about separately from storage.
+
+#### Wiring (React only; no change to the GameEngine)
+- `src/App.jsx`: `const [levelProgress, setLevelProgress] = useState(getLevelProgress)`, next to `hiScore`. The level's win is registered when the engine emits `onLevelWin` (the moment the score is final and the You Win! transition starts): the `YOU_WIN` handler calls `setLevelProgress(registerLevelWin(level.number))` before `navigate`. This is one low-frequency event, like the score handoff that already happens there. Game Over and EXIT TO MENU register nothing.
+- `LevelSelectionMenuScreen` receives `levelProgress` and passes each level's lock state down. The progress is read when the screen mounts, so coming back from You Win! shows the new tier already unlocked.
+
+#### Level Select
+- **Rows by tier.** Tier 0 is the first row, tier 1 the second, and so on. Within a row, levels go left to right by level number (*choice made with the user:* the mockup's 2, 4, 3 order in the middle row is a mockup mistake, to be fixed there). Each row is centered horizontally; the block of rows stays vertically centered between the top and BACK, as the single column is today. The rows come from the levels' `tier`, so moving a level to another tier or adding one needs no layout change.
+- **Spacing:** the horizontal gap between buttons in a row is the same as the vertical gap between rows, the existing `.menu__items` gap (64 mockup px, border to border; the mockup measures about 61–63 px, within rounding).
+- **Equal widths:** every level button and BACK have the same width, as in the mockup. Today `.menu` stretches its items to the widest one, which can't work across rows (and would stretch BACK to the full width of the three-button row). The font is monospaced, so the width is fixed in characters: room for `LEVEL_NAME_MAX_LENGTH` (14) characters, the longest name allowed, whatever the current names are. Adding QUANTAMORPHICA later, or unlocking a level, never changes the layout. The screen sets a CSS variable `--level-label-chars` from the constant (so the number lives only in `levelLoader.js`), and the buttons get `width: max(283 mockup px (the existing minimum), that many ch + 1em padding + 2 borders)`. This makes the buttons slightly wider than in the mockup, which fits 13 characters (CHRONOSAEDR0N); three of them and the two gaps still fit well inside 1920 px. BACK uses the same class and the footer centers it instead of stretching it.
+- **Locked buttons** (items 1 and 2 of the menu brief):
+  - The label is 12 dashes (`------------`) instead of the name, the same for every locked level, so neither the name nor its length shows. The button keeps its border and position.
+  - The button is `disabled`: clicks and taps do nothing, and it gets no pressed look (`.button:disabled` is left out of the `:active` / `:focus-visible` rule) and the default cursor.
+  - `src/input/menuNavigation.js`: `ITEMS_SELECTOR` adds `:not(:disabled)`, so the controller never selects a locked button, and the first selection on the screen is the first unlocked level. Moving uses the existing spatial search (`nearestItem`), which already handles rows: left/right stay in a row, up/down go to the nearest button in line in the next row with an unlocked button, or to BACK. No change to the search itself.
+- **Files:**
+  - `src/screens/LevelSelectionMenuScreen.jsx`: groups `levels` by `tier` (ascending, each group by `number`), renders one `.level-select__row` per tier, sets `--level-label-chars` from `LEVEL_NAME_MAX_LENGTH`, and gives each button its label and `disabled` from `isLevelUnlocked`. The 12-dash label is a constant at the top of this file.
+  - `src/components/Menu.jsx`: no change; the screen puts its rows inside `Menu` as children. Update the comment only if the "vertical stack" description no longer holds for this screen.
+  - `src/index.css`: `.level-select__row` (flex row, centered, the same 64 mockup px gap), the shared button width, the centered footer for this screen, and the disabled style.
+- No new colors or fonts: locked buttons look like the mockup, the same black border and text as unlocked ones.
+
+#### Docs
+- `docs/game-rules.md`: new "Level unlocking" section (tiers, tier 0 unlocked by default, the rule for unlocking the next tier, persistence). Tier values are given as examples pointing at the level files.
+- `docs/navigation.md`: Level Select no longer says "All levels are unlocked from the start". It now says the levels are arranged in rows by tier, and locked levels show dashes and can't be selected.
+- `docs/graphical-specs.md`: Level Select layout (one row per tier, centered, equal-width buttons, the same gap horizontally and vertically) and the locked-button look (12 dashes, same border and colors, no pressed state).
+- `docs/project-structure.md`: add `levelProgress.js`.
+- This file: the Level Select decision under "Layout & UI" and the Verification line for level unlocking follow the tier rule; `docs/implementation-status.md` ticks Phase 13.
+
+#### Checks
+- `npm run lint` and `npm run build` pass; a level file without `tier`, with a negative or non-integer tier, or a set of levels with a tier gap fails at load with a clear message.
+- Fresh install (empty `localStorage`): only LEARN is selectable; the other four show 12 dashes and ignore clicks and taps, with no pressed look. With a controller, LEARN is selected first, and down goes straight to BACK.
+- Layout against `LEVEL MENU.png` / `LEVEL MENU (LOCKED LEVELS).png` at 1920×1080: three rows (LEARN; FEMTOCOSMOS, CHRONOSAEDR0N, MEKANOMANCER; NEUTRONIKA), all buttons and BACK the same width (room for 14 characters: a temporary 14-character name fits on one line with the 0.5em padding), the same gap between rows and between buttons in a row, and the button widths the same with locked and unlocked labels. Also checked at a phone size (UI scaling).
+- With tier 1 unlocked and a controller: left/right move along the middle row; up from any of them goes to LEARN; down from LEARN goes to the middle button; down from the middle row goes to BACK while NEUTRONIKA is locked.
+- Beating LEARN unlocks levels 2–4 (Level Select shows their names on return); level 5 stays locked.
+- Beating two of levels 2–4, reloading, then beating the third, unlocks level 5. Losing, or exiting from the Pause Overlay, unlocks nothing.
+- The progress survives a reload on the web and an app restart on Android/iOS. A corrupted `bouncerback.levelProgress` value falls back to tier 0 without errors.
 
 ### Phase 14 — Results ambience track
 - Game Over and You Win! were silent until now: the level's track faded out and nothing replaced it. Each screen now gets its own ambience track (see `docs/audio-map.md`), both already in `assets/audio/tracks/`: `game_over_lose.mp3` for Game Over and `game_over_win.mp3` for You Win!. *(The first version of this phase planned one shared track.)*
