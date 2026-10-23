@@ -20,7 +20,9 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 | `docs/mobile-build.md` | Where the iOS and Android test builds are, and how to build and launch them from the command line |
 | `docs/info-for-testers.md` | Tricks and information for game testers (e.g. unlocking every level) |
 | `docs/implementation-guidelines.md` | Summary of architectural and implementation rules |
-| `docs/implementation-plan.md` | Design decisions and the phase-by-phase implementation plan |
+| `docs/implementation-plan.md` | The phases still pending, and where new phases are planned |
+| `docs/design-decisions.md` | Design decisions taken while planning, with their reasons — read the section for the area being changed |
+| `docs/archive/` | Completed phases, one file per development cycle — history only; read only when working on, or asked about, a past phase |
 | `docs/implementation-status.md` | Which implementation phases are completed and which are pending |
 | `docs/level-file-schema.json` | JSON Schema for all level files |
 | `docs/mockups/` | Reference mockups — filenames indicate which screen they represent |
@@ -32,6 +34,7 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 ## Workflow Rules
 
 - **Planning and implementation are separate steps.** When asked to plan, stop once the plan is delivered. Never go on to implementation without first asking for and getting explicit approval.
+- **Completed phases move to the archive.** New phases are planned in `docs/implementation-plan.md`. Once a phase is done, move its section and its verification items to its cycle's file in `docs/archive/`, and mark it in `docs/implementation-status.md`.
 
 ---
 

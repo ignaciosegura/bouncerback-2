@@ -1,6 +1,6 @@
 # Bouncerback — Implementation Status
 
-Tracks progress against the phases defined in `docs/implementation-plan.md`. Update this file whenever a phase is completed.
+Tracks progress against the phases: pending ones are in `docs/implementation-plan.md`, completed ones in `docs/archive/` (one file per development cycle). Update this file whenever a phase is completed.
 
 Legend: `[x]` done · `[ ]` pending · `[~]` won't do
 
@@ -17,13 +17,13 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
 - [x] **Phase 6** — Scoring & rules
 - [x] **Phase 7** — QA pass (web)
 
-## Second Development Cycle (Quality of Life) — ⏳ Pending
+## Second Development Cycle (Quality of Life) — ✅ Complete
 
 - [x] **Phase 8** — Pause functionality (`PauseOverlay` over the frozen game: MUSIC / SFX / OLD TV, EXIT TO MENU, RESUME, on a panel in the gameplay background's color; `P` or the controller's menu button toggles it, only while playing; auto-pause when the tab is hidden or the window loses focus; music and SFX pause with the game. The on-screen Pause button for touch-only devices is left for a later phase)
 - [x] **Phase 9** — Screen transitions (old-TV effect on every screen change, pure CSS, on the screen's elements only — backgrounds, the menu animation and the game canvas stay still: 1 s screen-out — fade out, color blends to transition dark yellow `#666600` then transition dark red `#660000`, vertical shake at the end — then 0.5 s fade-in)
 - [x] **Phase 10** — Mobile packaging (Capacitor `ios/` and `android/` added; landscape-only in `Info.plist` and the Android manifest plus a runtime lock; icons and a logo-on-black splash generated from `assets/native/`; Android fullscreen with the system bars hidden; the game pauses when the app goes to the background; `npm run cap:*` scripts. Checked on the Android emulator, and on the iOS simulator up to the splash and Intro; the iOS credit links and background pause still need a manual check)
 - [~] **Phase 11** — Rotate-device overlay — **won't do** (the native apps are locked to landscape in Phase 10; the web build is not a supported play target, so a portrait warning isn't needed)
-- [ ] **Phase 12** — Optional visual effects (`palette_invert`, `glow_pulse`, level `vfx` timelines)
+- [~] **Phase 12** — Optional visual effects — **won't do** (`palette_invert`, `glow_pulse`, level `vfx` timelines; the `vfx` arrays in the level files stay empty)
 - [x] **Phase 13** — Level unlocking (levels grouped in tiers by a required `tier` in the level file; tier 0 is unlocked from the start, beating every level of the highest unlocked tier unlocks the next; progress saved in `localStorage`. Level Select shows one row per tier, equal-width buttons sized for 14-character names, locked levels as 12 dashes that can't be clicked or selected with the controller)
 - [x] **Phase 14** — Results ambience track (Game Over plays `game_over_lose.mp3`, You Win! plays `game_over_win.mp3`, once with no loop; preloaded when the outcome is known)
 - [x] **Phase 15** — Capturable atom cue (charge ≥ 3 yellow → red)

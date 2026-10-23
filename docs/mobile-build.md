@@ -2,7 +2,7 @@
 
 Where the debug builds of the iOS and Android apps end up, and how to build and launch them from the command line. These are builds for testing on simulators, emulators and your own devices, not store releases (those need signing: see "Not covered").
 
-Setup (Xcode, Android Studio, JDK 21, `ANDROID_HOME`, `JAVA_HOME`) is in `docs/tech-stack.md`, section 4. The Capacitor decisions are in `docs/implementation-plan.md`, Phase 10.
+Setup (Xcode, Android Studio, JDK 21, `ANDROID_HOME`, `JAVA_HOME`) is in `docs/tech-stack.md`, section 4. The Capacitor decisions are in `docs/archive/cycle-2.md`, Phase 10.
 
 ---
 

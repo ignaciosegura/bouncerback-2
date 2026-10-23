@@ -14,6 +14,8 @@ root/
     └── fonts/                      # Font files for the game (TTF and OTF formats).
 └── docs/                           # Documentation for the implementation
     ├── mockups/                    # Reference images for layout and style
+    ├── archive/                    # Completed implementation phases, one file per development cycle (history only)
+    ├── design-decisions.md         # Design decisions taken while planning, with their reasons
     ├── tech-stack.md               # Tech stack & architectural boundaries
     ├── game-instructions.md        # The How To Play screen's text (the screen renders it)
     ├── navigation.md               # Navigation flow
