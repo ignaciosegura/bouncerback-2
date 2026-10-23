@@ -6,6 +6,7 @@ root/
 ├── ios/                            # Capacitor iOS native project
 ├── capacitor.config.json           # Capacitor configuration
 ├── package.json                  
+├── scripts/                        # Node scripts run through npm (deploy-ftp.js, validate-levels.js: checks src/levels/*.json against docs/level-file-schema.json, `npm run validate:levels`)
 └── assets/                         # Static assets
     ├── audio/                      # Sound effects & music files for Howler.js
     ├── images/                     # SVG vector assets and mobile app icon

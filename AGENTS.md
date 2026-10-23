@@ -88,6 +88,7 @@ Mobile browsers block audio until an explicit user interaction. Ensure Howler.js
 - Must strictly conform to `docs/level-file-schema.json`.
 - Level 1 is the easiest level — no special mechanics or tutorial logic.
 - Do not add fields not defined in the schema (`additionalProperties: false` is enforced).
+- **Validate after every change to a level file or to the schema:** run `npm run validate:levels` (all of `src/levels/*.json`) or `npm run validate:levels -- path/to/level.json`. It exits with a non-zero code and lists each error's path when a file is invalid. Run it yourself; do not rely on reading the JSON by eye.
 
 ---
 
