@@ -24,6 +24,7 @@ root/
     ├── graphical-specs.md          # Graphical specifications
     ├── project-structure.md        # Project structure
     ├── mobile-build.md             # Where the iOS / Android test builds are and how to launch them
+    ├── desktop-build.md            # Overview of what is needed to publish the desktop versions on Steam (Windows, Linux; macOS to be considered)
     ├── implementation-guidelines.md  # Implementation guidelines
     ├── level-file-schema.json      # Level file schema
     ├── react-pixi-example.jsx      # Example of a React Pixi component
