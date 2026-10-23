@@ -8,26 +8,30 @@ Bouncerback is a retro-inspired 2D arcade game built with React + PixiJS, packag
 
 Read the relevant docs before implementing anything. Do not guess at conventions.
 
-| File | What it answers |
-| :--- | :--- |
-| `docs/tech-stack.md` | Technology choices, architectural boundaries, critical rules |
-| `docs/project-structure.md` | Full folder and file layout |
-| `docs/navigation.md` | Screen flow and navigation hierarchy |
-| `docs/graphical-specs.md` | Visual style, colors, fonts, layout rules |
-| `docs/game-rules.md` | Game mechanics, scoring, win/loss conditions |
-| `docs/audio-map.md` | Which sound effect each game event triggers |
-| `docs/game-controller.md` | Game controller: button terms (by position), controls, how controllers are read, supported controllers |
-| `docs/mobile-build.md` | Where the iOS and Android test builds are, and how to build and launch them from the command line |
-| `docs/info-for-testers.md` | Tricks and information for game testers (e.g. unlocking every level) |
-| `docs/implementation-guidelines.md` | Summary of architectural and implementation rules |
-| `docs/implementation-plan.md` | The phases still pending, and where new phases are planned |
-| `docs/design-decisions.md` | Design decisions taken while planning, with their reasons — read the section for the area being changed |
-| `docs/archive/` | Completed phases, one file per development cycle — history only; read only when working on, or asked about, a past phase |
-| `docs/implementation-status.md` | Which implementation phases are completed and which are pending |
-| `docs/level-file-schema.json` | JSON Schema for all level files |
-| `docs/mockups/` | Reference mockups — filenames indicate which screen they represent |
-| `docs/post-processing.md` | How the post-processing (`src/effects/`: zoom blur, CRT) works, step by step, and how to tune it |
-| `docs/react-pixi-example.jsx` | Reference example of a React + PixiJS component integration |
+**Read only what the task needs.** Don't read a doc whose area the task doesn't touch: no `docs/audio-map.md` for a task that has nothing to do with audio, no `docs/game-controller.md` for one that has nothing to do with controllers, and so on. In a large doc, read only the sections for the area being changed (`docs/graphical-specs.md` and `docs/game-rules.md` are split by topic; their headings say where to look). This file (AGENTS.md) is the only one to read for every task.
+
+| File | What it answers | Read it when |
+| :--- | :--- | :--- |
+| `docs/tech-stack.md` | Technology choices, architectural boundaries, critical rules, development environment setup | Adding or changing a dependency or a build tool, setting up the development environment, or deciding which layer (React or PixiJS) new code belongs to |
+| `docs/implementation-guidelines.md` | Summary of architectural and implementation rules | Writing new code that crosses the React / PixiJS boundary, or touching PixiJS setup, audio unlocking or the canvas container |
+| `docs/project-structure.md` | Full folder and file layout | Looking for where something lives, or adding, moving or renaming a file or folder (update it afterwards) |
+| `docs/navigation.md` | Screen flow and navigation hierarchy | Adding or changing a screen, a menu button or a path between screens (back buttons included) |
+| `docs/graphical-specs.md` | Visual style, colors, fonts, layout rules | Changing anything visible: layout, colors, fonts, animations, visual feedback, transitions, the menu background or the logo. Read only the sections involved |
+| `docs/mockups/` | Reference mockups — filenames indicate which screen they represent | Building or changing the layout of a screen: open only that screen's mockup |
+| `docs/game-rules.md` | Game mechanics, scoring, win/loss conditions | Changing gameplay: atoms, paddles, the core, capture, scoring, lives, time, level unlocking or high score. Read only the sections involved |
+| `docs/game-instructions.md` | The How To Play screen's text (the screen renders it) | Changing the How To Play screen, or a gameplay change the instructions describe (it is updated by hand: ask before editing it) |
+| `docs/level-file-schema.json` | JSON Schema for all level files | Creating or editing a level file, or reading a new level field in the code |
+| `docs/audio-map.md` | Which sound effect each game event triggers | Adding, changing or removing a sound or music track, or a game event that plays one |
+| `docs/game-controller.md` | Game controller: button terms (by position), controls, how controllers are read, supported controllers | Touching controller input in the menus or in gameplay (`src/input/`, or the gamepad handling in `GameEngine`) |
+| `docs/post-processing.md` | How the post-processing (`src/effects/`: zoom blur, CRT) works, step by step, and how to tune it | Touching `src/effects/`, the OLD TV setting, or anything that renders through the zoom blur or CRT |
+| `docs/mobile-build.md` | Where the iOS and Android test builds are, and how to build and launch them from the command line | Building, launching or testing the iOS or Android app, or changing Capacitor or native settings |
+| `docs/info-for-testers.md` | Tricks and information for game testers (e.g. unlocking every level) | Testing something that needs a trick (such as unlocked levels), or changing one of those tricks (update it afterwards) |
+| `docs/implementation-status.md` | Which implementation phases are completed and which are pending | Planning a new phase (for its number) or completing one (to mark it) |
+| `docs/implementation-plan.md` | The phases still pending, and where new phases are planned | Planning a new phase, or implementing a pending one |
+| `docs/design-decisions.md` | Design decisions taken while planning, with their reasons | Changing how an existing area works, to know why it is the way it is. Read only the section for that area |
+| `docs/archive/` | Completed phases, one file per development cycle — history only | Only when working on, or asked about, a past phase (move a completed phase here) |
+| `docs/react-pixi-example.jsx` | Reference example of a React + PixiJS component integration | Creating a new React component that hosts a PixiJS application |
+| `docs/react-pixi-usage-example.jsx` | Reference example of using that component | Same as above |
 
 ---
 
