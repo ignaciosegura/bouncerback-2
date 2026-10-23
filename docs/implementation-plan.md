@@ -33,4 +33,45 @@ The **third development cycle** starts with game controller support (Phases 30�
 
 ## Pending Phases
 
-None. The next phase is Phase 54.
+### Phase 54 — Gamepad indicator on the Main Menu
+
+**Why.** The menus and the game can be played with a controller, but nothing tells the player so. The Main Menu now shows whether a controller is detected (MAIN MENU and MAIN MENU - gamepad not detected mockups).
+
+**The component: `src/components/GamepadIndicator.jsx`** (React, menus' HTML layer)
+
+- It shows one line of text with a controller drawing below it. It has two states: `gamepadDetected` true shows "Gamepad detected" with `assets/images/gamepad_detected.svg`, and false shows "You can use a gamepad" with `assets/images/gamepad_not_detected.svg` (the outline with a `?`). The false text is a hint, not a warning: once the player presses any button on a controller (any menu interaction does), the indicator switches to the detected state.
+- **Live state.** `useState(hasGamepad)` sets the starting state, and `useEffect(() => watchGamepads(setGamepadDetected), [])` keeps it current (both from `src/input/gamepad.js`; the unsubscribe it returns is the cleanup). It switches as soon as the browser reports a controller connecting or disconnecting. This is a low-frequency event, so React state is fine (rule 2). No polling.
+  - Browsers only expose a controller after one of its buttons is pressed on the page. A controller that is plugged in but untouched shows "You can use a gamepad" until its first button press, then switches. Only `standard`-mapping controllers count (the same rule as menu navigation), so a controller the game can't use is never "detected".
+- **Drawing.** The two SVGs become inline SVG in JSX (not `<img>`), drawn in `currentColor` like `HowToPlayDiagram.jsx`, so they follow the screen's foreground color and the screen transitions' tint. The source art's black `fill` and `stroke` become `currentColor`, and Affinity's metadata is dropped. Both share the outline and the L1/R1 bumpers, so these are written once and only the inner details change (sticks, d-pad and face buttons, or the `?`).
+  - The `viewBox` is cropped from `0 0 1000 1000` to the drawing's own bounds (about `91 199 818 569`, to be checked against the paths). The element's box is then the drawing itself, and the 350px offset and the vertical alignment apply to the visible lines, as in the mockup.
+- **Text.** It's 24px (`TextBox size="hud"`), with no border, in sentence case exactly as written above (`text-transform: none`). It's a non-interactive informative text, like the How To Play instructions and the credits. It's one line, horizontally centered over the drawing; it's wider than the drawing and overflows it equally on both sides. Its bottom is about 27px above the drawing's top (about 548 → 575 in the mockup; to be confirmed against the mockup when it's built).
+- The drawing is `aria-hidden`; the text is what screen readers read.
+- **Not on mobile devices.** The component renders nothing on phones and tablets: in the native apps (`isNative` from `src/native.js`) and in mobile browsers. Mobile browsers are detected by a touch-only primary input, `matchMedia('(hover: none) and (pointer: coarse)')`. This is read once, when the component mounts. A touch-screen laptop still shows the indicator, because its primary input is the mouse or trackpad.
+
+**On the Main Menu: `MainMenuScreen.jsx`, `index.css`**
+
+- Placed inside the menu's `<nav>`, after the buttons, as an absolutely positioned element. `.main-menu-screen .menu` gets `position: relative`. The `<nav>` is horizontally centered on the screen, so its 50% is the screen's center, and its bottom is the HOW TO button's bottom.
+- **Horizontal:** the drawing's left edge is at `left: calc(50% + 350 * var(--u))`.
+- **Vertical:** the drawing runs from the SETTINGS button's top to the HOW TO button's bottom: `bottom: 0` and `top:` one button height plus one gap (`calc(2 * var(--font-menu) + 2 * var(--border-width) + 64 * var(--u))`: a button is 1em of text plus 0.5em of padding top and bottom, plus its borders). The drawing's height fills that span, and its width follows from the `viewBox`'s aspect ratio. The text sits above the drawing, positioned absolutely so it doesn't push the drawing down.
+- Positioned with `left` / `top` / `bottom`, not with a `transform`: the screen-out's shake animates `transform` on the screen's children. Being inside the `<nav>`, it fades, tints and shakes with the buttons in the screen transitions, like the other elements.
+- It has no buttons, so controller menu navigation never selects it, and it catches no taps.
+- The logo, the buttons and the credits don't move.
+
+**Docs**
+
+- `docs/graphical-specs.md`: a new "Main Menu gamepad indicator" section (texts, sizes, position, the two drawings, live switching, not shown on mobile devices, part of the screen transitions). Also, in "Text and menus", add it to the mixed-case texts and to the 24px texts.
+- `AGENTS.md`, "Visual & Style Rules": add the indicator to the mixed-case exceptions and to the 24px sizes.
+- `docs/game-controller.md`: one line under "How controllers are read" (the indicator uses `hasGamepad` / `watchGamepads`, and the first press exposes a controller), and the component in its code map.
+- `docs/project-structure.md`: add `GamepadIndicator.jsx` under `src/components/`.
+
+**Verification**
+
+- [ ] With no controller connected, the Main Menu matches the MAIN MENU - gamepad not detected mockup (as updated to "You can use a gamepad"): text, `?` drawing, the drawing's left edge 350px right of the center, and its top and bottom level with the SETTINGS top and the HOW TO bottom at 1920x1080.
+- [ ] Pressing a button on a connected controller while on the Main Menu switches it at once to "Gamepad detected" with the full drawing (MAIN MENU mockup). Unplugging it switches it back at once.
+- [ ] A controller already exposed (a button pressed on the Intro) shows "Gamepad detected" as soon as the Main Menu appears.
+- [ ] It fades, tints and shakes with the buttons in the screen transitions to and from the Main Menu.
+- [ ] It scales with the viewport and stays in place at other desktop aspect ratios (4:3, and a narrow window at the 0.4px `--u` floor).
+- [ ] It isn't shown in the Android or iOS app, or in a mobile browser (the browser's device emulation with touch). The rest of the Main Menu is unchanged there.
+- [ ] Controller navigation of the Main Menu is unchanged (PLAY → SETTINGS → HOW TO only).
+
+The next phase after this one is Phase 55.
