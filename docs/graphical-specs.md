@@ -49,17 +49,29 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * The links look exactly like the text around them: same color, no underline, no change once visited. They give no feedback on hover, press, tap or focus.
 * They're one of the screen's elements, so they take part in the screen transitions together with the logo and the buttons (see "Screen transitions").
 
+## Main Menu gamepad indicator
+
+* On the right of the Main Menu's buttons, a controller drawing with one line of text above it tells the player that the game can be played with a controller (see the MAIN MENU and MAIN MENU - gamepad not detected mockups; `src/components/GamepadIndicator.jsx`).
+* It has two states:
+    * No controller detected: "You can use a gamepad", with the controller's outline and a `?` (`assets/images/gamepad_not_detected.svg`). It's a hint, not a warning.
+    * Controller detected: "Gamepad detected", with the full drawing: sticks, d-pad and face buttons (`assets/images/gamepad_detected.svg`).
+* It switches as soon as a controller is connected or disconnected. Browsers only expose a controller once one of its buttons has been pressed on the page, so any menu interaction with the controller switches it to "Gamepad detected". Only the controllers the game can use count (see "Supported controllers" in `docs/game-controller.md`).
+* The text is 24px, in sentence case exactly as above (a non-interactive informative text, like the credits), in the screen's foreground color, with no border, on one line, horizontally centered over the drawing (it's wider than the drawing). The drawing is in the foreground color too.
+* At the 1920x1080 reference size, the drawing's left edge is 350px right of the screen's center, its top is level with the SETTINGS button's top and its bottom with the HOW TO button's bottom. The bottom of the text line is 27px above the drawing's top. The logo, the buttons and the credits don't move to make room for it.
+* It isn't shown on phones and tablets: in the native apps, and in browsers whose primary input is touch only.
+* It's one of the screen's elements, so it takes part in the screen transitions together with the logo and the buttons (see "Screen transitions"). Controller navigation never selects it.
+
 ## Text and menus
 
 * All menus and texts will be wrapped in a transparent rectangle with a thin border, the same color as the text.
 * The distance between the text and the border will always be 0.5 em, meaning that it will scale with the font size (matches the mockups).
 * Font size should always be (at the 1920x1080 reference size of the mockups; see "Scaling" below):
-    * 24px for HUD text during gameplay, and for the Main Menu credits (see "Main Menu credits")
+    * 24px for HUD text during gameplay, and for the Main Menu credits and gamepad indicator (see "Main Menu credits" and "Main Menu gamepad indicator")
     * 32px for all menu buttons, and for the Intro screen's note (see "Intro screen note")
     * 64px for the texts "GAME OVER" and "YOU WIN!" texts in those screens.
 * Line height will be exactly 1.
 * Font weight normal/regular in all cases (no bold or italic).
-* All texts will be uppercase, except the non-interactive informative texts, which are written in mixed case: the Intro screen note, the Main Menu credits, the How To Play instructions and the Gameplay tips (see "Intro screen note", "Main Menu credits", "How To Play screen" and "Gameplay tips"). Buttons, including READY, are always uppercase.
+* All texts will be uppercase, except the non-interactive informative texts, which are written in mixed case: the Intro screen note, the Main Menu credits, the Main Menu gamepad indicator, the How To Play instructions and the Gameplay tips (see "Intro screen note", "Main Menu credits", "Main Menu gamepad indicator", "How To Play screen" and "Gameplay tips"). Buttons, including READY, are always uppercase.
 * The font used will be "C64 Angled", a monospaced font: `assets/fonts/c64_angled.ttf`.
 * All text boxes and buttons should put all the text in one line (no line-breaks). The only exception is the How To Play screen's instructions (see "How To Play screen").
 

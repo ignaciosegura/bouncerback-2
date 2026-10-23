@@ -349,7 +349,38 @@ button {
 }
 
 .main-menu-screen .menu {
+  position: relative;
   margin-bottom: calc(123 * var(--u));
+}
+
+/* Gamepad indicator (MAIN MENU mockups): the drawing's left edge 350px right of the screen's center
+   (the menu is centered on it), spanning from the SETTINGS top to the HOW TO bottom. A button is
+   1em of text plus 0.5em of padding on each side, plus its borders. Placed with left / bottom, not a
+   transform: it shakes with the menu in the screen-out */
+.gamepad-indicator {
+  --button-height: calc(2 * var(--font-menu) + 2 * var(--border-width));
+  position: absolute;
+  left: calc(50% + 350 * var(--u));
+  bottom: 0;
+  height: calc(2 * var(--button-height) + 64 * var(--u));
+  aspect-ratio: 818 / 571;
+  pointer-events: none;
+}
+
+.gamepad-indicator__drawing {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Centered over the drawing, overflowing it on both sides (a flex item overflows centered) */
+.gamepad-indicator__text {
+  position: absolute;
+  inset-inline: 0;
+  bottom: calc(100% + 27 * var(--u));
+  display: flex;
+  justify-content: center;
+  text-transform: none;
 }
 
 /* Pinned 109px from the bottom (MAIN MENU mockup). Centered with inset + flex, not a translate:

@@ -53,7 +53,7 @@ Other terms:
 
 ## How controllers are read
 
-* **Gamepad API, no library.** It has no input events: the state is read by polling `navigator.getGamepads()` once per frame. The `gamepadconnected` / `gamepaddisconnected` events are only used to start and stop polling in the menus.
+* **Gamepad API, no library.** It has no input events: the state is read by polling `navigator.getGamepads()` once per frame. The `gamepadconnected` / `gamepaddisconnected` events are only used to start and stop polling in the menus, and to switch the Main Menu's gamepad indicator (see "Main Menu gamepad indicator" in `docs/graphical-specs.md`). Browsers only expose a controller once one of its buttons has been pressed on the page, so that first press is what connects it.
 * **Only the `standard` mapping.** Controllers the browser doesn't report with the `standard` mapping are ignored.
 * **Secure context only.** Browsers hide controllers outside `https://` and `localhost`.
 * **One controller at a time.** With several connected, the one used last drives the game (the last one with a button pressed or a stick pushed).
@@ -70,6 +70,7 @@ Other terms:
 | `src/input/menuNavigation.js` | Menu navigation: marks the selected button with the `gamepad-selected` class and activates it with `click()`; feeds the Konami Code on the screen marked `data-konami-code` |
 | `src/input/konamiCode.js` | `KonamiCode`: detects the code in the d-pad presses |
 | `src/App.jsx` | Starts the menu navigation on the screen-transition wrapper; the Konami Code calls `toggleAllLevelsUnlocked()` (`src/game/levelProgress.js`) |
+| `src/components/GamepadIndicator.jsx` | The Main Menu's gamepad indicator: `hasGamepad` for its first state, `watchGamepads` to switch it; not rendered on phones and tablets |
 | `src/game/GameEngine.js` | `handleGamepad()`: stick paddles and capture during play |
 | Screens | `data-gamepad="ignore"` (Intro button: never selected), `data-gamepad="back"` (the `<<< BACK` buttons), `data-konami-code` (Level Select) |
 

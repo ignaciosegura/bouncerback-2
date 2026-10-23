@@ -3,6 +3,7 @@ import Menu from '../components/Menu.jsx'
 import Button from '../components/Button.jsx'
 import Logo from '../components/Logo.jsx'
 import TextBox from '../components/TextBox.jsx'
+import GamepadIndicator from '../components/GamepadIndicator.jsx'
 
 export default function MainMenuScreen ({ onPlay, onSettings, onHowTo, onLogoRect }) {
   return (
@@ -13,6 +14,8 @@ export default function MainMenuScreen ({ onPlay, onSettings, onHowTo, onLogoRec
         <Button onClick={onPlay}>PLAY</Button>
         <Button onClick={onSettings}>SETTINGS</Button>
         <Button onClick={onHowTo}>HOW TO</Button>
+        {/* Out of the buttons' flow: beside SETTINGS and HOW TO */}
+        <GamepadIndicator />
       </Menu>
       {/* Mixed case on purpose (MAIN MENU mockup); pinned to the bottom, outside the centered logo + buttons group */}
       <div className="main-menu__credits">

@@ -35,6 +35,7 @@ root/
     ├── components/                 # React UI components (HUD, Menus, Modals)
     │   ├── Button.jsx              # Reusable button component
     │   ├── HUD.jsx                 # Heads-Up Display for in-game information
+    │   ├── GamepadIndicator.jsx    # Main Menu's gamepad indicator: controller drawing (inline SVG) and text, switches when a controller is detected; hidden on mobile
     │   ├── HowToPlayDiagram.jsx    # Inline SVG example drawing of the arena for the How To Play screen
     │   ├── Logo.jsx                # The Main Menu logo's empty box in the layout: reports its position to the menu scene, which draws the logo
     │   ├── Menu.jsx                # Generic menu container component
