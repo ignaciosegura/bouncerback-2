@@ -5,6 +5,10 @@ root/
 ├── android/                        # Capacitor Android native project
 ├── ios/                            # Capacitor iOS native project
 ├── capacitor.config.json           # Capacitor configuration
+├── electron/                       # Desktop wrapper (Electron main process)
+│   └── main.js                     # Opens the window, serves dist/ through app://bouncerback/, writes launch-info.txt
+├── electron-builder.json           # Desktop packaging config (`npm run desktop:build:linux`)
+├── release/                        # Desktop builds made by electron-builder (not committed)
 ├── package.json                  
 ├── scripts/                        # Node scripts run through npm (deploy-ftp.js, validate-levels.js: checks src/levels/*.json against docs/level-file-schema.json, `npm run validate:levels`)
 └── assets/                         # Static assets

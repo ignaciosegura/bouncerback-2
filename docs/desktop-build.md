@@ -92,11 +92,44 @@ Extended Steamworks features, listed so they can be picked up later. None of the
 | **macOS** *(to be considered)* | `.app` (universal: Intel + Apple Silicon) | Needs the paid Apple Developer account: signing, hardened runtime, notarization, entitlements, build on a Mac. Decide before investing in it. |
 | **Linux** | x64 build, run under the Steam Linux Runtime | Test on a mainstream distro, Chromium sandbox flags, GPU drivers. |
 
-- [ ] Add npm scripts for each target (e.g. `build:desktop:win`, `:mac`, `:linux`), reusing `vite build` for the web part.
+- [ ] Add npm scripts for each target, reusing `vite build` for the web part. *(Linux done in Phase D1: `desktop:build:linux`; Windows and macOS to come.)*
 - [ ] Desktop icons for each OS (from `assets/native/` sources).
 - [ ] Version numbering shared with `package.json`.
 - [ ] CI pipeline producing the three builds (optional but recommended).
-- [ ] Add the new folder(s) to `docs/project-structure.md`; keep `android/`, `ios/` untouched.
+- [x] Add the new folder(s) to `docs/project-structure.md`; keep `android/`, `ios/` untouched. *(Phase D1: `electron/`, `electron-builder.json`, `release/`.)*
+
+---
+
+### Test builds
+
+**Linux x64 (Phase D1).** Built on the Mac; no Steam integration.
+
+1. `npm run desktop:start` builds the web app and runs it in Electron on the Mac, as a check before copying. (From a VS Code terminal, run `unset ELECTRON_RUN_AS_NODE` first: VS Code sets it, and it makes Electron run as plain Node.)
+2. `npm run desktop:build:linux` builds `release/bouncerback-<version>.tar.gz` (about 130 MB). `release/linux-unpacked/` is the same build, unpacked.
+3. Copy the archive to the Deck (USB stick, or a network share in Desktop Mode) and extract it, e.g. to `~/Games/`, keeping the permissions (Dolphin's "Extract here" does). It extracts to a `bouncerback-<version>/` folder.
+4. **Desktop Mode:** run `./bouncerback` in that folder (double click, or from Konsole to see the console output). If it stops at once with a message about the sandbox (`chrome-sandbox`), try `./bouncerback --no-sandbox` and note it in the results: it gets fixed in the packaging, not on the Deck.
+5. **Game Mode:** Game Mode only starts things from the Steam library, so in Desktop Mode add the executable as a non-Steam game (Steam → Add a Game → Add a Non-Steam Game → Browse). It's still the native Linux build, with no Steamworks and no Proton: check that "Force the use of a specific Steam Play compatibility tool" stays off in its properties. Then switch to Game Mode and start it from the library. Steam Input gives the game a virtual controller, as it will on release.
+
+The build starts fullscreen. F11 toggles windowed mode; Ctrl+Shift+I opens DevTools (Desktop Mode: Steam + X brings up the keyboard). Saved data and `launch-info.txt` (Electron and Chromium versions, display, GPU and WebGL status) are in `~/.config/Bouncerback/`. In Game Mode the Deck's performance overlay (Quick Access → Performance) shows FPS and GPU load.
+
+### Steam Deck test results
+
+To be filled after testing the Phase D1 build, in both modes unless noted. Date and SteamOS version:
+
+- **Starts?** Time to the Intro; any white flash; console output; `launch-info.txt` (is WebGL hardware-accelerated?):
+- **Display at 1280x800:** whole UI scaled correctly at 16:10, nothing cut off; menu background cropped as expected; arena and CRT glass fit:
+- **Text legibility:** HUD, credits, How To Play, gameplay tips:
+- **Performance:** 60 fps in menus and in level 5, OLD TV off and on; last life zoom; stutter at level start; battery draw:
+- **Audio:** music and effects, crackle, volume steps; after sleep and wake:
+- **Controller:** seen by the game in Desktop Mode? in Game Mode? Menus (d-pad, A, B), gameplay (both sticks, captures, holds), pause with the menu button; any button acting in Steam and in the game at once:
+- **Gamepad indicator** (Main Menu): shown or hidden; switches to "Gamepad detected"?
+- **Touchscreen:** menus and gameplay; trackpad as mouse in Desktop Mode:
+- **Saved data** survives closing and reopening (OLD TV, volumes, unlocked levels, high score):
+- **Pause when leaving the game:** Steam button / Quick Access in Game Mode; switching windows in Desktop Mode:
+- **Quitting:** Game Mode (Steam button → Exit game), Desktop Mode (closing the window); no process left running:
+- **Credit links:** what happens in each mode:
+- **Sleep and resume** during a level and in the menus:
+- **Other:**
 
 ---
 

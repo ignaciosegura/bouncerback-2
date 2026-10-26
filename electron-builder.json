@@ -1,0 +1,19 @@
+{
+  "appId": "com.bouncerback.app",
+  "productName": "Bouncerback",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**",
+    "electron/**",
+    "package.json",
+    "!node_modules/**"
+  ],
+  "linux": {
+    "target": [{ "target": "tar.gz", "arch": ["x64"] }],
+    "executableName": "bouncerback",
+    "icon": "assets/native/icon-only.png",
+    "category": "Game"
+  }
+}

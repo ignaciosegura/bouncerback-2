@@ -80,4 +80,4 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
 
 Runs on its own, in parallel with the numbered cycles (see `docs/desktop-build.md`). Phases numbered D1, D2…; completed ones go to `docs/archive/desktop-steam.md`.
 
-- [ ] **Phase D1** — Desktop test build for the Steam Deck (Electron 44 with electron-builder, Linux x64 `.tar.gz` built on the Mac, copied to the Deck by hand and run in Desktop Mode and as a non-Steam game in Game Mode; no Steamworks, no Proton; collects feedback on display, performance, audio, controller, touch and saved data)
+- [ ] **Phase D1** — Desktop test build for the Steam Deck (Electron 44 with electron-builder, Linux x64 `.tar.gz` built on the Mac, copied to the Deck by hand and run in Desktop Mode and as a non-Steam game in Game Mode; no Steamworks, no Proton; collects feedback on display, performance, audio, controller, touch and saved data) — *build done (`npm run desktop:build:linux`); waiting for the Steam Deck test, whose results go into `docs/desktop-build.md`*

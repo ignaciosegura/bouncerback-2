@@ -24,6 +24,7 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 | `docs/audio-map.md` | Which sound effect each game event triggers | Adding, changing or removing a sound or music track, or a game event that plays one |
 | `docs/game-controller.md` | Game controller: button terms (by position), controls, how controllers are read, supported controllers | Touching controller input in the menus or in gameplay (`src/input/`, or the gamepad handling in `GameEngine`) |
 | `docs/post-processing.md` | How the post-processing (`src/effects/`: zoom blur, CRT) works, step by step, and how to tune it | Touching `src/effects/`, the OLD TV setting, or anything that renders through the zoom blur or CRT |
+| `docs/desktop-build.md` | The desktop (Electron) and Steam release plan, how to build and run the desktop test builds, and the Steam Deck test results | Building, running or changing the desktop build (`electron/`, `electron-builder.json`), or working on the Steam integration |
 | `docs/mobile-build.md` | Where the iOS and Android test builds are, and how to build and launch them from the command line | Building, launching or testing the iOS or Android app, or changing Capacitor or native settings |
 | `docs/info-for-testers.md` | Tricks and information for game testers (e.g. unlocking every level) | Testing something that needs a trick (such as unlocked levels), or changing one of those tricks (update it afterwards) |
 | `docs/implementation-status.md` | Which implementation phases are completed and which are pending | Planning a new phase (for its number) or completing one (to mark it) |
@@ -48,6 +49,7 @@ Violating these rules will break the game or cause hard-to-debug issues.
 
 ### 1. React and PixiJS have strictly separate domains
 
+- **Electron's main process** (`electron/`, desktop builds only) sits outside both: it opens the window and serves the files, and never reads or writes game state.
 - **React** owns: routing, menus, HUD overlays, modal screens, settings. It sits on top of the canvas as an HTML layer.
 - **PixiJS** owns: the game canvas, the game loop, all in-game entities, physics, rendering, and in-game input handling. It also draws the menu screens' background animation and the Main Menu logo, behind the menus' HTML layer (`src/menu/`); React only tells it, on screen changes and resizes, which screen transition the logo plays and where the logo's box is.
 - These layers must never cross. React does not read or write frame-by-frame game state.

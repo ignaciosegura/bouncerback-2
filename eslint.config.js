@@ -5,7 +5,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 
 export default [
   {
-    ignores: ['dist/', 'android/', 'ios/', 'project-files/', 'working/', 'docs/']
+    ignores: ['dist/', 'release/', 'android/', 'ios/', 'project-files/', 'working/', 'docs/']
   },
   js.configs.recommended,
   {
@@ -34,7 +34,7 @@ export default [
     ...reactHooks.configs.flat.recommended
   },
   {
-    files: ['*.config.js', 'scripts/**/*.js'],
+    files: ['*.config.js', 'scripts/**/*.js', 'electron/**/*.js'],
     languageOptions: {
       globals: {
         ...globals.node
