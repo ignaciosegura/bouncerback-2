@@ -17,7 +17,7 @@ This document defines the core technology stack, architectural boundaries, proje
 | **Menu Background Animation** | **lottie-web** (canvas player) | Draws the Lottie vector animation behind the menu screens into an off-screen canvas, shown by the menus' own PixiJS application as a texture (`src/menu/`). |
 | **Audio** | Manages cross-platform sound effects and background music playback. |
 | **Mobile Packaging** | **Capacitor** | Wraps the web application into native iOS and Android packages. Native-only setup (landscape lock, splash, background pause) lives in `src/native.js` and does nothing in the browser. |
-| **Desktop Packaging** | **Electron 44** + **electron-builder** | Wraps the web build into Windows, Linux and (to be considered) macOS builds for Steam. The main process (`electron/main.js`) serves `dist/` through a custom `app://bouncerback/` protocol and never touches game state; so far only the Linux x64 test build exists. See `docs/desktop-build.md`. |
+| **Desktop Packaging** | **Electron 44** + **electron-builder** | Wraps the web build into Windows, Linux and (to be considered) macOS builds for Steam. The main process (`electron/main.js`) serves `dist/` through a custom `app://bouncerback/` protocol and never touches game state; a preload bridge (`electron/preload.cjs`, read by `src/desktop.js`) is the only way the game talks to it (so far: quit); so far only the Linux x64 test build exists. See `docs/desktop-build.md`. |
 | **Steam Integration** *(planned)* | **Steamworks SDK** through a Node binding (`steamworks-ffi-node` likely; chosen in its phase, see `docs/desktop-build.md`) | Runs in Electron's main process only. Minimum scope: launch through Steam and the overlay. See `docs/desktop-build.md`. |
 
 ---

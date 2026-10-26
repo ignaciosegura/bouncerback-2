@@ -6,7 +6,8 @@ root/
 ├── ios/                            # Capacitor iOS native project
 ├── capacitor.config.json           # Capacitor configuration
 ├── electron/                       # Desktop wrapper (Electron main process)
-│   └── main.js                     # Opens the window, serves dist/ through app://bouncerback/, writes launch-info.txt
+│   ├── main.js                     # Opens the window, serves dist/ through app://bouncerback/, writes launch-info.txt, quits on the game's request
+│   └── preload.cjs                 # Preload bridge: exposes `window.bouncerbackDesktop` (quit) to the game
 ├── electron-builder.json           # Desktop packaging config (`npm run desktop:build:linux`)
 ├── release/                        # Desktop builds made by electron-builder (not committed)
 ├── package.json                  
@@ -110,5 +111,6 @@ root/
     │   └── PauseOverlay.jsx        # Pause overlay on top of the Game Screen (second development cycle)
     ├── App.jsx                     # React top-level router / screen switcher
     ├── main.jsx                    # React entry point
+    ├── desktop.js                  # Desktop (Electron) builds: `isDesktop` and `quitDesktop()` through the preload bridge; no-ops elsewhere
     └── index.css                   # Global styles & mobile safe-area setup
 └── project-files/                  # non-code files for asset building (project files). Affinity, Ableton Live project files, 

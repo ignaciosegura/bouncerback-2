@@ -1,13 +1,16 @@
 // Electron main process: the desktop wrapper around the web build in dist/ (see docs/desktop-build.md).
 // It never touches game state: it only opens the window and serves the files.
-import { app, BrowserWindow, Menu, net, protocol, screen, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu, net, protocol, screen, shell } from 'electron'
 import { writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const DIST = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist')
+const HERE = path.dirname(fileURLToPath(import.meta.url))
+const DIST = path.join(HERE, '..', 'dist')
+const PRELOAD = path.join(HERE, 'preload.cjs')
 const SCHEME = 'app'
-const START_URL = `${SCHEME}://bouncerback/index.html`
+const ORIGIN = `${SCHEME}://bouncerback/`
+const START_URL = `${ORIGIN}index.html`
 
 // The game is served from app://bouncerback/ rather than file://: fetch / XHR (Howler, the hashed
 // asset URLs) work as on the web site, and localStorage gets one fixed origin
@@ -43,7 +46,8 @@ function createWindow () {
     webPreferences: {
       contextIsolation: true,
       sandbox: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      preload: PRELOAD
     }
   })
 
@@ -93,6 +97,11 @@ async function writeLaunchInfo () {
 }
 
 Menu.setApplicationMenu(null)
+
+// The Main Menu's EXIT GAME button (through the preload bridge), only from the game's own pages
+ipcMain.on('quit', (event) => {
+  if (event.senderFrame?.url.startsWith(ORIGIN)) app.quit()
+})
 
 app.whenReady().then(() => {
   serveDist()

@@ -9,7 +9,7 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ['**/*.{js,jsx}'],
+    files: ['**/*.{js,jsx,cjs}'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -34,11 +34,17 @@ export default [
     ...reactHooks.configs.flat.recommended
   },
   {
-    files: ['*.config.js', 'scripts/**/*.js', 'electron/**/*.js'],
+    files: ['*.config.js', 'scripts/**/*.js', 'electron/**/*.{js,cjs}'],
     languageOptions: {
       globals: {
         ...globals.node
       }
+    }
+  },
+  {
+    files: ['**/*.cjs'],
+    languageOptions: {
+      sourceType: 'commonjs'
     }
   }
 ]

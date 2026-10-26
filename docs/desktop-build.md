@@ -36,7 +36,7 @@ Overview of what is needed to publish Bouncerback on Steam for Windows, macOS an
 
 - [ ] Remove or disable the mobile-only parts on desktop (Capacitor plugins in `src/native.js`, safe areas, forced orientation).
 - [ ] Window behavior: fullscreen toggle, windowed resizing, remembered window size, aspect ratio handling on the 1080px reference layout.
-- [ ] Quit option (desktop games need an exit path from the Main Menu).
+- [x] Quit option (desktop games need an exit path from the Main Menu): the Main Menu's EXIT GAME button, desktop builds only (Phase D2).
 - [ ] Keyboard and mouse controls for menus and gameplay (today: touch, mouse, gamepad).
 - [ ] Persistent data (settings, unlocked levels, high score) stored in the OS user-data folder instead of browser storage, or at least verified to survive updates.
 - [ ] Audio: autoplay unlocking is not an issue in the wrapper, but check volume and device-change behavior.
@@ -126,7 +126,7 @@ To be filled after testing the Phase D1 build, in both modes unless noted. Date 
 - **Touchscreen:** menus and gameplay; trackpad as mouse in Desktop Mode:
 - **Saved data** survives closing and reopening (OLD TV, volumes, unlocked levels, high score):
 - **Pause when leaving the game:** Steam button / Quick Access in Game Mode; switching windows in Desktop Mode:
-- **Quitting:** Game Mode (Steam button → Exit game), Desktop Mode (closing the window); no process left running:
+- **Quitting:** Game Mode (Steam button → Exit game), Desktop Mode (closing the window), and the Main Menu's EXIT GAME button in both (with the build that has it, Phase D2); no process left running:
 - **Credit links:** what happens in each mode:
 - **Sleep and resume** during a level and in the menus:
 - **Other:**

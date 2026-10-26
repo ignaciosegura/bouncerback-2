@@ -371,17 +371,34 @@ button {
   pointer-events: none;
 }
 
+/* A button is 1em of text plus 0.5em of padding on each side, plus its borders */
+.main-menu-screen {
+  --button-height: calc(2 * var(--font-menu) + 2 * var(--border-width));
+}
+
 .main-menu-screen .menu {
   position: relative;
   margin-bottom: calc(123 * var(--u));
 }
 
+/* Desktop builds (MAIN MENU - desktop mockup): a fourth button, EXIT GAME. The gaps between buttons
+   shrink to a third of a button's height to make room for it, and the logo's gap gives up whatever
+   is left (the 64px gap is a bit short of a button), so the logo and the last button's bottom stay
+   where they are on the web build */
+.main-menu-screen--desktop .menu__items {
+  gap: calc(var(--button-height) / 3);
+}
+
+.main-menu-screen--desktop .main-menu__logo {
+  margin-bottom: calc(132 * var(--u) - (2 * var(--button-height) - 2 * 64 * var(--u)));
+}
+
 /* Gamepad indicator (MAIN MENU mockups): the drawing's left edge 350px right of the screen's center
-   (the menu is centered on it), spanning from the SETTINGS top to the HOW TO bottom. A button is
-   1em of text plus 0.5em of padding on each side, plus its borders. Placed with left / bottom, not a
-   transform: it shakes with the menu in the screen-out */
+   (the menu is centered on it), spanning from the SETTINGS top to the HOW TO bottom: two buttons and
+   the 64px gap. On desktop it keeps that size, its bottom level with EXIT GAME's (MAIN MENU - desktop
+   mockup), so its height doesn't follow the desktop gap. Placed with left / bottom, not a transform:
+   it shakes with the menu in the screen-out */
 .gamepad-indicator {
-  --button-height: calc(2 * var(--font-menu) + 2 * var(--border-width));
   position: absolute;
   left: calc(50% + 350 * var(--u));
   bottom: 0;

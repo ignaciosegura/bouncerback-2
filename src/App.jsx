@@ -15,6 +15,7 @@ import YouWinScreen from './screens/YouWinScreen.jsx'
 import MenuBackground from './components/MenuBackground.jsx'
 import { startMenuNavigation } from './input/menuNavigation.js'
 import { onBackButton, exitApp } from './native.js'
+import { quitDesktop } from './desktop.js'
 
 const SCREENS = {
   INTRO: 'intro',
@@ -26,6 +27,9 @@ const SCREENS = {
   GAME_OVER: 'gameOver',
   YOU_WIN: 'youWin'
 }
+
+// Not a screen: the screen-out started by EXIT GAME (desktop builds) ends by quitting the game
+const EXIT_GAME = 'exitGame'
 
 // Screens drawn over the menu background animation; it plays uninterrupted between them
 const MENU_BACKGROUND_SCREENS = [SCREENS.MAIN_MENU, SCREENS.LEVEL_SELECT, SCREENS.SETTINGS, SCREENS.HOW_TO]
@@ -92,6 +96,10 @@ export default function App () {
   // marks the end of the screen-out; every element ends its screen-in at the same time.
   const handleTransitionEnd = (event) => {
     if (event.animationName === 'screen-tint') {
+      if (nextScreen === EXIT_GAME) {
+        quitDesktop()
+        return
+      }
       setScreen(nextScreen)
       setTransition('in')
     } else if (event.animationName === 'screen-in') {
@@ -100,6 +108,14 @@ export default function App () {
   }
 
   const goToMainMenu = () => navigate(SCREENS.MAIN_MENU)
+
+  // EXIT GAME (desktop builds only): the screen-out plays as for any screen change and the music
+  // fades out during it; the game quits when it ends, on the empty screen
+  const exitGame = () => {
+    if (transition) return
+    soundManager.stopTrack()
+    navigate(EXIT_GAME)
+  }
 
   // The Android back button (see "Mobile back button" in docs/navigation.md). The Game screen sets
   // `gameBackRef`: back pauses the game or resumes it, and never leaves the level.
@@ -183,6 +199,7 @@ export default function App () {
           onPlay={() => navigate(SCREENS.LEVEL_SELECT)}
           onSettings={() => navigate(SCREENS.SETTINGS)}
           onHowTo={() => navigate(SCREENS.HOW_TO)}
+          onExit={exitGame}
           onLogoRect={setLogoRect}
         />
       )
