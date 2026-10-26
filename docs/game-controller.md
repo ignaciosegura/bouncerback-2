@@ -39,7 +39,7 @@ Other terms:
 * **Selection:** nothing is selected until the controller is used. Connecting a controller counts as using it: browsers only expose a controller after one of its buttons has been pressed. The first push or press on a screen with nothing selected only selects its first button. In controller mode, every new screen arrives with its first button selected. A mouse click, a touch or disconnecting the last controller leaves controller mode and hides the selection.
 * **Screen transitions:** controller input is ignored while a transition runs, like taps and clicks.
 * **Konami Code (Level Select only):** up, up, down, down, left, right, left, right on the d-pad (the classic code without its final B A, since those buttons go back and activate in the menus). Entered with some levels locked, it unlocks every level; entered with every level unlocked, it locks them again as on a fresh install (see "Level unlocking" in `game-rules.md`). The level names show or turn to dashes at once. The d-pad still moves the selection while the code is entered; any other button or a stick push starts the code over, and so does leaving the screen. In every build: a player who knows the code deserves the levels.
-* **Intro:** the controller doesn't work there. Browsers don't count controller input as a user interaction for unlocking audio (only keyboard, mouse and touch count), so pressing `ENTER BOUNCERBACK` with the controller would leave the game silent. The Intro needs a click, tap or key press.
+* **Intro:** on the web and in the native apps the controller doesn't work there. Browsers don't count controller input as a user interaction for unlocking audio (only keyboard, mouse and touch count), so pressing `ENTER BOUNCERBACK` with the controller would leave the game silent. The Intro needs a click, tap or key press. In the desktop builds (Phase D4) Electron plays audio without a user interaction, so the button works with the controller, and the press that makes the controller visible to the game (browsers only expose a controller once one of its buttons is pressed) enters at once: if it's the bottom face button or RT, the button shows pressed and activates on release. Any other first press only shows the selection. A press during the Intro's screen-in is ignored, like any press during a transition.
 
 ### Gameplay
 
@@ -72,7 +72,7 @@ Other terms:
 | `src/App.jsx` | Starts the menu navigation on the screen-transition wrapper; the Konami Code calls `toggleAllLevelsUnlocked()` (`src/game/levelProgress.js`) |
 | `src/components/GamepadIndicator.jsx` | The Main Menu's gamepad indicator: `hasGamepad` for its first state, `watchGamepads` to switch it; not rendered on phones and tablets |
 | `src/game/GameEngine.js` | `handleGamepad()`: stick paddles and capture during play |
-| Screens | `data-gamepad="ignore"` (Intro button: never selected), `data-gamepad="back"` (the `<<< BACK` buttons), `data-konami-code` (Level Select) |
+| Screens | `data-gamepad="ignore"` (Intro button on the web and in the apps: never selected), `data-gamepad="connect-press"` (Intro button on desktop: the press that connects a controller activates it; on any other button that press only shows the selection), `data-gamepad="back"` (the `<<< BACK` buttons), `data-konami-code` (Level Select) |
 
 ---
 

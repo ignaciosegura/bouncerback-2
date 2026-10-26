@@ -47,6 +47,9 @@ function createWindow () {
       contextIsolation: true,
       sandbox: true,
       nodeIntegration: false,
+      // Audio needs no user gesture (Electron's default, set so it never changes under us): the
+      // Intro button is pressed with the controller here, and controller input isn't a user gesture
+      autoplayPolicy: 'no-user-gesture-required',
       preload: PRELOAD
     }
   })

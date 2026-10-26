@@ -12,9 +12,11 @@ const ACTIVATE_BUTTONS = [BUTTONS.A, BUTTONS.RT]
 // Every button of the current screen, except the ones opted out (the Intro's: controller input
 // can't unlock audio) and disabled ones (Level Select's locked levels)
 const ITEMS_SELECTOR = '.screen button:not([data-gamepad="ignore"]):not(:disabled)'
-// `data-gamepad` holds space-separated roles: "back" (right face button), "menu" (menu button)
+// `data-gamepad` holds space-separated roles: "back" (right face button), "menu" (menu button),
+// "connect-press" (the press that connects a controller activates it: the desktop Intro)
 const BACK_SELECTOR = '.screen [data-gamepad~="back"]'
 const MENU_SELECTOR = '.screen [data-gamepad~="menu"]'
+const CONNECT_PRESS_SELECTOR = '[data-gamepad~="connect-press"]'
 // The screen where the Konami Code works (Level Select)
 const KONAMI_SELECTOR = '.screen[data-konami-code]'
 const TRANSITION_CLASSES = ['screen-transition--out', 'screen-transition--in']
@@ -75,6 +77,8 @@ export function startMenuNavigation (root, { onKonamiCode } = {}) {
   let controllerMode = false
   // First item of the previous frame: when it changes, a new menu is shown
   let firstItem = null
+  // A controller just connected: the press that connected it may activate a connect-press button
+  let connectPress = false
 
   const select = (item) => {
     selected?.classList.remove(SELECTED_CLASS)
@@ -166,7 +170,19 @@ export function startMenuNavigation (root, { onKonamiCode } = {}) {
     // Ignored during screen transitions, like taps and clicks
     if (TRANSITION_CLASSES.some((name) => root.classList.contains(name))) {
       cancelPress()
+      connectPress = false
       return
+    }
+
+    // The press that connected the controller is held from before reading started, so it never
+    // counts as a press. On a connect-press button it starts one, which activates on release
+    if (connectPress) {
+      connectPress = false
+      const button = ACTIVATE_BUTTONS.find((activate) => reader.isDown(activate))
+      if (button !== undefined && selected?.matches(CONNECT_PRESS_SELECTOR) && !press) {
+        startPress(selected, button)
+        return
+      }
     }
 
     updateKonamiCode()
@@ -220,6 +236,7 @@ export function startMenuNavigation (root, { onKonamiCode } = {}) {
       return
     }
     controllerMode = true
+    connectPress = true
     startLoop()
   })
   if (hasGamepad()) startLoop()

@@ -4,6 +4,7 @@ import Menu from '../components/Menu.jsx'
 import Button from '../components/Button.jsx'
 import TextBox from '../components/TextBox.jsx'
 import { MENU_TRACK, preloadTrack } from '../audio/soundManager.js'
+import { isDesktop } from '../desktop.js'
 
 // First screen: its button is the user interaction that unlocks audio before the Main Menu
 export default function IntroScreen ({ onEnter }) {
@@ -20,9 +21,11 @@ export default function IntroScreen ({ onEnter }) {
       {/* Outside the Menu: it's wider than the button, which the menu would stretch to match */}
       <TextBox size="menu" className="intro-screen__note">Grab your best headphones first ;)</TextBox>
       <Menu>
-        {/* Not selectable with the game controller: browsers don't unlock audio on controller input */}
+        {/* Web and native apps: not selectable with the game controller, as browsers don't unlock
+            audio on controller input. Desktop (no such rule): selectable, and the press that
+            connects the controller enters, so the Steam Deck needs no second press */}
         <Button
-          data-gamepad="ignore"
+          data-gamepad={isDesktop ? 'connect-press' : 'ignore'}
           blinking={!entered}
           onClick={() => {
             setEntered(true)

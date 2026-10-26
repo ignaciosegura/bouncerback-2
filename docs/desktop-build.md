@@ -121,7 +121,7 @@ To be filled after testing the Phase D1 build, in both modes unless noted. Date 
 - **Text legibility:** HUD, credits, How To Play, gameplay tips:
 - **Performance:** 60 fps in menus and in level 5, OLD TV off and on; last life zoom; stutter at level start; battery draw:
 - **Audio:** music and effects, crackle, volume steps; after sleep and wake:
-- **Controller:** seen by the game in Desktop Mode? in Game Mode? Menus (d-pad, A, B), gameplay (both sticks, captures, holds), pause with the menu button; any button acting in Steam and in the game at once:
+- **Controller:** seen by the game in Desktop Mode? in Game Mode? Menus (d-pad, A, B), gameplay (both sticks, captures, holds), pause with the menu button; does one press of A enter from the Intro (Phase D4); any button acting in Steam and in the game at once:
 - **Gamepad indicator** (Main Menu): shown or hidden; switches to "Gamepad detected"?
 - **Touchscreen:** menus and gameplay; trackpad as mouse in Desktop Mode:
 - **Saved data** survives closing and reopening (OLD TV, volumes, unlocked levels, high score):
@@ -135,7 +135,7 @@ To be filled after testing the Phase D1 build, in both modes unless noted. Date 
 
 ## 6. Steam Deck Verified requirements (overview)
 
-- [ ] Fully playable with the Deck's built-in controls, no keyboard or mouse needed (including every menu, and entering anything that needs text).
+- [ ] Fully playable with the Deck's built-in controls, no keyboard or mouse needed (including every menu, and entering anything that needs text). The Intro's `ENTER BOUNCERBACK` takes the controller on desktop from Phase D4.
 - [ ] Default controller glyphs and button names match the Deck's controller.
 - [ ] Text legible at the Deck's 1280x800 screen (smallest text size check, mixed-case informative texts).
 - [ ] Runs on the Deck's default configuration without extra setup or launchers.
