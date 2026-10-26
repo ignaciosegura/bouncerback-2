@@ -75,3 +75,9 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
 - [x] **Phase 53** — Konami Code (on Level Select, up up down down left right left right on the d-pad unlocks every level, or locks them again as on a fresh install when they're all unlocked; no B A; in every build)
 - [x] **Phase 54** — Gamepad indicator (Main Menu: a controller drawing with "You can use a gamepad" or "Gamepad detected", switching as soon as a controller is detected; 350px right of center, from the SETTINGS top to the HOW TO bottom; not on phones and tablets)
 - [x] **Phase 55** — Blinking buttons (the text of `ENTER BOUNCERBACK` and of unlocked levels not yet beaten blinks, 1 s on / 1 s off, all in sync; it keeps blinking under the controller's selection and the pressed look, and turns steady on activation)
+
+## Desktop & Steam Cycle (parallel) — ⏳ Pending
+
+Runs on its own, in parallel with the numbered cycles (see `docs/desktop-build.md`). Phases numbered D1, D2…; completed ones go to `docs/archive/desktop-steam.md`.
+
+- [ ] **Phase D1** — Desktop test build for the Steam Deck (Electron 44 with electron-builder, Linux x64 `.tar.gz` built on the Mac, copied to the Deck by hand and run in Desktop Mode and as a non-Steam game in Game Mode; no Steamworks, no Proton; collects feedback on display, performance, audio, controller, touch and saved data)

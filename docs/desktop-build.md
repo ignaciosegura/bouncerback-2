@@ -12,8 +12,8 @@ Overview of what is needed to publish Bouncerback on Steam for Windows, macOS an
 
 ## 1. Decisions to take first
 
-- [ ] **Desktop wrapper.** Electron is the most likely candidate (it bundles Chromium, so WebGL and the Gamepad API behave like in the browser, and Steamworks bindings exist, e.g. `steamworks.js`). Tauri is lighter but uses the system WebView, which differs per OS and is riskier for the CRT shaders. Pick one, record it in `docs/design-decisions.md` and `docs/tech-stack.md`.
-- [ ] **Steamworks integration scope.** Minimum: launching through Steam and the overlay. Optional: achievements, cloud saves, Steam Input, leaderboards for the high score.
+- [x] **Desktop wrapper: Electron.** It bundles Chromium, so WebGL, the CRT shaders and the Gamepad API behave the same on every OS and like in the browser, and Node bindings for Steamworks exist (see "Binding library" in section 4). Tauri was rejected: lighter, but it uses the system WebView, which differs per OS (WebKitGTK on Linux and the Deck) and is riskier for the shaders and the Gamepad API. Recorded in `docs/design-decisions.md` ("Desktop build") and `docs/tech-stack.md`.
+- [x] **Steamworks integration scope: minimum.** Only what a Steam release and Steam Deck Verified need: launching through Steam, the overlay, and a default controller configuration (details in section 4). Everything else Steamworks offers is listed in section 4 as **nice to have**, not planned: each one can become its own phase after release, or before it if we decide so.
 - [ ] **Game name, price, release date target.**
 - [ ] **Where the build runs.** Windows and Linux builds can come from CI runners (e.g. GitHub Actions) or local machines. (macOS, if it goes ahead, needs a Mac for building and notarization.)
 - [ ] **macOS: to be considered.** Decide later whether it is worth the Apple Developer fee. Until then, keep the wrapper choice and the code macOS-compatible, but do not set up signing or notarization.
@@ -47,10 +47,40 @@ Overview of what is needed to publish Bouncerback on Steam for Windows, macOS an
 
 ## 4. Steam integration
 
-- [ ] Initialize the Steamworks SDK in the wrapper; handle "Steam not running" and `steam_appid.txt` for development.
-- [ ] Steam overlay working over the WebGL canvas (a known pain point with Electron: needs testing on each OS).
-- [ ] Optional features chosen in section 1 (achievements, cloud saves, leaderboards).
-- [ ] Steam Input: controller configuration so Steam's layer and the existing Gamepad API handling in `docs/game-controller.md` do not conflict.
+The Steamworks SDK is reached through a Node binding, which still has to be chosen (see "Binding library" below). It runs in Electron's **main process** only; the game (renderer) never calls it directly. Whatever the renderer needs from Steam (e.g. "the overlay opened") crosses through a small preload bridge, as low-frequency messages, the same way React and PixiJS talk today. The web and mobile builds must keep working without any of it: on those builds the bridge simply isn't there.
+
+### Binding library (checked 2026-10-26, current Electron 45)
+
+- **`steamworks.js`** (ceifa): the best known. Its last npm release is 0.4.0 from August 2024, and the last commit to its repo is from September 2025. It is built on N-API, so in principle a newer Electron doesn't need a rebuild, but nobody has confirmed it works on recent Electron versions, and its own test app uses Electron 24. Its overlay support (`electronEnableSteamOverlay()`, Chromium switches) has open reports of **not working on native Linux** and on macOS; it is reported to work on Windows. That rules it out for us as it stands, since Linux comes first.
+- **`steamworks-ffi-node`** (ArtyProf, MIT): newer (since October 2025), actively released (0.11.3 in September 2026), needs Node 22 or newer (Electron 45 has it). Calls the SDK through `koffi` instead of a compiled addon. Its overlay draws the Electron window's content into its own native window (OpenGL on Windows and Linux, Metal on macOS) where Steam can inject the overlay. It says this was tested on Windows, macOS and the Steam Deck's Desktop Mode, and it needs **X11 on Linux (no Wayland yet)**. It is still young and maintained by one person, and copying every frame adds a cost. Both its native files must be unpacked from the `.asar` archive when packaging.
+- **The Deck's Game Mode** might not need any of this: there the screen is composed by gamescope, which draws the Steam overlay itself. Check this on the Deck first; if it holds, the overlay problem is limited to desktop Linux and Windows.
+- **To decide at the start of the phase:** first build a small test app with Electron 45 and `steamworks-ffi-node` (init, overlay, overlay event) and run it on the Deck (Game Mode and Desktop Mode), desktop Linux and Windows. If the overlay can't be made to work on desktop Linux, decide whether to accept that (Steam doesn't require the overlay) rather than block the release on it.
+
+### Minimum scope (planned)
+
+- [ ] **Initialize Steamworks** in the main process at startup, with the game's App ID.
+- [ ] **Launched outside Steam:** ask Steam to relaunch the game through it (the SDK's "restart app if necessary" check) and quit. If Steam can't be reached at all, show a plain error and quit, rather than starting without Steam.
+- [ ] **Development:** a `steam_appid.txt` next to the executable when running from source or from a local build, never shipped in the Steam depots.
+- [ ] **Steam overlay** (Shift+Tab, or the Steam button on the Deck) drawn over the WebGL canvas. A known pain point with Electron: it needs specific Chromium switches and a canvas that repaints continuously (ours does, `app.ticker` runs every frame). Test on each OS and on the Deck.
+- [ ] **Pause when the overlay opens.** The game already pauses when the window loses focus, but the overlay doesn't take the focus away; listen to Steam's overlay-activated event and open the Pause Overlay, as the focus loss does (only while playing, same rules as `P`).
+- [ ] **Default controller configuration** in Steamworks (Steam Input "gamepad" template), so Steam presents every controller (including the Deck's built-in controls) to the game as a standard gamepad, which the existing Gamepad API handling in `docs/game-controller.md` already reads. No Steam Input API calls in the code. Check that Steam's layer and the game don't both react to the same press (e.g. the menu button).
+- [ ] **No Steam DRM wrapper** on the executable (it is known to break Electron apps, and it isn't required).
+
+### Nice to have (not planned)
+
+Extended Steamworks features, listed so they can be picked up later. None of them is needed for the release or for Steam Deck Verified. Each needs its own design (what exactly is tracked or shown) and its own phase.
+
+- **Achievements.** E.g. beating each level, beating the game, capturing the supercharged atom, a long charged atom hold, a level with no life lost. Needs the list and the icons (locked and unlocked) designed, set up in Steamworks, and the game events that trigger them sent from the engine to the main process (low frequency, at the end of a level or on a capture). Must work when unlocked offline (Steam syncs later).
+- **Stats.** Counters behind the achievements (total captures, atoms bounced, levels played). Only worth it together with achievements or leaderboards.
+- **Leaderboards.** One per level for the high score, with the player's rank and friends' scores. Needs a place on screen to show them (e.g. Game Over / You Win! or Level Select), which is new UI: plan it with a mockup. Scores are client-submitted, so cheating can't really be prevented: accept it for a casual game.
+- **Steam Cloud.** Saves settings, unlocked levels and high scores across machines. **Auto-Cloud** (set up in Steamworks, no code) needs the save data in plain files under a known folder; today it is in `localStorage`, which Electron keeps in a database folder that isn't safe to sync. So it needs the save data moved to a file first (see "Persistent data" in section 3), and a rule for conflicts (e.g. keep the most progress).
+- **Rich Presence.** What friends see in their Steam friends list, e.g. "In the menus" / "Playing LEVEL NAME". A few calls on screen changes.
+- **Steam Input API** (full integration, beyond the default configuration): named actions ("place paddle", "capture", "pause") and action sets for menus and gameplay, so players can remap them in Steam, and Steam's own button glyphs for whatever controller is in use. Large change: it would replace or sit beside the Gamepad API handling, and all of `docs/game-controller.md`.
+- **Game recording timeline** (Steam's game recording feature): markers on the recording's timeline for moments like a capture, a life lost, a level won, so players find their highlights easily.
+- **Overlay web browser** for the Main Menu credit links (niknak.es, manfromspace.com), so they open inside the Steam overlay instead of switching to the desktop browser (better on the Deck, where there is no desktop in Game Mode).
+- **Steam Deck detection** to adapt defaults on the Deck, e.g. the OLD TV switch or a lighter post-processing if the performance check in section 3 asks for it.
+- **Steam Workshop** for player-made levels: the levels are already JSON files with a schema (`docs/level-file-schema.json`). Large feature: a way to make and test levels, upload, browse and play them, validation of untrusted files.
+- **Steam Trading Cards, badges, profile items.** No code: art and Steamworks setup only, and Valve enables them only once the game has enough sales.
 
 ---
 
