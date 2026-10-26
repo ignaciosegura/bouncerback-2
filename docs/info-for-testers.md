@@ -10,7 +10,7 @@ Only the first tier of levels (LEARN) is unlocked on a fresh install. Each furth
 
 ### Konami Code (recommended)
 
-With a game controller connected, go to Level Select and press **up, up, down, down, left, right, left, right** on the d-pad (no B A at the end). Every level unlocks at once. Enter the code again with every level unlocked and the progress goes back to a fresh install's: only the first tier unlocked, no levels beaten (the high score and the settings are kept).
+With a game controller connected, go to Level Select and press **up, up, down, down, left, right, left, right** on the d-pad (no B A at the end). Every level unlocks at once. Enter the code again with every level unlocked and the progress goes back to a fresh install's: only the first tier unlocked, no levels beaten (the high score and the settings are kept). After the reset, LEARN blinks again as a level still to beat.
 
 It works the same on the web and on the Android and iOS apps, in every build, and the result is saved like normal progress. If it doesn't react, check that the controller drives the menus (the selection moves with the d-pad) and enter it again: any other button or a stick push starts the code over. See "Menus" in `game-controller.md`.
 

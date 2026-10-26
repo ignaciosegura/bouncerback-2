@@ -132,6 +132,7 @@ The levels are grouped in tiers, set by the `tier` field of each level file (for
 * When every level of the highest unlocked tier has been beaten, the next tier unlocks. The levels of a tier can be beaten in any order and over several sessions.
 * Unlocked tiers stay unlocked: the progress (the highest unlocked tier and the beaten levels) is saved on the device and survives closing the app or the browser tab. It never goes back.
 * Locked levels can't be played: Level Select shows them, without their name, and they can't be selected (see `navigation.md`).
+* Level Select shows the unlocked levels still to beat by blinking their name; beaten levels' names are steady (see "Level Select" in `graphical-specs.md`). How To Play doesn't explain it: the player works it out from the blinking Intro button and from how Level Select changes.
 * **Konami Code:** on Level Select, the Konami Code on a game controller's d-pad unlocks every level; entered again with every level unlocked, it resets the progress to a fresh install's (only tier 0 unlocked, no beaten levels). See "Menus" in `game-controller.md`.
 
 # High Score
