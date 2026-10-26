@@ -37,7 +37,7 @@ Overview of what is needed to publish Bouncerback on Steam for Windows, macOS an
 - [ ] Remove or disable the mobile-only parts on desktop (Capacitor plugins in `src/native.js`, safe areas, forced orientation).
 - [ ] Window behavior: fullscreen toggle, windowed resizing, remembered window size, aspect ratio handling on the 1080px reference layout.
 - [x] Quit option (desktop games need an exit path from the Main Menu): the Main Menu's EXIT GAME button, desktop builds only (Phase D2).
-- [ ] Keyboard and mouse controls for menus and gameplay (today: touch, mouse, gamepad).
+- [ ] Keyboard and mouse controls for menus and gameplay (today: touch, mouse, gamepad). The Escape key is handled (Phase D3, see "Desktop Escape key" in `docs/navigation.md`); the rest is pending.
 - [ ] Persistent data (settings, unlocked levels, high score) stored in the OS user-data folder instead of browser storage, or at least verified to survive updates.
 - [ ] Audio: autoplay unlocking is not an issue in the wrapper, but check volume and device-change behavior.
 - [ ] Performance check of the CRT / zoom blur post-processing on integrated GPUs and on the Steam Deck.

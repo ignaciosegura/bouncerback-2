@@ -60,6 +60,20 @@ The Android system back button (and its gesture) follows the navigation below. I
 
 The Game Screen and the Pause Overlay are the exceptions on purpose: a player who taps the back button by mistake must not lose the current game. Leaving a level takes the deliberate EXIT TO MENU button of the Pause Overlay. While the game can't be paused (the 3-second start delay, the core collapse, the Game Over delay, the Gameplay Tips), the back button does nothing.
 
+## Desktop Escape key
+
+In the desktop builds, the Escape key follows the navigation below. Like taps, it is ignored while a screen transition runs, and a key held down acts only once. The web build ignores Escape: in a browser it has its own uses (leaving fullscreen, among others). It doesn't take the desktop window out of fullscreen.
+
+| Screen | Escape |
+| :--- | :--- |
+| Level Selection, How To Play, Settings, Game Over, You Win! | → Main Menu |
+| Game Screen | Opens the Pause Overlay (never leaves the game) |
+| Pause Overlay | Resumes the game (same as `<<< RESUME`) |
+| Gameplay Tips | Leaves the level → Main Menu (same as the Pause Overlay's EXIT TO MENU) |
+| Intro, Main Menu | Nothing (quitting takes the EXIT GAME button) |
+
+The Gameplay Tips and the Game Screen differ on purpose: before the level starts nothing is lost, so Escape is the quick way out after choosing the wrong level; once it has started, a stray key press must not lose the game, as with the mobile back button. Once READY is pressed, Escape does nothing while the tip fades out, and on the Game Screen it does nothing while the game can't be paused (the 3-second start delay, the core collapse, the Game Over delay).
+
 ## Game controller
 
 The menus can also be navigated with a game controller, except on the Intro. The controls are in `docs/game-controller.md`; the selected button's look is in `graphical-specs.md` ("Game controller selection").

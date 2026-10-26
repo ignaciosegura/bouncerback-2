@@ -15,7 +15,7 @@ import YouWinScreen from './screens/YouWinScreen.jsx'
 import MenuBackground from './components/MenuBackground.jsx'
 import { startMenuNavigation } from './input/menuNavigation.js'
 import { onBackButton, exitApp } from './native.js'
-import { quitDesktop } from './desktop.js'
+import { isDesktop, quitDesktop } from './desktop.js'
 
 const SCREENS = {
   INTRO: 'intro',
@@ -136,6 +136,32 @@ export default function App () {
   })
   useEffect(() => onBackButton(() => handleBackButton()), [])
 
+  // The Escape key, desktop builds only: the browser keeps it on the web (see "Desktop Escape key"
+  // in docs/navigation.md). The Game screen sets `gameEscapeRef`: Escape pauses the game or resumes
+  // it, and leaves the level only from the Gameplay Tips.
+  const gameEscapeRef = useRef(null)
+  const handleEscapeKey = useEffectEvent(() => {
+    if (transition) return
+    switch (screen) {
+    case SCREENS.INTRO:
+    case SCREENS.MAIN_MENU:
+      return
+    case SCREENS.GAME:
+      gameEscapeRef.current?.()
+      return
+    default:
+      goToMainMenu()
+    }
+  })
+  useEffect(() => {
+    if (!isDesktop) return
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape' && !event.repeat) handleEscapeKey()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   // The unlock must happen inside the button's click; the menu track starts when the Main Menu appears
   const enter = () => {
     soundManager.unlock()
@@ -233,6 +259,7 @@ export default function App () {
           onLevelWin={winLevel}
           onExitToMenu={goToMainMenu}
           backRef={gameBackRef}
+          escapeRef={gameEscapeRef}
         />
       )
 

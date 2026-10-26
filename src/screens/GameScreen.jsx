@@ -5,7 +5,7 @@ import PauseOverlay from './PauseOverlay.jsx'
 import GameplayTips from './GameplayTips.jsx'
 import GameEngine from '../game/GameEngine.js'
 
-export default function GameScreen ({ level, hiScore, settings, onScoreChange, onGameOver, onLevelWin, onExitToMenu, backRef }) {
+export default function GameScreen ({ level, hiScore, settings, onScoreChange, onGameOver, onLevelWin, onExitToMenu, backRef, escapeRef }) {
   const canvasContainerRef = useRef(null)
   const engineRef = useRef(null)
   const [score, setScore] = useState(0)
@@ -13,8 +13,8 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
   const [timeTenths, setTimeTenths] = useState(level.timerTenths)
   // null while playing; { backgroundColor } while paused
   const [pause, setPause] = useState(null)
-  // The level's tip stays up until READY; levels without one start straight away
-  const [tipShown, setTipShown] = useState(level.tip !== null)
+  // The level's tip stays up until READY, then fades out ('leaving'); levels without one start straight away
+  const [tip, setTip] = useState(level.tip !== null ? 'shown' : null)
   const handleScoreChange = useEffectEvent((value) => onScoreChange(value))
   const handleGameOver = useEffectEvent((result) => onGameOver(result))
   const handleLevelWin = useEffectEvent((result) => onLevelWin(result))
@@ -47,23 +47,36 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
     return () => { backRef.current = null }
   }, [backRef])
 
-  useEffect(() => {
-    engineRef.current.setOldTv(settings.oldTv)
-  }, [settings.oldTv])
-
   const exitToMenu = () => {
     engineRef.current.leave()
     onExitToMenu()
   }
 
+  // The desktop Escape key leaves the level from the tip (nothing is lost yet), does nothing while
+  // it fades out after READY, and otherwise pauses or resumes like the back button
+  const handleEscape = useEffectEvent(() => {
+    if (tip === 'shown') exitToMenu()
+    else if (tip === null) backRef.current?.()
+  })
+  useEffect(() => {
+    escapeRef.current = () => handleEscape()
+    return () => { escapeRef.current = null }
+  }, [escapeRef])
+
+  useEffect(() => {
+    engineRef.current.setOldTv(settings.oldTv)
+  }, [settings.oldTv])
+
   return (
     <Screen variant="dark" className="game-screen">
       <div ref={canvasContainerRef} className="game-screen__canvas" />
       <HUD score={score} timeTenths={timeTenths} hiScore={Math.max(hiScore, score)} lives={lives} />
-      {tipShown && (
+      {tip && (
         <GameplayTips
           lines={level.tip}
-          onReady={() => { setTipShown(false); engineRef.current.begin() }}
+          leaving={tip === 'leaving'}
+          onLeave={() => setTip('leaving')}
+          onReady={() => { setTip(null); engineRef.current.begin() }}
         />
       )}
       {pause && (
