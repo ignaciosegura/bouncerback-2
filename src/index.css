@@ -13,6 +13,13 @@
   initial-value: #FFFFFF;
 }
 
+/* Registered so a blinking button's text can read its menu's blink clock (see "Blinking buttons") */
+@property --blink {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
 :root {
   --color-black: #000000;
   --color-white: #FFFFFF;
@@ -224,6 +231,22 @@ button {
   display: flex;
   flex-direction: column;
   gap: calc(64 * var(--u));
+}
+
+/* Blinking buttons: the text only, 1 s visible, 1 s invisible. One clock per menu keeps every
+   blinking text in sync, also one that starts blinking later. It's on .menu__items because the
+   screen and its direct children get the screen transitions' animations, which would replace it. */
+@keyframes blink {
+  0% { --blink: 1; }
+  50%, 100% { --blink: 0; }
+}
+
+.menu__items {
+  animation: blink 2s step-end infinite;
+}
+
+.button__label--blinking {
+  opacity: var(--blink);
 }
 
 .menu--with-footer {

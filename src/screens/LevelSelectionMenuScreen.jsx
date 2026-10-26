@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Screen from '../components/Screen.jsx'
 import Menu from '../components/Menu.jsx'
 import Button from '../components/Button.jsx'
@@ -18,6 +19,9 @@ function rowsByTier (levels) {
 }
 
 export default function LevelSelectionMenuScreen ({ levels, levelProgress, onSelectLevel, onBack }) {
+  // The level picked to play: its name stops blinking and stays steady through the screen-out
+  const [selectedLevel, setSelectedLevel] = useState(null)
+
   return (
     <Screen
       variant="light"
@@ -31,12 +35,18 @@ export default function LevelSelectionMenuScreen ({ levels, levelProgress, onSel
           <div key={row[0].tier} className="level-select__row">
             {row.map((level) => {
               const unlocked = isLevelUnlocked(level, levelProgress)
+              // Unlocked but not beaten yet: its name blinks (graphical-specs "Level Select")
+              const pending = unlocked && !levelProgress.beatenLevels.includes(level.number)
               return (
                 <Button
                   key={level.number}
                   className="level-select__button"
                   disabled={!unlocked}
-                  onClick={() => onSelectLevel(level)}
+                  blinking={pending && level.number !== selectedLevel}
+                  onClick={() => {
+                    setSelectedLevel(level.number)
+                    onSelectLevel(level)
+                  }}
                 >
                   {unlocked ? level.name : LOCKED_LABEL}
                 </Button>

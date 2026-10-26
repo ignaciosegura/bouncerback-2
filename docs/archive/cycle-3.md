@@ -401,7 +401,7 @@ The Intro's `ENTER BOUNCERBACK` button blinks too. It's the player's first click
 
 **Implementation** (React / CSS only: menus' HTML layer; no PixiJS, no per-frame state)
 
-- `src/components/Button.jsx`: a new `blinking` prop. When it's true, the children go in a `<span className="button__label button__label--blinking">`; otherwise the button renders as today.
+- `src/components/Button.jsx`: a new `blinking` prop. The children always go in a `<span className="button__label">`, so the DOM never changes; `blinking` only adds `button__label--blinking` to it.
 - `src/index.css`:
   - One shared clock per menu, so every blinking text stays in sync: a registered custom property `--blink` (`@property`, `<number>`, inherited, initial value 1), animated on `.menu__items` with `@keyframes blink` (1 for the first half, 0 for the second), 2 s, `step-end`, infinite.
   - `.button__label--blinking { opacity: var(--blink); }`. A button that starts blinking later reads the same clock, so it's in phase at once. Using `opacity`, not `visibility` or `display`, keeps the box and the layout fixed, and screen readers always read the text.
