@@ -86,7 +86,7 @@ async function writeLaunchInfo () {
     sessionType: process.env.XDG_SESSION_TYPE ?? null,
     display: { size: display.size, scaleFactor: display.scaleFactor },
     gpuFeatureStatus: app.getGPUFeatureStatus(),
-    gpuInfo: await app.getGPUInfo('basic').catch((error) => String(error))
+    gpuInfo: await app.getGPUInfo('complete').catch((error) => String(error))
   }
   const file = path.join(app.getPath('userData'), 'launch-info.txt')
   await writeFile(file, JSON.stringify(info, null, 2)).catch(() => {})
