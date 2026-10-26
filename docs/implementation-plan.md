@@ -165,3 +165,52 @@ Like taps, Escape is ignored while a screen transition runs. A key held down act
 - `P`, the controller's menu button and the controller's right face button behave as before.
 - `npm run dev` in a browser: Escape does nothing in the game (and still leaves the browser's fullscreen). The Android back button behaves as before, including doing nothing on the Gameplay Tips.
 - `npm run lint` passes.
+
+### Phase D4 — ENTER BOUNCERBACK with the controller on desktop
+
+**Goal**
+
+On the desktop builds, the Intro's `ENTER BOUNCERBACK` button works with the game controller, so the Steam Deck can be played from launch with its built-in controls only (a Steam Deck Verified requirement, `docs/desktop-build.md` section 6). A single press of the bottom face button (or RT) enters, even though that press is also the one that makes the controller visible to the game. The web and mobile builds don't change: there the Intro still ignores the controller, because browsers don't unlock audio on controller input.
+
+Out of scope: any other screen's controller behavior, keyboard controls on the Intro, and skipping the Intro on desktop.
+
+**The problem**
+
+- The Intro button has `data-gamepad="ignore"`, so the menu navigation never selects it (`docs/game-controller.md`, "Intro"). The reason (audio needs a click, tap or key press) is a browser rule; Electron's autoplay policy doesn't need a user gesture, so on desktop the reason doesn't hold.
+- Chromium only exposes a controller once one of its buttons is pressed on the page, also on the Deck in Game Mode where Steam's virtual controller exists from launch. That press fires `gamepadconnected`, but it never counts as a press: the reader's first poll only records the state, and the first frame with a new menu resets the reader. Making the button selectable alone would therefore need two presses: the first shows the selection, the second enters.
+
+**Choices** (confirmed with the user)
+
+- **Desktop only.** The Intro button stays ignored by the controller on the web and in the native apps (`isDesktop`, `src/desktop.js`).
+- **The connecting press enters, on the Intro only.** When a controller connects while the Intro is up and the press that connected it is the bottom face button or RT, it becomes a held press on `ENTER BOUNCERBACK` (pressed look at once) and activates on release, like any other controller press (Phase 35). Any other button, the d-pad or a stick only shows the selection, as on every screen today.
+- **Only on a button marked for it.** A new `data-gamepad` role, `connect-press`, marks the one button the connecting press may activate. On every other screen the connecting press still only shows the selection: on the Main Menu, picking up the controller must not start PLAY.
+- **Missed presses are accepted.** A press during the Intro's screen-in (the first 0.5 s), or a tap so short it's released before the first poll after `gamepadconnected`, only shows the selection, or nothing during the transition; the player presses again.
+- **The autoplay policy is set explicitly** in the Electron window (`autoplayPolicy: 'no-user-gesture-required'`, Electron's current default), so the game never depends on a default that could change.
+
+**Implementation**
+
+- `electron/main.js`: `autoplayPolicy: 'no-user-gesture-required'` in the window's `webPreferences`, with a comment (the Intro button is pressed with the controller on desktop, and controller input isn't a user gesture).
+- `src/screens/IntroScreen.jsx`: the button's `data-gamepad` is `connect-press` when `isDesktop`, `ignore` otherwise. The comment explains both.
+- `src/input/menuNavigation.js`:
+  - A `connectPress` flag, set by the `watchGamepads` callback when a controller connects (next to `controllerMode = true`). The loop starting at mount because a controller is already exposed doesn't set it.
+  - In `update()`, once the frame gets past the new-menu reset and the transition check: if the flag is set, it is cleared, and when the selected item has the `connect-press` role and the bottom face button or RT is down (`reader.isDown`, not `wasPressed`), `startPress(selected, button)` runs. The existing `updatePress()` activates it on release. The flag is also cleared when the frame stops at the transition check, so a connection during a transition never turns into a press later.
+  - A `CONNECT_PRESS_SELECTOR` (`[data-gamepad~="connect-press"]`) next to the other role selectors; `ITEMS_SELECTOR` is unchanged (the role isn't `ignore`, so the button is selectable).
+- No change in `src/input/gamepad.js`, the Intro's layout or its audio code: `unlock()` runs from the button's `onClick`, which `click()` triggers as it does for a mouse.
+
+**Docs** (as part of the implementation)
+
+- `docs/game-controller.md`: the "Intro" bullet (ignored on the web and in the apps; on desktop selectable, and the connecting press enters, with the reason); the `data-gamepad` row of the file table gets the `connect-press` role and notes that `ignore` is web and mobile only.
+- `docs/design-decisions.md`, "Desktop build (Steam)": why the Intro takes the controller on desktop (Electron's autoplay policy; Steam Deck Verified), why the connecting press enters only on the Intro, and that missed presses during the screen-in are accepted.
+- `docs/desktop-build.md`: section 6's "fully playable with the Deck's built-in controls" item notes the Intro is covered by Phase D4; the "Steam Deck test results" Controller item asks whether one press enters from the Intro.
+- `docs/implementation-status.md`: Phase D4.
+
+**Verification**
+
+- `npm run desktop:start` with a controller connected to the Mac, and no button pressed since launch:
+  - After the Intro's screen-in, one press and release of the bottom face button enters: the button shows selected and pressed while held, activates on release, and the Main Menu's music starts as usual. Same with RT.
+  - Restart; first press on the d-pad, B or a stick: the selection shows, nothing else. The bottom face button then enters.
+  - Restart; first press during the screen-in: nothing happens; a later press works.
+  - Restart; click `ENTER BOUNCERBACK` with the mouse: works as before. On the Main Menu, the first controller press (bottom face button) only shows the selection on PLAY; it doesn't start a level.
+- `npm run dev` in a browser: the controller still can't select or press the Intro button; the other menus behave as before.
+- On the Deck (with the Phase D1 test, Game Mode and Desktop Mode): one press of A on the Intro enters, and the music plays.
+- `npm run lint` passes.
