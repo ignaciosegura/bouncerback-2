@@ -30,6 +30,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * It's 32px, the same size as the button's text, in the screen's foreground color (black on the white #D8D8D8 background), with no border: it's a note, not a button, like the scores on the Game Over and You Win! screens.
 * At the 1920x1080 reference size, the bottom of its text line is 59px above the button's top edge, and it's horizontally centered. The button doesn't move: it stays centered on the screen.
 * It's one of the screen's elements, so it takes part in the screen transitions together with the button (see "Screen transitions").
+* The ENTER BOUNCERBACK button blinks; the note doesn't (see "Blinking buttons").
 
 ## Game logo
 
@@ -75,6 +76,15 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * The font used will be "C64 Angled", a monospaced font: `assets/fonts/c64_angled.ttf`.
 * All text boxes and buttons should put all the text in one line (no line-breaks). The only exception is the How To Play screen's instructions (see "How To Play screen").
 
+## Blinking buttons
+
+* A blinking button is the one suggested to press next. The Intro's ENTER BOUNCERBACK button blinks, so the player learns this with their first click; Level Select then uses it, unexplained, for the levels still to beat (see "Level Select"). No other button blinks.
+* Only the text blinks: visible for 1 s, invisible for 1 s, with no fade (a hard on/off), starting visible. The border, the size, the game controller's double border and the pressed look don't change, so nothing moves.
+* Every blinking text on a screen blinks in sync, also one that starts blinking while the screen is shown.
+* It keeps blinking while the button is selected with the game controller, and while it's held down (its text blinks in the pressed look's inverted color).
+* When the button is activated (click, tap, or the controller's release), its text stops blinking and stays visible through the screen-out. Other blinking buttons keep blinking. Nothing is saved: the next time the screen is shown, it blinks again if it still applies.
+* It doesn't follow the system's reduced-motion setting, like the rest of the game.
+
 ## Level Select
 
 See the LEVEL MENU and LEVEL MENU (LOCKED LEVELS) mockups.
@@ -83,6 +93,7 @@ See the LEVEL MENU and LEVEL MENU (LOCKED LEVELS) mockups.
 * The gap between the buttons of a row is the same as the gap between rows, the menus' usual gap between buttons.
 * Every level button and BACK have the same width: room for the longest level name allowed (14 characters), whatever the current names are, so unlocking a level or adding one never changes the layout.
 * A locked level's button shows 12 dashes (`------------`) instead of its name, the same for every locked level. It keeps the border and colors of the other buttons, but it has no pressed look and the game controller never selects it.
+* An unlocked level that hasn't been beaten yet blinks its name (see "Blinking buttons"); a beaten level's name is steady. A level button is therefore locked (dashes), pending (blinking) or beaten (steady).
 
 ## Pause overlay
 

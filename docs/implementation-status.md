@@ -74,3 +74,4 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
   - [x] **Phase 52** — Supercharged launch sound (the supercharged atom plays its own `launch_super` when it is generated, instead of `launch`, never both)
 - [x] **Phase 53** — Konami Code (on Level Select, up up down down left right left right on the d-pad unlocks every level, or locks them again as on a fresh install when they're all unlocked; no B A; in every build)
 - [x] **Phase 54** — Gamepad indicator (Main Menu: a controller drawing with "You can use a gamepad" or "Gamepad detected", switching as soon as a controller is detected; 350px right of center, from the SETTINGS top to the HOW TO bottom; not on phones and tablets)
+- [x] **Phase 55** — Blinking buttons (the text of `ENTER BOUNCERBACK` and of unlocked levels not yet beaten blinks, 1 s on / 1 s off, all in sync; it keeps blinking under the controller's selection and the pressed look, and turns steady on activation)
