@@ -15,7 +15,7 @@ Overview of what is needed to publish Bouncerback on Steam for Windows, macOS an
 - [x] **Desktop wrapper: Electron.** It bundles Chromium, so WebGL, the CRT shaders and the Gamepad API behave the same on every OS and like in the browser, and Node bindings for Steamworks exist (see "Binding library" in section 4). Tauri was rejected: lighter, but it uses the system WebView, which differs per OS (WebKitGTK on Linux and the Deck) and is riskier for the shaders and the Gamepad API. Recorded in `docs/design-decisions.md` ("Desktop build") and `docs/tech-stack.md`.
 - [x] **Steamworks integration scope: minimum.** Only what a Steam release and Steam Deck Verified need: launching through Steam, the overlay, and a default controller configuration (details in section 4). Everything else Steamworks offers is listed in section 4 as **nice to have**, not planned: each one can become its own phase after release, or before it if we decide so.
 - [ ] **Game name, price, release date target.**
-- [ ] **Where the build runs.** Windows and Linux builds can come from CI runners (e.g. GitHub Actions) or local machines. (macOS, if it goes ahead, needs a Mac for building and notarization.)
+- [ ] **Where the build runs.** Windows and Linux builds can come from CI runners (e.g. GitHub Actions) or local machines. For now the Linux and Windows test builds are made on the Mac (Phases D1 and D5); CI is still open. (macOS, if it goes ahead, needs a Mac for building and notarization.)
 - [ ] **macOS: to be considered.** Decide later whether it is worth the Apple Developer fee. Until then, keep the wrapper choice and the code macOS-compatible, but do not set up signing or notarization.
 
 ---
@@ -88,11 +88,11 @@ Extended Steamworks features, listed so they can be picked up later. None of the
 
 | Platform | Output | Main points |
 | :--- | :--- | :--- |
-| **Windows** | x64 folder or installer-less build | Signing (optional), test on a clean machine, Visual C++ runtime not needed with Electron. |
+| **Windows** | x64 folder or installer-less build | Signing (optional), test on a clean machine, Visual C++ runtime not needed with Electron. *First pass done in Phase D5: `.zip` of the unpacked app, x64, unsigned, built on the Mac.* |
 | **macOS** *(to be considered)* | `.app` (universal: Intel + Apple Silicon) | Needs the paid Apple Developer account: signing, hardened runtime, notarization, entitlements, build on a Mac. Decide before investing in it. |
 | **Linux** | x64 build, run under the Steam Linux Runtime | Test on a mainstream distro, Chromium sandbox flags, GPU drivers. |
 
-- [ ] Add npm scripts for each target, reusing `vite build` for the web part. *(Linux done in Phase D1: `desktop:build:linux`; Windows and macOS to come.)*
+- [ ] Add npm scripts for each target, reusing `vite build` for the web part. *(Linux done in Phase D1: `desktop:build:linux`; Windows in Phase D5: `desktop:build:win`; macOS to come.)*
 - [ ] Desktop icons for each OS (from `assets/native/` sources).
 - [ ] Version numbering shared with `package.json`.
 - [ ] CI pipeline producing the three builds (optional but recommended).
@@ -112,6 +112,16 @@ Extended Steamworks features, listed so they can be picked up later. None of the
 
 The build starts fullscreen. F11 toggles windowed mode; Ctrl+Shift+I opens DevTools (Desktop Mode: Steam + X brings up the keyboard). Saved data and `launch-info.txt` (Electron and Chromium versions, display, GPU and WebGL status) are in `~/.config/Bouncerback/`. In Game Mode the Deck's performance overlay (Quick Access → Performance) shows FPS and GPU load.
 
+**Windows x64 (Phase D5).** Built on the Mac; unsigned; no Steam integration. No Windows PC is available for now, so it is tried on the Mac under CrossOver (Wine, with the x64 code running through Rosetta 2). That shows whether the build is sound (it starts, files and saved data in place, fullscreen, quitting, links, controller and keyboard), not how it performs on Windows: the GPU calls go through translation layers (Direct3D → Metal), so frame rate and GPU status are noted, not judged.
+
+1. `npm run desktop:start` to check the build, then `npm run desktop:build:win`. It builds `release/bouncerback-<version>-win-x64.zip` (about 165 MB); `release/win-unpacked/` is the same build, unpacked.
+2. In CrossOver, create a bottle for it (Windows 10 64-bit), e.g. "Bouncerback".
+3. Extract the zip into the bottle's C: drive (CrossOver → the bottle → Open C: Drive), e.g. to `C:\Games\Bouncerback\`.
+4. Bottle → Run Command → Browse to `Bouncerback.exe` → Run. Tick "Debug options → create log file" the first time, to keep the console output. "Save command as a launcher" keeps it in the bottle for the next runs.
+5. **If it doesn't start, or shows a blank window**, try these one at a time in Run Command's command line, and note which one was needed: `--no-sandbox` (Chromium's sandbox often fails under Wine), `--disable-gpu-sandbox`, then a different graphics backend in the bottle's settings (Auto, D3DMetal, DXVK), then `--use-angle=gl`. A flag that only CrossOver needs stays a launch flag, not a change in the wrapper.
+
+The build starts fullscreen; F11 toggles windowed mode; Ctrl+Shift+I opens DevTools. Saved data and `launch-info.txt` are in the bottle, under `drive_c/users/crossover/AppData/Roaming/Bouncerback/` (the bottle's folder is in `~/Library/Application Support/CrossOver/Bottles/`). On a real Windows PC they are in `%APPDATA%\Bouncerback\`, and SmartScreen warns on the first launch, since the build is unsigned ("Windows protected your PC" → More info → Run anyway).
+
 ### Steam Deck test results
 
 To be filled after testing the Phase D1 build, in both modes unless noted. Date and SteamOS version:
@@ -129,6 +139,22 @@ To be filled after testing the Phase D1 build, in both modes unless noted. Date 
 - **Quitting:** Game Mode (Steam button → Exit game), Desktop Mode (closing the window), and the Main Menu's EXIT GAME button in both (with the build that has it, Phase D2); no process left running:
 - **Credit links:** what happens in each mode:
 - **Sleep and resume** during a level and in the menus:
+- **Other:**
+
+### Windows test results (CrossOver)
+
+To be filled after testing the Phase D5 build. Date, CrossOver version, bottle's Windows version:
+
+- **Starts?** Launch flags and graphics backend needed; time to the Intro; any white flash; log file; `launch-info.txt` (Electron and Chromium versions, is WebGL hardware-accelerated?):
+- **Display:** fullscreen on the Mac's screen, whole UI scaled, nothing cut off; F11 to windowed and back; resizing the window:
+- **Rendering:** CRT and zoom blur as in the browser (OLD TV off and on), no missing shapes or black screen; frame rate (noted, not judged):
+- **Audio:** music and effects, crackle, volume steps:
+- **Controller:** seen by the game; menus; ENTER BOUNCERBACK with it (Phase D4); gameplay; pause with the menu button:
+- **Keyboard and mouse:** Escape on the menus and in a level (Phase D3), `P`, F11; mouse in menus and gameplay:
+- **Saved data** survives closing and reopening, and is in the folder above:
+- **Quitting:** EXIT GAME (Phase D2) and closing the window; no `Bouncerback.exe` left running in the bottle:
+- **Credit links:** open in the Mac's default browser?
+- **The `.exe`'s icon and file properties** (version, company, copyright), if CrossOver shows them:
 - **Other:**
 
 ---
@@ -157,7 +183,7 @@ To be filled after testing the Phase D1 build, in both modes unless noted. Date 
 
 ## 8. Testing and review
 
-- [ ] Test matrix: Windows 10/11, one or two Linux distros, Steam Deck; current macOS (Intel and Apple Silicon) only if macOS goes ahead.
+- [ ] Test matrix: Windows 10/11, one or two Linux distros, Steam Deck; current macOS (Intel and Apple Silicon) only if macOS goes ahead. The Windows build has only been tried under CrossOver so far (Phase D5), which isn't representative: a real Windows 10/11 PC test is still needed before release.
 - [ ] Install, update and uninstall through Steam on each OS.
 - [ ] Valve's review of the store page and of the build (can send changes back).
 - [ ] Release checklist: price, regions, release date, press/keys, launch announcement.

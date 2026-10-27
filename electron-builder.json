@@ -1,6 +1,7 @@
 {
   "appId": "com.bouncerback.app",
   "productName": "Bouncerback",
+  "copyright": "© 2026 Nik Nak Studio",
   "directories": {
     "output": "release"
   },
@@ -15,5 +16,10 @@
     "executableName": "bouncerback",
     "icon": "assets/native/icon-only.png",
     "category": "Game"
+  },
+  "win": {
+    "target": [{ "target": "zip", "arch": ["x64"] }],
+    "icon": "assets/native/icon-only.png",
+    "artifactName": "bouncerback-${version}-win-x64.${ext}"
   }
 }

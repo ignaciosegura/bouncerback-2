@@ -8,7 +8,7 @@ root/
 ├── electron/                       # Desktop wrapper (Electron main process)
 │   ├── main.js                     # Opens the window, serves dist/ through app://bouncerback/, writes launch-info.txt, quits on the game's request
 │   └── preload.cjs                 # Preload bridge: exposes `window.bouncerbackDesktop` (quit) to the game
-├── electron-builder.json           # Desktop packaging config (`npm run desktop:build:linux`)
+├── electron-builder.json           # Desktop packaging config (`npm run desktop:build:linux`, `npm run desktop:build:win`)
 ├── release/                        # Desktop builds made by electron-builder (not committed)
 ├── package.json                  
 ├── scripts/                        # Node scripts run through npm (deploy-ftp.js, validate-levels.js: checks src/levels/*.json against docs/level-file-schema.json, `npm run validate:levels`)

@@ -17,6 +17,7 @@
     "cap:assets": "capacitor-assets generate --ios --android --assetPath assets/native --iconBackgroundColor \"#000000\" --iconBackgroundColorDark \"#000000\" --splashBackgroundColor \"#000000\" --splashBackgroundColorDark \"#000000\"",
     "desktop:start": "vite build && electron .",
     "desktop:build:linux": "vite build && electron-builder --linux tar.gz --x64",
+    "desktop:build:win": "vite build && electron-builder --win zip --x64",
     "validate:levels": "node scripts/validate-levels.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
