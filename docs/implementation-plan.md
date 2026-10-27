@@ -109,59 +109,71 @@ Out of scope: Steamworks, the overlay, Proton, Steam depots, Windows and macOS b
 - `npm run desktop:build:linux` produces a `.tar.gz` in `release/` containing an executable `bouncerback`, with no `node_modules` from the project inside the app archive.
 - On the Deck: the steps in "Running it on the Deck" work in both modes, and every item in "Feedback to collect" has an answer written into `docs/desktop-build.md`.
 
-### Phase D3 — Escape key on desktop
+### Phase D5 — Windows test build
 
 **Goal**
 
-The desktop builds handle the Escape key, as desktop players expect: it backs out of the menus to the Main Menu, and in a level it pauses the game. This is the first part of "Keyboard and mouse controls" in `docs/desktop-build.md`, section 3. The web and mobile builds don't change: in a browser, Escape already has its own uses (leaving fullscreen, among others), so the game leaves it alone there.
+A Windows x64 build of the game, wrapped in Electron like the Linux one, made on the Mac and tried on the Mac under CrossOver. It is the first pass of the Windows row in `docs/desktop-build.md`, section 5 (step 5 of "Suggested order", moved forward: it needs no Steam work and shows early whether anything in the wrapper behaves differently on Windows).
 
-Out of scope: the rest of the keyboard and mouse controls (menu navigation with the arrow keys, Enter, gameplay keys), quitting with Escape, and the Android back button, which keeps working exactly as today.
-
-**Behavior** (desktop builds only)
-
-| Screen | Escape |
-| :--- | :--- |
-| Intro, Main Menu | Nothing |
-| Level Selection, How To Play, Settings, Game Over, You Win! | → Main Menu |
-| Game Screen, while the game can be paused | Pauses the game and opens the Pause Overlay |
-| Pause Overlay | Resumes the game (same as `<<< RESUME`) |
-| Gameplay Tips | Leaves the level → Main Menu (same as the Pause Overlay's EXIT TO MENU) |
-| Gameplay Tips, after READY (while the tip fades out) | Nothing |
-| Game Screen, while the game can't be paused (the 3-second start delay, the core collapse, the Game Over delay) | Nothing |
-
-Like taps, Escape is ignored while a screen transition runs. A key held down acts once (key repeats are ignored).
+Out of scope: code signing, an installer, CI, Steamworks, Windows on ARM, and testing on a real Windows PC (none is available for now; it stays open in `docs/desktop-build.md`, section 8). The game runs exactly as in the Linux build; no change in `src/`.
 
 **Choices** (confirmed with the user)
 
-- **Desktop only.** The listener exists only when the preload bridge is there (`isDesktop`, `src/desktop.js`), so the web build never takes Escape away from the browser.
-- **The Main Menu and the Intro do nothing.** Quitting stays the deliberate EXIT GAME button; Escape never closes the game.
-- **On the Pause Overlay, Escape resumes**, like `P`, the controller's menu button and the Android back button, so the same key opens and closes the overlay.
-- **On the Gameplay Tips, Escape leaves the level.** The level hasn't started, so nothing is lost; it's the quick way out after choosing the wrong level. During play, Escape only pauses: leaving a level that has started still takes the Pause Overlay's EXIT TO MENU, so a stray key press can't lose a game. Once READY is pressed the level is about to start, so Escape does nothing during the tip's fade-out (it would race with the engine's `begin()`).
-- **Electron's fullscreen isn't affected.** The window is fullscreen through `BrowserWindow` (`fullscreen: true`, F11), not the page's Fullscreen API, so Escape doesn't take it out of fullscreen. No change in `electron/`.
+- **Output: a `.zip` of the unpacked app**, like the Linux `.tar.gz`: extract it and run `Bouncerback.exe`. No NSIS installer or portable `.exe`: Steam installs a depot's folder itself, so the zip is closest to what ships, and a portable `.exe` unpacks itself to a temporary folder on every launch.
+- **x64 only.** Steam's Windows build is x64; Windows on ARM PCs run it under emulation.
+- **Built on the Mac**, as the Linux build. electron-builder 26 edits the `.exe` (icon, version information) in JavaScript (`resedit`), so no Wine is needed to build; there are still no native modules. CI is left for a later phase.
+- **Unsigned.** On a real Windows PC, SmartScreen warns on the first launch ("Windows protected your PC" → More info → Run anyway). Signing becomes its own phase once a certificate is bought (`docs/desktop-build.md`, section 2).
+- **Tested under CrossOver on this Mac** (Wine, with the x64 code running through Rosetta 2). It shows whether the build is sound: it starts, the files and the saved-data folder are in place, the Windows code paths of Electron work (fullscreen, F11, quitting, links), the controller and the keyboard reach the game. It does **not** show how the game performs on Windows: the GPU calls go through translation layers (Direct3D → Metal) and the CPU through Rosetta, so frame rate, GPU status and controller details are noted but not taken as Windows results.
+- **Executable name `Bouncerback.exe`** (the product name, as Windows apps usually are), not the Linux build's lowercase `bouncerback`.
 
 **Implementation**
 
-- `src/App.jsx`:
-  - A `keydown` listener on `window`, added only when `isDesktop`, acting on `event.key === 'Escape'` without `event.repeat`. It goes through a `useEffectEvent` handler, like `handleBackButton`.
-  - The handler is ignored while a transition runs, and follows the table: Intro and Main Menu do nothing; the Game Screen calls `gameEscapeRef`; every other screen calls `goToMainMenu()`.
-- `src/screens/GameScreen.jsx`:
-  - A new `escapeRef` prop, next to `backRef`. `backRef` keeps its behavior (it does nothing during the tips, as today). While the tip is up and READY hasn't been pressed, `escapeRef` calls `exitToMenu()` (`engine.leave()` and back to the Main Menu). Otherwise it pauses or resumes, like `backRef` (the engine ignores a pause outside play).
-  - The tip's state moves up from `GameplayTips`, so the Game Screen knows when READY has been pressed: `tipShown` becomes a three-way state (shown, leaving, gone). `GameplayTips` receives `leaving` and an `onLeave` callback in place of its own `useState`.
-- `src/screens/GameplayTips.jsx`: uses the `leaving` prop and calls `onLeave` on READY; nothing else changes (same fade-out, same `onReady` at its end).
-- No change to `GameEngine`: `P` and the controller's menu button keep their own handling there.
+- `package.json`: a `desktop:build:win` script (`vite build`, then `electron-builder --win zip --x64`).
+- `electron-builder.json`:
+  - A `win` section: target `zip` x64, icon from `assets/native/icon-only.png` (1024×1024; electron-builder makes the `.ico` from it), `artifactName` `bouncerback-${version}-win-x64.${ext}` so it sits next to the Linux archive in `release/` without confusion.
+  - A top-level `copyright` (`© 2026 Nik Nak Studio`), shown in the `.exe`'s file properties with the version and the company (`author` in `package.json`).
+  - `files` stays as it is: only `dist/`, `electron/` and `package.json`, no `node_modules`.
+- `electron/main.js`: nothing Windows-specific is expected. The Linux-only X11 switch is already behind `process.platform === 'linux'`; the user-data folder becomes `%APPDATA%\Bouncerback\` by itself. If the CrossOver test needs a change in the wrapper (and not only a launch flag, see below), it is discussed before being made.
+- No change in `src/`.
+
+**Running it in CrossOver** (goes into `docs/desktop-build.md`, "Test builds")
+
+1. On the Mac: `npm run desktop:start` to check the build, then `npm run desktop:build:win`; the archive is `release/bouncerback-<version>-win-x64.zip`, and `release/win-unpacked/` is the same build, unpacked.
+2. In CrossOver, create a bottle for it (Windows 10 64-bit), e.g. "Bouncerback".
+3. Extract the zip into the bottle's C: drive (CrossOver → the bottle → Open C: Drive), e.g. to `C:\Games\Bouncerback\`.
+4. Bottle → Run Command → Browse to `Bouncerback.exe` → Run. Tick "Debug options → create log file" the first time, to keep the console output. "Save command as a launcher" keeps it in the bottle for the next runs.
+5. **If it doesn't start, or shows a blank window**, try these one at a time in Run Command's command line, and note which one was needed: `--no-sandbox` (Chromium's sandbox often fails under Wine), `--disable-gpu-sandbox`, then a different graphics backend in the bottle's settings (Auto, D3DMetal, DXVK), then `--use-angle=gl`. A flag that only CrossOver needs stays a launch flag, not a change in the wrapper.
+
+The build starts fullscreen; F11 toggles windowed mode; Ctrl+Shift+I opens DevTools. Saved data and `launch-info.txt` are in the bottle, under `drive_c/users/crossover/AppData/Roaming/Bouncerback/` (the bottle's folder is in `~/Library/Application Support/CrossOver/Bottles/`).
+
+**Feedback to collect** (results go into `docs/desktop-build.md`, a new "Windows test results (CrossOver)" section)
+
+- Starts? Which launch flags and graphics backend were needed; time to the Intro; any white flash; the log file and `launch-info.txt` (Electron and Chromium versions, GPU feature status: is WebGL hardware-accelerated?).
+- Display: fullscreen on the Mac's screen, the whole UI scaled and nothing cut off; F11 to windowed and back; resizing the window.
+- Rendering: the CRT and zoom blur look as in the browser (OLD TV off and on), no missing shapes or black screen. Frame rate noted, not judged.
+- Audio: music and effects play, no crackle, volume steps work.
+- Controller (the one used with the Mac): seen by the game, menus, ENTER BOUNCERBACK with it (Phase D4), gameplay, pause with the menu button.
+- Keyboard and mouse: Escape on the menus and in a level (Phase D3), `P`, F11; mouse in menus and gameplay.
+- Saved data survives closing and reopening, and is in the folder above.
+- Quitting: EXIT GAME (Phase D2) and closing the window; no `Bouncerback.exe` left running in the bottle (CrossOver → the bottle → Quit / task list).
+- Credit links: open in the Mac's default browser (CrossOver hands URLs to macOS)?
+- The `.exe`'s icon and file properties (version, company, copyright) as shown under CrossOver, if it shows them.
 
 **Docs** (as part of the implementation)
 
-- `docs/navigation.md`: a "Desktop Escape key" section after "Mobile back button", with the table above, the reason for the Gameplay Tips / Game Screen difference, and a note that the web build ignores Escape.
-- `docs/desktop-build.md`, section 3: under "Keyboard and mouse controls", note that Escape is handled (Phase D3); the item stays open for the rest.
-- `docs/design-decisions.md`, "Desktop build (Steam)": Escape is desktop only, never quits, resumes on the Pause Overlay, and leaves from the Gameplay Tips but only pauses during play, with the reasons.
-- `docs/implementation-status.md`: Phase D3.
+- `docs/desktop-build.md`:
+  - Section 1, "Where the build runs": the Linux and Windows test builds are made on the Mac; CI still open.
+  - Section 5: the Windows row's first pass (zip, unsigned, built on the Mac); the npm scripts item notes `desktop:build:win` (Phase D5), macOS to come.
+  - "Test builds": a "Windows x64 (Phase D5)" part with "Running it in CrossOver" above, and an empty "Windows test results (CrossOver)" section with the feedback list, to fill after the test.
+  - Section 8: note that a real Windows 10/11 PC test is still needed before release, since CrossOver isn't representative.
+- `docs/tech-stack.md`: the Desktop Packaging row (Windows x64 zip next to the Linux build); the development environment row (the Windows build is made on the Mac too; CrossOver for a first test); `desktop:build:win` in the desktop commands.
+- `docs/project-structure.md`: `electron-builder.json`'s comment names both build scripts.
+- `docs/design-decisions.md`, "Desktop build (Steam)": Windows zip, x64 only, built on the Mac, unsigned, CrossOver as a smoke test only, with the reasons.
+- `docs/implementation-status.md`: Phase D5.
 
 **Verification**
 
-- `npm run desktop:start`, Escape on every row of the table: Level Selection, How To Play, Settings, Game Over and You Win! go to the Main Menu with the screen transition; the Main Menu and the Intro do nothing; in a level, Escape opens the Pause Overlay and Escape again resumes; on a level with a tip (e.g. level 2), Escape leaves to the Main Menu and the menu music comes back; after READY, Escape during the fade does nothing; during the start delay, the core collapse and the Game Over delay it does nothing.
-- Escape held down: one action only (it doesn't open and close the Pause Overlay repeatedly). Escape pressed during a screen transition: ignored.
-- The window stays fullscreen after every Escape press; F11 still toggles it.
-- `P`, the controller's menu button and the controller's right face button behave as before.
-- `npm run dev` in a browser: Escape does nothing in the game (and still leaves the browser's fullscreen). The Android back button behaves as before, including doing nothing on the Gameplay Tips.
+- `npm run desktop:build:win` on the Mac produces `release/bouncerback-<version>-win-x64.zip` containing `Bouncerback.exe`, with no project `node_modules` inside the app's `resources/app.asar`; size noted next to the Linux archive's (about 130 MB).
+- `npm run desktop:build:linux`, `npm run desktop:start`, the web build (`npm run build`) and the mobile builds (`npm run cap:sync`) are unchanged.
+- In CrossOver: the steps in "Running it in CrossOver" work, and every item in "Feedback to collect" has an answer written into `docs/desktop-build.md`.
 - `npm run lint` passes.

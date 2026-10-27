@@ -69,6 +69,63 @@ EXIT GAME is a normal menu button: same width as the others (they stretch to the
 - `npm run dev` in a browser and the mobile builds (`npm run cap:sync`, a quick Android check): three buttons, layout exactly as the MAIN MENU mockup, and `window.bouncerbackDesktop` is undefined.
 - `npm run lint` passes. `npm run desktop:build:linux` still builds, and the archive contains `electron/preload.cjs`. On the Deck (with the next D1 test): EXIT GAME closes the game in Desktop Mode and returns to the library in Game Mode.
 
+### Phase D3 — Escape key on desktop
+
+**Goal**
+
+The desktop builds handle the Escape key, as desktop players expect: it backs out of the menus to the Main Menu, and in a level it pauses the game. This is the first part of "Keyboard and mouse controls" in `docs/desktop-build.md`, section 3. The web and mobile builds don't change: in a browser, Escape already has its own uses (leaving fullscreen, among others), so the game leaves it alone there.
+
+Out of scope: the rest of the keyboard and mouse controls (menu navigation with the arrow keys, Enter, gameplay keys), quitting with Escape, and the Android back button, which keeps working exactly as today.
+
+**Behavior** (desktop builds only)
+
+| Screen | Escape |
+| :--- | :--- |
+| Intro, Main Menu | Nothing |
+| Level Selection, How To Play, Settings, Game Over, You Win! | → Main Menu |
+| Game Screen, while the game can be paused | Pauses the game and opens the Pause Overlay |
+| Pause Overlay | Resumes the game (same as `<<< RESUME`) |
+| Gameplay Tips | Leaves the level → Main Menu (same as the Pause Overlay's EXIT TO MENU) |
+| Gameplay Tips, after READY (while the tip fades out) | Nothing |
+| Game Screen, while the game can't be paused (the 3-second start delay, the core collapse, the Game Over delay) | Nothing |
+
+Like taps, Escape is ignored while a screen transition runs. A key held down acts once (key repeats are ignored).
+
+**Choices** (confirmed with the user)
+
+- **Desktop only.** The listener exists only when the preload bridge is there (`isDesktop`, `src/desktop.js`), so the web build never takes Escape away from the browser.
+- **The Main Menu and the Intro do nothing.** Quitting stays the deliberate EXIT GAME button; Escape never closes the game.
+- **On the Pause Overlay, Escape resumes**, like `P`, the controller's menu button and the Android back button, so the same key opens and closes the overlay.
+- **On the Gameplay Tips, Escape leaves the level.** The level hasn't started, so nothing is lost; it's the quick way out after choosing the wrong level. During play, Escape only pauses: leaving a level that has started still takes the Pause Overlay's EXIT TO MENU, so a stray key press can't lose a game. Once READY is pressed the level is about to start, so Escape does nothing during the tip's fade-out (it would race with the engine's `begin()`).
+- **Electron's fullscreen isn't affected.** The window is fullscreen through `BrowserWindow` (`fullscreen: true`, F11), not the page's Fullscreen API, so Escape doesn't take it out of fullscreen. No change in `electron/`.
+
+**Implementation**
+
+- `src/App.jsx`:
+  - A `keydown` listener on `window`, added only when `isDesktop`, acting on `event.key === 'Escape'` without `event.repeat`. It goes through a `useEffectEvent` handler, like `handleBackButton`.
+  - The handler is ignored while a transition runs, and follows the table: Intro and Main Menu do nothing; the Game Screen calls `gameEscapeRef`; every other screen calls `goToMainMenu()`.
+- `src/screens/GameScreen.jsx`:
+  - A new `escapeRef` prop, next to `backRef`. `backRef` keeps its behavior (it does nothing during the tips, as today). While the tip is up and READY hasn't been pressed, `escapeRef` calls `exitToMenu()` (`engine.leave()` and back to the Main Menu). Otherwise it pauses or resumes, like `backRef` (the engine ignores a pause outside play).
+  - The tip's state moves up from `GameplayTips`, so the Game Screen knows when READY has been pressed: `tipShown` becomes a three-way state (shown, leaving, gone). `GameplayTips` receives `leaving` and an `onLeave` callback in place of its own `useState`.
+- `src/screens/GameplayTips.jsx`: uses the `leaving` prop and calls `onLeave` on READY; nothing else changes (same fade-out, same `onReady` at its end).
+- No change to `GameEngine`: `P` and the controller's menu button keep their own handling there.
+
+**Docs** (as part of the implementation)
+
+- `docs/navigation.md`: a "Desktop Escape key" section after "Mobile back button", with the table above, the reason for the Gameplay Tips / Game Screen difference, and a note that the web build ignores Escape.
+- `docs/desktop-build.md`, section 3: under "Keyboard and mouse controls", note that Escape is handled (Phase D3); the item stays open for the rest.
+- `docs/design-decisions.md`, "Desktop build (Steam)": Escape is desktop only, never quits, resumes on the Pause Overlay, and leaves from the Gameplay Tips but only pauses during play, with the reasons.
+- `docs/implementation-status.md`: Phase D3.
+
+**Verification**
+
+- `npm run desktop:start`, Escape on every row of the table: Level Selection, How To Play, Settings, Game Over and You Win! go to the Main Menu with the screen transition; the Main Menu and the Intro do nothing; in a level, Escape opens the Pause Overlay and Escape again resumes; on a level with a tip (e.g. level 2), Escape leaves to the Main Menu and the menu music comes back; after READY, Escape during the fade does nothing; during the start delay, the core collapse and the Game Over delay it does nothing.
+- Escape held down: one action only (it doesn't open and close the Pause Overlay repeatedly). Escape pressed during a screen transition: ignored.
+- The window stays fullscreen after every Escape press; F11 still toggles it.
+- `P`, the controller's menu button and the controller's right face button behave as before.
+- `npm run dev` in a browser: Escape does nothing in the game (and still leaves the browser's fullscreen). The Android back button behaves as before, including doing nothing on the Gameplay Tips.
+- `npm run lint` passes.
+
 ### Phase D4 — ENTER BOUNCERBACK with the controller on desktop
 
 **Goal**
