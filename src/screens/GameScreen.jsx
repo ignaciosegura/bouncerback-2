@@ -5,7 +5,7 @@ import PauseOverlay from './PauseOverlay.jsx'
 import GameplayTips from './GameplayTips.jsx'
 import GameEngine from '../game/GameEngine.js'
 
-export default function GameScreen ({ level, hiScore, settings, onScoreChange, onGameOver, onLevelWin, onExitToMenu, backRef, escapeRef }) {
+export default function GameScreen ({ level, hiScore, settings, onScoreChange, onGameOver, onLevelWin, onContinue, onExitToMenu, backRef, escapeRef }) {
   const canvasContainerRef = useRef(null)
   const engineRef = useRef(null)
   const [score, setScore] = useState(0)
@@ -15,9 +15,12 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
   const [pause, setPause] = useState(null)
   // The level's tip stays up until READY, then fades out ('leaving'); levels without one start straight away
   const [tip, setTip] = useState(level.tip !== null ? 'shown' : null)
+  // The level's end-of-level picture is on the canvas: the HUD is hidden at once
+  const [interstitial, setInterstitial] = useState(false)
   const handleScoreChange = useEffectEvent((value) => onScoreChange(value))
   const handleGameOver = useEffectEvent((result) => onGameOver(result))
   const handleLevelWin = useEffectEvent((result) => onLevelWin(result))
+  const handleContinue = useEffectEvent(() => onContinue())
   // The engine starts with the current OLD TV switch; later changes (from the Pause overlay) go
   // to setOldTv(), so they don't restart the level
   const getOldTv = useEffectEvent(() => settings.oldTv)
@@ -29,8 +32,9 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
       onLivesChange: setLives,
       onTimeChange: setTimeTenths,
       onPauseChange: ({ paused, backgroundColor }) => setPause(paused ? { backgroundColor } : null),
-      onGameOver: (result) => handleGameOver(result),
-      onLevelWin: (result) => handleLevelWin(result)
+      onGameOver: (result) => { setInterstitial(result.interstitial); handleGameOver(result) },
+      onLevelWin: (result) => { setInterstitial(result.interstitial); handleLevelWin(result) },
+      onContinue: () => handleContinue()
     }, { oldTv: getOldTv(), waitForBegin: level.tip !== null })
     engineRef.current = engine
     engine.mount(canvasContainerRef.current)
@@ -70,7 +74,7 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
   return (
     <Screen variant="dark" className="game-screen">
       <div ref={canvasContainerRef} className="game-screen__canvas" />
-      <HUD score={score} timeTenths={timeTenths} hiScore={Math.max(hiScore, score)} lives={lives} />
+      {!interstitial && <HUD score={score} timeTenths={timeTenths} hiScore={Math.max(hiScore, score)} lives={lives} />}
       {tip && (
         <GameplayTips
           lines={level.tip}

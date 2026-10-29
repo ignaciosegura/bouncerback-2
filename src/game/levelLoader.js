@@ -4,9 +4,21 @@ import { ADDITIONAL_MECHANICS } from './additionalMechanics.js'
 // Level Select buttons are sized for names this long (the longest planned: QUANTAMORPHICA)
 export const LEVEL_NAME_MAX_LENGTH = 14
 
+// The end-of-level pictures named by youWinInterstitial / gameOverInterstitial: file name → bundled URL
+const interstitialFiles = Object.fromEntries(
+  Object.entries(import.meta.glob('../../assets/interstitials/*.png', { eager: true, query: '?url', import: 'default' }))
+    .map(([path, url]) => [path.split('/').pop(), url])
+)
+const INTERSTITIAL_FIELDS = ['youWinInterstitial', 'gameOverInterstitial']
+
+// Missing or blank (empty, or only spaces): no picture
+function interstitialName (value) {
+  return value?.trim() || null
+}
+
 /**
  * Checks a value against the subset of JSON Schema used by docs/level-file-schema.json
- * (type, enum, required, properties, additionalProperties, items). Returns a list of problems.
+ * (type, enum, pattern, required, properties, additionalProperties, items). Returns a list of problems.
  */
 function checkSchema (value, rule, path) {
   const problems = []
@@ -14,6 +26,9 @@ function checkSchema (value, rule, path) {
 
   if (rule.enum && !rule.enum.includes(value)) {
     return [`${path} must be one of: ${rule.enum.map((name) => `"${name}"`).join(', ')}`]
+  }
+  if (rule.pattern && typeof value === 'string' && !new RegExp(rule.pattern).test(value)) {
+    return [`${path} must match ${rule.pattern}`]
   }
 
   switch (rule.type) {
@@ -70,6 +85,10 @@ function checkRanges (level) {
   if (level.name.trim() === '') problems.push('level.name must not be empty')
   if (level.name.length > LEVEL_NAME_MAX_LENGTH) problems.push(`level.name must be at most ${LEVEL_NAME_MAX_LENGTH} characters`)
   if (level.tier < 0) problems.push('level.tier must be 0 or greater')
+  for (const field of INTERSTITIAL_FIELDS) {
+    const name = interstitialName(level[field])
+    if (name && !(name in interstitialFiles)) problems.push(`level.${field}: assets/interstitials/${name} doesn't exist`)
+  }
   return problems
 }
 
@@ -100,6 +119,9 @@ export function loadLevel (data, number) {
     soundTrack: data.soundTrack,
     lives: data.lives,
     tip: data.tip ?? null,
+    // URLs of the end-of-level pictures, or null for none
+    youWinInterstitial: interstitialFiles[interstitialName(data.youWinInterstitial)] ?? null,
+    gameOverInterstitial: interstitialFiles[interstitialName(data.gameOverInterstitial)] ?? null,
     // Fixed when the level is loaded: mechanics never change while a level is played
     additionalGameMechanics: Object.freeze([...data.additionalGameMechanics]),
     atomCapture: data.additionalGameMechanics.includes(ADDITIONAL_MECHANICS.ATOM_CAPTURE),

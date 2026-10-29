@@ -44,6 +44,8 @@ export default function App () {
   const previousScreenRef = useRef(null)
   const transitionRootRef = useRef(null)
   const [level, setLevel] = useState(null)
+  // The result screen waiting for the player to leave the level's end-of-level interstitial
+  const pendingResultRef = useRef(null)
   const [score, setScore] = useState(0)
   const [hiScore, setHiScore] = useState(getHiScore)
   const [levelProgress, setLevelProgress] = useState(getLevelProgress)
@@ -85,11 +87,13 @@ export default function App () {
     onKonamiCode: () => setLevelProgress(toggleAllLevelsUnlocked())
   }), [])
 
-  // Ignored while a transition runs, so a second tap can't navigate twice
-  const navigate = (next) => {
+  // Ignored while a transition runs, so a second tap can't navigate twice. With `cut`, there's no
+  // screen-out: the next screen replaces the current one at once and plays its screen-in.
+  const navigate = (next, { cut = false } = {}) => {
     if (transition) return
     setNextScreen(next)
-    setTransition('out')
+    if (cut) setScreen(next)
+    setTransition(cut ? 'in' : 'out')
   }
 
   // The screen's and its elements' animations end here. The tint (on the screen itself, once)
@@ -203,10 +207,14 @@ export default function App () {
   // Saves the high score to localStorage the instant it's beaten, live during gameplay
   const registerScore = (currentScore) => setHiScore(beatHiScore(currentScore))
 
-  const endLevel = (resultScreen) => ({ score: finalScore }) => {
+  // With an interstitial, the result screen waits until the player leaves it, then cuts in
+  const endLevel = (resultScreen) => ({ score: finalScore, interstitial }) => {
     setScore(finalScore)
-    navigate(resultScreen)
+    if (interstitial) pendingResultRef.current = resultScreen
+    else navigate(resultScreen)
   }
+
+  const continueToResult = () => navigate(pendingResultRef.current, { cut: true })
 
   // Saves the win to localStorage as You Win! starts, unlocking the next tier when it completes one
   const winLevel = (result) => {
@@ -257,6 +265,7 @@ export default function App () {
           onScoreChange={registerScore}
           onGameOver={endLevel(SCREENS.GAME_OVER)}
           onLevelWin={winLevel}
+          onContinue={continueToResult}
           onExitToMenu={goToMainMenu}
           backRef={gameBackRef}
           escapeRef={gameEscapeRef}

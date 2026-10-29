@@ -74,8 +74,8 @@ export default class PostProcessing {
   }
 
   destroy () {
-    for (const effect of this.effects) effect.destroy()
     this.pass.destroy()
+    for (const effect of this.effects) effect.destroy()
     this.sceneTexture.destroy(true)
   }
 }

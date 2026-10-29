@@ -1,8 +1,9 @@
-import { Application, Container } from 'pixi.js'
+import { Application, Container, ImageSource, Sprite, Texture } from 'pixi.js'
 import * as soundManager from '../audio/soundManager.js'
 import { bouncePoints, capturePoints, containmentPoints, livesBonus, timeBonus } from './scoring.js'
 import { lerpColor } from './color.js'
 import { CHARGED_ATOM_HOLD_SETTINGS } from './chargedAtomHoldSettings.js'
+import { INTERSTITIAL_SETTINGS } from './interstitialSettings.js'
 import { easeInOutQuad, easeInQuad, easeOutQuad } from './easing.js'
 import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
 import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
@@ -43,6 +44,9 @@ const MAX_ACTIVE_PADDLES = 2
 // Controller: each stick drags and sets a paddle, like a finger; any of these buttons captures
 const STICKS = ['left', 'right']
 const CAPTURE_BUTTONS = [BUTTONS.A, BUTTONS.LT, BUTTONS.RT, BUTTONS.L3, BUTTONS.R3]
+// Continue from an interstitial: the menus' activate buttons and keys
+const CONTINUE_BUTTONS = [BUTTONS.A, BUTTONS.RT]
+const CONTINUE_KEYS = ['Enter', 'NumpadEnter', 'Space']
 // Core collapse: the core grows to the ring while the atoms settle, then it collapses with them
 const CORE_COLLAPSE_SETTLE_TIME = 1.85
 const CORE_COLLAPSE_TIME = 2
@@ -73,13 +77,16 @@ const STATE = {
   PLAYING: 'playing',
   COLLAPSING: 'collapsing',
   LOST: 'lost',
+  INTERSTITIAL: 'interstitial', // the level's end-of-level picture is shown until the player continues
   ENDED: 'ended'
 }
 
 /**
  * Owns the PixiJS application and the game loop. Only low-frequency events reach React,
  * through the callbacks: onScoreChange(score), onLivesChange(lives), onTimeChange(tenths),
- * onPauseChange({ paused, backgroundColor }), onGameOver({ score }) and onLevelWin({ score }).
+ * onPauseChange({ paused, backgroundColor }), onGameOver({ score, interstitial }),
+ * onLevelWin({ score, interstitial }) and onContinue(). With `interstitial` true, the level's picture
+ * for that outcome is on screen, and onContinue() comes when the player leaves it.
  */
 export default class GameEngine {
   // `oldTv`: the Settings "OLD TV" switch (the CRT layers); changed mid-level with setOldTv()
@@ -129,11 +136,19 @@ export default class GameEngine {
     this.pausedHeld = null // the hold cancelled by the pause: its atom is captured on resume
     this.paddles = [] // every paddle instance, active or pooled, to update their flashes
     this.gamepad = new GamepadReader()
+
+    // End-of-level pictures: URL → promise of its texture (null if it failed to load). They are
+    // this engine's own textures, outside PixiJS' Assets cache, so they're destroyed with it.
+    this.interstitialTextures = new Map()
+    this.interstitialScene = null // the picture shown, in place of the arena
+    this.interstitialSprite = null
+    this.continuePresses = new Set() // inputs pressed after the input lock: they continue on release
   }
 
   async mount (container) {
     // Ready to start the moment the start delay ends
     soundManager.preloadTrack(this.level.soundTrack)
+    this.loadInterstitials()
 
     await this.app.init({
       resizeTo: container,
@@ -150,6 +165,7 @@ export default class GameEngine {
     // Unmounted while initializing (e.g. React StrictMode's double effect)
     if (this.destroyed) {
       this.app.destroy(true, { children: true, texture: true })
+      this.destroyInterstitials()
       return
     }
 
@@ -171,6 +187,7 @@ export default class GameEngine {
     if (!this.mounted) return
     this.mounted = false
     window.removeEventListener('keydown', this.onKeyDown)
+    window.removeEventListener('keyup', this.onKeyUp)
     window.removeEventListener('blur', this.onAutoPause)
     document.removeEventListener('visibilitychange', this.onVisibilityChange)
     if (this.paused) soundManager.stopPausedSfx()
@@ -182,7 +199,9 @@ export default class GameEngine {
       // Off the stage with post-processing, so app.destroy() wouldn't reach them
       this.post?.destroy()
       this.arena.destroy({ children: true })
+      this.interstitialScene?.destroy({ children: true })
       this.app.destroy(true, { children: true, texture: true })
+      this.destroyInterstitials()
     }, TEARDOWN_DELAY)))
   }
 
@@ -207,18 +226,21 @@ export default class GameEngine {
     this.buildPostProcessing()
   }
 
-  // Puts the arena on the stage, through the post-processing or straight. Called again when the
-  // OLD TV switch changes mid-level, so it first takes down the previous chain.
+  // Puts the arena (or the interstitial picture in its place) on the stage, through the
+  // post-processing or straight. Called again when the OLD TV switch changes mid-level and when the
+  // picture appears, so it first takes down the previous chain.
   buildPostProcessing () {
     const { renderer, stage } = this.app
     this.post?.destroy()
     this.post = null
     this.zoomBlur = null
     stage.removeChild(this.arena)
+    if (this.interstitialScene) stage.removeChild(this.interstitialScene)
 
     if (this.postProcessing) {
       const effects = []
-      if (ZOOM_BLUR_ENABLED) {
+      // The picture gets the arena's effects but the zoom blur, which radiates from the core
+      if (ZOOM_BLUR_ENABLED && !this.interstitialScene) {
         this.zoomBlur = new ZoomBlurEffect(renderer)
         effects.push(this.zoomBlur)
       }
@@ -228,12 +250,18 @@ export default class GameEngine {
         effects.push(new CrtEffect(renderer))
       }
       // Only the processed image goes on the stage; the arena is drawn into it by renderArena()
-      this.post = new PostProcessing(renderer, effects)
-      stage.addChild(this.post.view)
-    } else {
-      stage.addChild(this.arena)
+      if (effects.length > 0) {
+        this.post = new PostProcessing(renderer, effects)
+        stage.addChild(this.post.view)
+      }
     }
-    renderer.background.color = this.post ? 0x000000 : this.backgroundColor
+    if (!this.post) stage.addChild(this.interstitialScene ?? this.arena)
+    renderer.background.color = this.post ? 0x000000 : this.sceneBackground()
+  }
+
+  // The color behind the arena, or black behind the interstitial picture (its bars)
+  sceneBackground () {
+    return this.interstitialScene ? 0x000000 : this.backgroundColor
   }
 
   // The Settings "OLD TV" switch, from the Settings screen or the Pause overlay. The effects are
@@ -257,7 +285,7 @@ export default class GameEngine {
   renderArena () {
     if (!this.post) return
     if (this.zoomBlur) this.zoomBlur.center = this.playfield.position
-    this.post.render(this.arena, { background: this.backgroundColor })
+    this.post.render(this.interstitialScene ?? this.arena, { background: this.sceneBackground() })
   }
 
   // Centres the playfield and scales it with the screen, applying the last life zoom; game state
@@ -272,6 +300,13 @@ export default class GameEngine {
       height / 2 + focusY * (base * offset - s)
     )
     this.playfield.scale.set(s)
+
+    // The interstitial picture fits the screen whole, centered (black bars where the shapes differ)
+    const sprite = this.interstitialSprite
+    if (sprite) {
+      sprite.scale.set(Math.min(width / sprite.texture.width, height / sprite.texture.height))
+      sprite.position.set(width / 2, height / 2)
+    }
   }
 
   // PixiJS draws the stage right after a resize, also while paused: the post-processing textures are
@@ -294,6 +329,7 @@ export default class GameEngine {
     stage.on('pointerup', this.onPointerUp)
     stage.on('pointerupoutside', this.onPointerUp)
     window.addEventListener('keydown', this.onKeyDown)
+    window.addEventListener('keyup', this.onKeyUp)
     // Auto-pause while the player is away (another tab, window or app)
     window.addEventListener('blur', this.onAutoPause)
     document.addEventListener('visibilitychange', this.onVisibilityChange)
@@ -306,7 +342,13 @@ export default class GameEngine {
   }
 
   onKeyDown = (event) => {
-    if (event.code === 'KeyP' && !event.repeat) this.togglePause()
+    if (event.repeat) return
+    if (CONTINUE_KEYS.includes(event.code)) this.pressContinue(`key:${event.code}`)
+    else if (event.code === 'KeyP') this.togglePause()
+  }
+
+  onKeyUp = (event) => {
+    if (CONTINUE_KEYS.includes(event.code)) this.releaseContinue(`key:${event.code}`)
   }
 
   togglePause () {
@@ -361,6 +403,7 @@ export default class GameEngine {
   }
 
   onPointerDown = (event) => {
+    if (this.state === STATE.INTERSTITIAL) this.pressContinue(`pointer:${event.pointerId}`)
     if (this.state !== STATE.PLAYING || this.paused) return
 
     const { x, y } = this.playfield.toLocal(this.scenePoint(event.global))
@@ -392,6 +435,7 @@ export default class GameEngine {
   }
 
   onPointerUp = (event) => {
+    if (this.releaseContinue(`pointer:${event.pointerId}`)) return
     if (this.corePresses.delete(event.pointerId)) {
       if (!this.paused) this.captureAtCore()
       return
@@ -479,6 +523,7 @@ export default class GameEngine {
     // Polled every frame, so a button held through the start delay doesn't count as a press later
     this.gamepad.poll()
     if (this.state === STATE.PLAYING) this.handleGamepad()
+    else if (this.state === STATE.INTERSTITIAL) this.handleInterstitialGamepad()
     this.updateBackground(dt)
     // Flashes outlive their paddles and finish during the core collapse
     for (const paddle of this.paddles) paddle.flash.update(dt)
@@ -498,6 +543,9 @@ export default class GameEngine {
       break
     case STATE.LOST:
       this.updateLost(dt)
+      break
+    case STATE.INTERSTITIAL:
+      this.stateTime += dt
       break
     default:
       break
@@ -791,10 +839,7 @@ export default class GameEngine {
     this.zoom.scale = ZOOM_SCALE ** e
     this.zoom.offset = 1 - e
     this.layout()
-    if (this.stateTime >= GAME_OVER_DELAY) {
-      this.state = STATE.ENDED
-      this.emit('onGameOver', { score: this.score })
-    }
+    if (this.stateTime >= GAME_OVER_DELAY) this.end('onGameOver', this.level.gameOverInterstitial)
   }
 
   // Timer reached 0: no spawns, paddles or input; the core takes every atom inside the ring
@@ -846,8 +891,86 @@ export default class GameEngine {
       this.releaseAtom(atom)
     }
     this.addScore(bonus)
+    this.end('onLevelWin', this.level.youWinInterstitial)
+  }
+
+  // End-of-level interstitials
+
+  // Loading starts with the level, so the pictures are ready when it ends
+  loadInterstitials () {
+    for (const url of [this.level.youWinInterstitial, this.level.gameOverInterstitial]) {
+      if (!url || this.interstitialTextures.has(url)) continue
+      const image = new Image()
+      image.src = url
+      this.interstitialTextures.set(url, image.decode().then(
+        () => new Texture({ source: new ImageSource({ resource: image }) }),
+        () => {
+          console.warn(`GameEngine: interstitial ${url} couldn't be loaded`)
+          return null
+        }
+      ))
+    }
+  }
+
+  // Textures not on the stage (never shown, or shown through the post-processing) aren't reached
+  // by app.destroy()
+  destroyInterstitials () {
+    for (const texture of this.interstitialTextures.values()) texture.then((t) => t?.destroy(true))
+  }
+
+  // The end animation is over: the outcome's picture, if it has one, else straight to the result.
+  // The result is emitted at once either way, so React saves it now. If the picture isn't loaded
+  // yet, the last frame stays until it is; if it failed, there's no picture.
+  end (event, url) {
     this.state = STATE.ENDED
-    this.emit('onLevelWin', { score: this.score })
+    const texture = url && this.interstitialTextures.get(url)
+    if (!texture) {
+      this.emit(event, { score: this.score, interstitial: false })
+      return
+    }
+    texture.then((loaded) => {
+      if (this.destroyed) return
+      if (loaded) this.showInterstitial(loaded)
+      this.emit(event, { score: this.score, interstitial: Boolean(loaded) })
+    })
+  }
+
+  // Cut in: the picture replaces the arena at once, in complete silence
+  showInterstitial (texture) {
+    this.state = STATE.INTERSTITIAL
+    this.stateTime = 0
+    soundManager.stopTrack({ cut: true })
+    soundManager.stopAllSfx()
+    // A controller button held from gameplay never continues
+    this.gamepad.reset()
+    this.interstitialSprite = new Sprite({ texture, anchor: 0.5 })
+    this.interstitialScene = new Container()
+    this.interstitialScene.addChild(this.interstitialSprite)
+    this.buildPostProcessing()
+    this.layout()
+  }
+
+  // Presses during the input lock are ignored, and so are their releases
+  pressContinue (input) {
+    if (this.state !== STATE.INTERSTITIAL || this.stateTime < INTERSTITIAL_SETTINGS.INPUT_LOCK_TIME) return
+    this.continuePresses.add(input)
+  }
+
+  // Continues on the release, like the menus, so it doesn't reach the result screen
+  releaseContinue (input) {
+    if (!this.continuePresses.delete(input)) return false
+    if (this.state === STATE.INTERSTITIAL) {
+      this.state = STATE.ENDED
+      this.emit('onContinue')
+    }
+    return true
+  }
+
+  handleInterstitialGamepad () {
+    for (const button of CONTINUE_BUTTONS) {
+      if (this.gamepad.wasPressed(button)) this.pressContinue(`button:${button}`)
+      else if (this.gamepad.wasReleased(button)) this.releaseContinue(`button:${button}`)
+    }
   }
 
   // Escaping and captured atoms finish their animations after play has stopped
@@ -878,7 +1001,7 @@ export default class GameEngine {
     if (this.backgroundTime >= BACKGROUND_TRANSITION_TIME) return
     this.backgroundTime = Math.min(BACKGROUND_TRANSITION_TIME, this.backgroundTime + dt)
     this.backgroundColor = lerpColor(this.backgroundFrom, this.backgroundTo, this.backgroundTime / BACKGROUND_TRANSITION_TIME)
-    if (!this.post) this.app.renderer.background.color = this.backgroundColor
+    if (!this.post) this.app.renderer.background.color = this.sceneBackground()
   }
 
   addScore (points) {

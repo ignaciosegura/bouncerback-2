@@ -175,6 +175,17 @@ export function resumeSfx () {
 }
 
 /**
+ * Stops every sound effect playing, loops included, with the quick fade that avoids clicks
+ * (complete silence for an end-of-level interstitial).
+ */
+export function stopAllSfx () {
+  for (const { howl, id } of liveVoices) stealVoice(howl, id)
+  liveVoices.clear()
+  pausedVoices = []
+  for (const name of Object.keys(activeVoices)) delete activeVoices[name]
+}
+
+/**
  * Stops the sound effects paused by pauseSfx (the game is left while paused).
  */
 export function stopPausedSfx () {
@@ -203,16 +214,18 @@ export function playTrack (name, { fadeIn = true } = {}) {
 }
 
 /**
- * Fades out the music and leaves silence (used by screens without a track).
+ * Fades out the music and leaves silence (used by screens without a track). With `cut: true` it
+ * stops at once, with only the quick fade that avoids a click (an end-of-level interstitial).
  */
-export function stopTrack () {
+export function stopTrack ({ cut = false } = {}) {
   if (currentTrack === null) return
 
   currentTrack = null
   musicPaused = false
   clearTimeout(fadeInTimer)
-  fadeOutOtherTracks()
-  fadeInTimer = setTimeout(() => unloadOtherTracks(), FADE_MS)
+  const fadeMs = cut ? STEAL_FADE_MS : FADE_MS
+  fadeOutOtherTracks(fadeMs)
+  fadeInTimer = setTimeout(() => unloadOtherTracks(), fadeMs)
 }
 
 /**
@@ -270,11 +283,11 @@ function createTrackHowl (name) {
 }
 
 // Fades out every playing track except the current one; returns whether any was fading
-function fadeOutOtherTracks () {
+function fadeOutOtherTracks (fadeMs = FADE_MS) {
   let fadingOut = false
   for (const [trackName, track] of Object.entries(tracks)) {
     if (trackName !== currentTrack && track.started) {
-      track.howl.fade(track.howl.volume(), 0, FADE_MS)
+      track.howl.fade(track.howl.volume(), 0, fadeMs)
       fadingOut = true
     }
   }
