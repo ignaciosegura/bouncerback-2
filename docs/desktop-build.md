@@ -110,17 +110,19 @@ Extended Steamworks features, listed so they can be picked up later. None of the
 4. **Desktop Mode:** run `./bouncerback` in that folder (double click, or from Konsole to see the console output). If it stops at once with a message about the sandbox (`chrome-sandbox`), try `./bouncerback --no-sandbox` and note it in the results: it gets fixed in the packaging, not on the Deck.
 5. **Game Mode:** Game Mode only starts things from the Steam library, so in Desktop Mode add the executable as a non-Steam game (Steam → Add a Game → Add a Non-Steam Game → Browse). It's still the native Linux build, with no Steamworks and no Proton: check that "Force the use of a specific Steam Play compatibility tool" stays off in its properties. Then switch to Game Mode and start it from the library. Steam Input gives the game a virtual controller, as it will on release.
 
-The build starts fullscreen. F11 toggles windowed mode; Ctrl+Shift+I opens DevTools (Desktop Mode: Steam + X brings up the keyboard). Saved data and `launch-info.txt` (Electron and Chromium versions, display, GPU and WebGL status) are in `~/.config/Bouncerback/`. In Game Mode the Deck's performance overlay (Quick Access → Performance) shows FPS and GPU load.
+The build starts fullscreen. F11 toggles windowed mode; Ctrl+Shift+I opens DevTools (Desktop Mode: Steam + X brings up the keyboard). Saved data and `launch-info.txt` (Electron and Chromium versions, display, GPU and WebGL status) are in `~/.config/bouncerback/`. In Game Mode the Deck's performance overlay (Quick Access → Performance) shows FPS and GPU load.
 
 **Windows x64 (Phase D5).** Built on the Mac; unsigned; no Steam integration. No Windows PC is available for now, so it is tried on the Mac under CrossOver (Wine, with the x64 code running through Rosetta 2). That shows whether the build is sound (it starts, files and saved data in place, fullscreen, quitting, links, controller and keyboard), not how it performs on Windows: the GPU calls go through translation layers (Direct3D → Metal), so frame rate and GPU status are noted, not judged.
 
 1. `npm run desktop:start` to check the build, then `npm run desktop:build:win`. It builds `release/bouncerback-<version>-win-x64.zip` (about 165 MB); `release/win-unpacked/` is the same build, unpacked.
-2. In CrossOver, create a bottle for it (Windows 10 64-bit), e.g. "Bouncerback".
-3. Extract the zip into the bottle's C: drive (CrossOver → the bottle → Open C: Drive), e.g. to `C:\Games\Bouncerback\`.
-4. Bottle → Run Command → Browse to `Bouncerback.exe` → Run. Tick "Debug options → create log file" the first time, to keep the console output. "Save command as a launcher" keeps it in the bottle for the next runs.
-5. **If it doesn't start, or shows a blank window**, try these one at a time in Run Command's command line, and note which one was needed: `--no-sandbox` (Chromium's sandbox often fails under Wine), `--disable-gpu-sandbox`, then a different graphics backend in the bottle's settings (Auto, D3DMetal, DXVK), then `--use-angle=gl`. A flag that only CrossOver needs stays a launch flag, not a change in the wrapper.
+2. In CrossOver, create a bottle for it (Windows 10 or 11, 64-bit), e.g. "Bouncerback".
+3. In the bottle's settings, set **Graphics to DXVK** (and turn MSync on).
+4. Extract the zip into the bottle's C: drive (CrossOver → the bottle → Open C: Drive) in a new folder of its own, `C:\Games\Bouncerback\`, so that `Bouncerback.exe` sits directly in it.
+5. Bottle → **Run Command** (not Install Software: CrossOver takes the `.exe` for an installer and waits for it to finish) → Browse to `Bouncerback.exe`, and add **`--in-process-gpu`** to its command line options → Run. "Save command as a launcher" keeps it, with the flag, in the bottle for the next runs.
 
-The build starts fullscreen; F11 toggles windowed mode; Ctrl+Shift+I opens DevTools. Saved data and `launch-info.txt` are in the bottle, under `drive_c/users/crossover/AppData/Roaming/Bouncerback/` (the bottle's folder is in `~/Library/Application Support/CrossOver/Bottles/`). On a real Windows PC they are in `%APPDATA%\Bouncerback\`, and SmartScreen warns on the first launch, since the build is unsigned ("Windows protected your PC" → More info → Run anyway).
+**Why `--in-process-gpu`.** Without it the window stays blank, although the game runs (the music plays and clicks reach the buttons). Wine doesn't implement DirectComposition, so Chromium's GPU process draws into a child window of the main process's window, and Wine's Mac driver doesn't show drawing done by one process in another process's window. The flag runs the GPU work inside the main process. Found with CrossOver 26.1 and DXVK; with the bottle's default graphics backend, Chromium's GPU process crashed outright and WebGL was disabled, and D3DMetal hasn't been tried together with the flag. `--no-sandbox` isn't needed. The flag is for CrossOver only: it is a launch option, not a change in the wrapper.
+
+The build starts fullscreen; F11 toggles windowed mode (not under CrossOver on the Mac: macOS keeps F11, and fn+F11, for Show Desktop); Ctrl+Shift+I opens DevTools. Saved data and `launch-info.txt` are in the bottle, under `drive_c/users/crossover/AppData/Roaming/bouncerback/` (the bottle's folder is in `~/Library/Application Support/CrossOver/Bottles/`). On a real Windows PC they are in `%APPDATA%\bouncerback\`, and SmartScreen warns on the first launch, since the build is unsigned ("Windows protected your PC" → More info → Run anyway).
 
 ### Steam Deck test results
 
@@ -143,19 +145,19 @@ To be filled after testing the Phase D1 build, in both modes unless noted. Date 
 
 ### Windows test results (CrossOver)
 
-To be filled after testing the Phase D5 build. Date, CrossOver version, bottle's Windows version:
+Phase D5 build, tested 2026-10-27 and 2026-10-29, CrossOver 26.1, Windows 11 64-bit bottle, DXVK, Apple M1 Max:
 
-- **Starts?** Launch flags and graphics backend needed; time to the Intro; any white flash; log file; `launch-info.txt` (Electron and Chromium versions, is WebGL hardware-accelerated?):
-- **Display:** fullscreen on the Mac's screen, whole UI scaled, nothing cut off; F11 to windowed and back; resizing the window:
-- **Rendering:** CRT and zoom blur as in the browser (OLD TV off and on), no missing shapes or black screen; frame rate (noted, not judged):
-- **Audio:** music and effects, crackle, volume steps:
-- **Controller:** seen by the game; menus; ENTER BOUNCERBACK with it (Phase D4); gameplay; pause with the menu button:
-- **Keyboard and mouse:** Escape on the menus and in a level (Phase D3), `P`, F11; mouse in menus and gameplay:
-- **Saved data** survives closing and reopening, and is in the folder above:
-- **Quitting:** EXIT GAME (Phase D2) and closing the window; no `Bouncerback.exe` left running in the bottle:
-- **Credit links:** open in the Mac's default browser?
-- **The `.exe`'s icon and file properties** (version, company, copyright), if CrossOver shows them:
-- **Other:**
+- **Starts?** Launch flags and graphics backend needed; time to the Intro; any white flash; log file; `launch-info.txt` (Electron and Chromium versions, is WebGL hardware-accelerated?): starts once the bottle is on DXVK and `--in-process-gpu` is added (see the steps above for what fails without them). `launch-info.txt`: Electron 44.9.3, Chromium 152; WebGL and GPU compositing enabled, ANGLE on Direct3D 11 (through DXVK) on the Apple M1 Max; display 2560x1440 at scale 1.
+- **Display:** fullscreen on the Mac's screen, whole UI scaled, nothing cut off; F11 to windowed and back; resizing the window: fullscreen, whole UI scaled correctly, nothing cut off. F11 can't be tested under CrossOver on the Mac (macOS keeps it).
+- **Rendering:** CRT and zoom blur as in the browser (OLD TV off and on), no missing shapes or black screen; frame rate (noted, not judged): CRT and zoom blur as in the browser, OLD TV off and on.
+- **Audio:** music and effects, crackle, volume steps: fine, volume steps work.
+- **Controller:** seen by the game; menus; ENTER BOUNCERBACK with it (Phase D4); gameplay; pause with the menu button: a full playthrough with the controller up to Game Over works as expected.
+- **Keyboard and mouse:** Escape on the menus and in a level (Phase D3), `P`, F11; mouse in menus and gameplay: Escape, `P` and the mouse work as expected (F11: see Display).
+- **Saved data** survives closing and reopening, and is in the folder above: yes.
+- **Quitting:** EXIT GAME (Phase D2) and closing the window; no `Bouncerback.exe` left running in the bottle: quitting from the game closes it cleanly (exit code 0, no process left).
+- **Credit links:** open in the Mac's default browser? Work as expected.
+- **The `.exe`'s icon and file properties** (version, company, copyright), if CrossOver shows them: the right icon while running. The version, company and copyright were checked on the Mac when building (read from the `.exe`).
+- **Other:** the saved launcher must carry `--in-process-gpu` (a flag given only to Run Command applies to that one run).
 
 ---
 

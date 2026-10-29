@@ -80,7 +80,7 @@ function createWindow () {
   win.loadURL(START_URL)
 }
 
-// A short report in the user-data folder (~/.config/Bouncerback/ on Linux), to check on the Deck,
+// A short report in the user-data folder (~/.config/bouncerback/ on Linux), to check on the Deck,
 // where there are no DevTools at hand, whether WebGL runs with hardware acceleration
 async function writeLaunchInfo () {
   const display = screen.getPrimaryDisplay()

@@ -174,3 +174,64 @@ Out of scope: any other screen's controller behavior, keyboard controls on the I
 - `npm run dev` in a browser: the controller still can't select or press the Intro button; the other menus behave as before.
 - On the Deck (with the Phase D1 test, Game Mode and Desktop Mode): one press of A on the Intro enters, and the music plays.
 - `npm run lint` passes.
+
+### Phase D5 — Windows test build
+
+**Goal**
+
+A Windows x64 build of the game, wrapped in Electron like the Linux one, made on the Mac and tried on the Mac under CrossOver. It is the first pass of the Windows row in `docs/desktop-build.md`, section 5 (step 5 of "Suggested order", moved forward: it needs no Steam work and shows early whether anything in the wrapper behaves differently on Windows).
+
+Out of scope: code signing, an installer, CI, Steamworks, Windows on ARM, and testing on a real Windows PC (none is available for now; it stays open in `docs/desktop-build.md`, section 8). The game runs exactly as in the Linux build; no change in `src/`.
+
+**Choices** (confirmed with the user)
+
+- **Output: a `.zip` of the unpacked app**, like the Linux `.tar.gz`: extract it and run `Bouncerback.exe`. No NSIS installer or portable `.exe`: Steam installs a depot's folder itself, so the zip is closest to what ships, and a portable `.exe` unpacks itself to a temporary folder on every launch.
+- **x64 only.** Steam's Windows build is x64; Windows on ARM PCs run it under emulation.
+- **Built on the Mac**, as the Linux build. electron-builder 26 edits the `.exe` (icon, version information) in JavaScript (`resedit`), so no Wine is needed to build; there are still no native modules. CI is left for a later phase.
+- **Unsigned.** On a real Windows PC, SmartScreen warns on the first launch ("Windows protected your PC" → More info → Run anyway). Signing becomes its own phase once a certificate is bought (`docs/desktop-build.md`, section 2).
+- **Tested under CrossOver on this Mac** (Wine, with the x64 code running through Rosetta 2). It shows whether the build is sound: it starts, the files and the saved-data folder are in place, the Windows code paths of Electron work (fullscreen, F11, quitting, links), the controller and the keyboard reach the game. It does **not** show how the game performs on Windows: the GPU calls go through translation layers (Direct3D → Metal) and the CPU through Rosetta, so frame rate, GPU status and controller details are noted but not taken as Windows results.
+- **Executable name `Bouncerback.exe`** (the product name, as Windows apps usually are), not the Linux build's lowercase `bouncerback`.
+
+**Implementation**
+
+- `package.json`: a `desktop:build:win` script (`vite build`, then `electron-builder --win zip --x64`).
+- `electron-builder.json`:
+  - A `win` section: target `zip` x64, icon from `assets/native/icon-only.png` (1024×1024; electron-builder makes the `.ico` from it), `artifactName` `bouncerback-${version}-win-x64.${ext}` so it sits next to the Linux archive in `release/` without confusion.
+  - A top-level `copyright` (`© 2026 Nik Nak Studio`), shown in the `.exe`'s file properties with the version and the company (`author` in `package.json`).
+  - `files` stays as it is: only `dist/`, `electron/` and `package.json`, no `node_modules`.
+- `electron/main.js`: nothing Windows-specific is expected. The Linux-only X11 switch is already behind `process.platform === 'linux'`; the user-data folder becomes `%APPDATA%\bouncerback\` by itself. If the CrossOver test needs a change in the wrapper (and not only a launch flag, see below), it is discussed before being made.
+- No change in `src/`.
+
+**Running it in CrossOver**: see "Test builds" in `docs/desktop-build.md` (Windows x64). Found during the test: the bottle needs Graphics set to DXVK, and the game the `--in-process-gpu` launch option, or the window stays blank (the reason is written there).
+
+**Feedback to collect** (results go into `docs/desktop-build.md`, a new "Windows test results (CrossOver)" section)
+
+- Starts? Which launch flags and graphics backend were needed; time to the Intro; any white flash; the log file and `launch-info.txt` (Electron and Chromium versions, GPU feature status: is WebGL hardware-accelerated?).
+- Display: fullscreen on the Mac's screen, the whole UI scaled and nothing cut off; F11 to windowed and back; resizing the window.
+- Rendering: the CRT and zoom blur look as in the browser (OLD TV off and on), no missing shapes or black screen. Frame rate noted, not judged.
+- Audio: music and effects play, no crackle, volume steps work.
+- Controller (the one used with the Mac): seen by the game, menus, ENTER BOUNCERBACK with it (Phase D4), gameplay, pause with the menu button.
+- Keyboard and mouse: Escape on the menus and in a level (Phase D3), `P`, F11; mouse in menus and gameplay.
+- Saved data survives closing and reopening, and is in the folder above.
+- Quitting: EXIT GAME (Phase D2) and closing the window; no `Bouncerback.exe` left running in the bottle (CrossOver → the bottle → Quit / task list).
+- Credit links: open in the Mac's default browser (CrossOver hands URLs to macOS)?
+- The `.exe`'s icon and file properties (version, company, copyright) as shown under CrossOver, if it shows them.
+
+**Docs** (as part of the implementation)
+
+- `docs/desktop-build.md`:
+  - Section 1, "Where the build runs": the Linux and Windows test builds are made on the Mac; CI still open.
+  - Section 5: the Windows row's first pass (zip, unsigned, built on the Mac); the npm scripts item notes `desktop:build:win` (Phase D5), macOS to come.
+  - "Test builds": a "Windows x64 (Phase D5)" part with "Running it in CrossOver" above, and an empty "Windows test results (CrossOver)" section with the feedback list, to fill after the test.
+  - Section 8: note that a real Windows 10/11 PC test is still needed before release, since CrossOver isn't representative.
+- `docs/tech-stack.md`: the Desktop Packaging row (Windows x64 zip next to the Linux build); the development environment row (the Windows build is made on the Mac too; CrossOver for a first test); `desktop:build:win` in the desktop commands.
+- `docs/project-structure.md`: `electron-builder.json`'s comment names both build scripts.
+- `docs/design-decisions.md`, "Desktop build (Steam)": Windows zip, x64 only, built on the Mac, unsigned, CrossOver as a smoke test only, with the reasons.
+- `docs/implementation-status.md`: Phase D5.
+
+**Verification**
+
+- `npm run desktop:build:win` on the Mac produces `release/bouncerback-<version>-win-x64.zip` containing `Bouncerback.exe`, with no project `node_modules` inside the app's `resources/app.asar`; size noted next to the Linux archive's (about 130 MB).
+- `npm run desktop:build:linux`, `npm run desktop:start`, the web build (`npm run build`) and the mobile builds (`npm run cap:sync`) are unchanged.
+- In CrossOver: the steps in "Running it in CrossOver" work, and every item in "Feedback to collect" has an answer written into `docs/desktop-build.md`.
+- `npm run lint` passes.
