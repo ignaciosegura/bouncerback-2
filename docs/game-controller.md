@@ -47,6 +47,7 @@ Other terms:
 * **The sticks share the paddles:** either stick places the next paddle, like a finger on a touch screen. With two paddles set, setting a third one removes the oldest (first in, first out), whichever stick, mouse or touch set it. Until then, the paddle that will be removed is shown in red (see "Paddles" in `game-rules.md`).
 * **bottom face button, LT, RT, L3 or R3:** captures the charged atom crossing the core, like a tap at the core, when the button is released. One capture per press. Only in levels with the `atom capture` additional mechanic; in the others, these buttons do nothing during play. A press with nothing to capture does nothing (unlike a tap, it never places a paddle). In levels with the `charged atom hold` additional mechanic, the press holds the atom (it stops and shakes, and scores while the button stays pressed) and the release captures that same atom; a press that held nothing captures nothing on release, even if an atom is crossing the core by then. Only one atom can be held at a time: while one is held, pressing another button holds nothing (see "Charged atom hold" in `game-rules.md`). Pausing cancels the hold: the held atom is captured when the game resumes.
 * **When it's ignored:** during the 3-second start delay, the core collapse and the Game Over delay. A stick held through the start delay places its paddle as soon as play starts.
+* **End-of-level interstitial:** the bottom face button or RT continues, on release, once the picture's short input lock has passed; a button held from gameplay or pressed during the lock doesn't count. The other buttons and the sticks do nothing (see "End-of-level interstitial" in `navigation.md`).
 * **menu button:** pauses the game and opens the Pause overlay; on the overlay, it resumes (like `<<< RESUME`). Same as `P` on the keyboard. Pausing also freezes gameplay controller input, and a button pressed during the pause doesn't fire on resume. On the overlay, the controller navigates the menu as on any other menu screen (see "Menus").
 
 ---
@@ -71,7 +72,7 @@ Other terms:
 | `src/input/konamiCode.js` | `KonamiCode`: detects the code in the d-pad presses |
 | `src/App.jsx` | Starts the menu navigation on the screen-transition wrapper; the Konami Code calls `toggleAllLevelsUnlocked()` (`src/game/levelProgress.js`) |
 | `src/components/GamepadIndicator.jsx` | The Main Menu's gamepad indicator: `hasGamepad` for its first state, `watchGamepads` to switch it; not rendered on phones and tablets |
-| `src/game/GameEngine.js` | `handleGamepad()`: stick paddles and capture during play |
+| `src/game/GameEngine.js` | `handleGamepad()`: stick paddles and capture during play; `handleInterstitialGamepad()`: continue from an end-of-level interstitial |
 | Screens | `data-gamepad="ignore"` (Intro button on the web and in the apps: never selected), `data-gamepad="connect-press"` (Intro button on desktop: the press that connects a controller activates it; on any other button that press only shows the selection), `data-gamepad="back"` (the `<<< BACK` buttons), `data-konami-code` (Level Select) |
 
 ---

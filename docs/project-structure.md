@@ -15,6 +15,7 @@ root/
 └── assets/                         # Static assets
     ├── audio/                      # Sound effects & music files for Howler.js
     ├── images/                     # SVG vector assets and mobile app icon
+    ├── interstitials/              # End-of-level PNG pictures, named by the level files' youWinInterstitial / gameOverInterstitial
     ├── motion/                     # Lottie animations (menu background)
     ├── native/                     # Sources for the native icons and splash (`npm run cap:assets` generates them into android/ and ios/)
     └── fonts/                      # Font files for the game (TTF and OTF formats).
@@ -76,9 +77,10 @@ root/
     │   └── menuSettings.js         # Its tunable values (resolution cap)
     ├── game/                       # Pure game logic & PixiJS implementation
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
-    │   ├── levelLoader.js          # Validates level JSON and derives runtime values (timer, speeds, intervals)
+    │   ├── levelLoader.js          # Validates level JSON and derives runtime values (timer, speeds, intervals, interstitial URLs)
     │   ├── additionalMechanics.js    # Enum constant with the names of the additional game mechanics
     │   ├── chargedAtomHoldSettings.js # Its tunable values (points per second while an atom is held, size of each score step)
+    │   ├── interstitialSettings.js # Tunable values of the end-of-level interstitials (input lock time)
     │   ├── scoring.js              # Pure score formulas and high-score persistence
     │   ├── oldTv.js                # The Settings "OLD TV" switch (the CRT effect), persisted
     │   ├── levelProgress.js        # Level unlocking: the unlocked tier and beaten levels, persisted

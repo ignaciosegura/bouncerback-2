@@ -157,6 +157,8 @@ On a resize the textures are reallocated (and emptied), so the engine redraws th
 
 `GameEngine` builds the chain from two switches: the zoom blur (`ZOOM_BLUR_ENABLED`, always on) and the OLD TV switch in Settings (off by default), which adds the bloom and the CRT. The order is zoom blur, bloom, CRT. The menus' chain has no bloom: it would wash out their light picture. Neither: no pipeline at all, the arena goes back on the stage (`POST_PROCESSING_ENABLED = false` does the same, to compare).
 
+**End-of-level interstitials.** When a level's end picture appears, `GameEngine` rebuilds the chain for the picture's own container in place of the arena: the same effects with the same values, minus the zoom blur (it radiates from the core). With OLD TV off that leaves no effects, so the picture goes straight on the stage. It's cleared to black, which gives the bars around the picture.
+
 **The order matters.** The bloom comes before the CRT so that the CRT's chromatic aberration reads the glow too and fringes it, like a lens would. The CRT comes last because it plays the screen: its curvature bends the blur's streaks with everything else, and its scanlines and mask sit on top of the whole picture, like a real CRT showing an image.
 
 ### The chain on the menus
@@ -484,3 +486,4 @@ On the menus with OLD TV on there's no zoom blur: the scene render (the backgrou
 - **Built-in names:** GLSL has built-in functions such as `distance()`, `length()`, `mix()`; naming a variable `distance` fails to compile on some drivers.
 - **`pow()` and negative numbers:** `pow(x, 2.0)` is undefined for negative `x` in GLSL (it may return garbage or 0). Square by hand: `x * x`.
 - **Stretched distances:** centered coordinates are stretched by the screen's shape; without the aspect correction, the curvature would turn the ring into an oval.
+- **Teardown order:** destroying a texture while the final pass's shader still binds it makes PixiJS warn ("a 'textureSource' was destroyed while still bound to a shader"). `PostProcessing.destroy()` destroys the final pass first, then the effects and the scene texture.

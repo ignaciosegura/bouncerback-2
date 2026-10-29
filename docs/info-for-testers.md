@@ -4,6 +4,17 @@ Useful tricks and information for testing the game.
 
 ---
 
+## End-of-level interstitials
+
+Until the real pictures exist, no level names one. To try the feature, put any PNG in `assets/interstitials/` (ideally 1920x1080) and name it in a level file, for example in `src/levels/level1.json`:
+
+```json
+"youWinInterstitial": "test.png",
+"gameOverInterstitial": "test.png"
+```
+
+Then run `npm run validate:levels` and `npm run dev`. To get there quickly, shorten the level (`duration`) for a win, or set `lives` to 1 for a loss. Don't commit the test picture or the level changes. See "End-of-level interstitials" in `graphical-specs.md`.
+
 ## Level unlocking
 
 Only the first tier of levels (LEARN) is unlocked on a fresh install. Each further tier unlocks when every level of the tier before it has been beaten (see "Level unlocking" in `game-rules.md`). The progress is saved on the device, under the `localStorage` key `bouncerback.levelProgress`.

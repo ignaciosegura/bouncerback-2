@@ -6,6 +6,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 * The background will always be black, except in the inverted menu layouts, where the background will be white, and during gameplay when the player has only one life left, where it turns dark red (see "Visual feedback" below).
     * During the game, black background, white lines and full circles only (except for the color changes in "Visual feedback" and "Visual feedback for additional game mechanics" below). No textures. The vector assets provided will also be in black and white.
+    * The one exception to "no textures" is the end-of-level interstitials: bitmap pictures shown after a level has ended, between player actions, so gameplay itself stays vector only (see "End-of-level interstitials" below).
     * During the menus, the same font and visual style will be used. The background will be black, with white text. In some cases, the layout will be inverted, white background, black texts and outlines.
 
 ## Menu background animation
@@ -111,6 +112,14 @@ See the LEVEL MENU and LEVEL MENU (LOCKED LEVELS) mockups.
 * The tip is informative text, so it's written in mixed case exactly as in the level file (not all uppercase, like the Intro screen note), 32px, centered, no border, one line per `tip` item. Below it, 54px under its last line, a READY button (32px, the usual button look), centered. At the 1920x1080 reference size the tip's top edge is 359px from the top of the screen.
 * It isn't a screen change, but READY plays a screen-out on the tip and the button (see "Screen transitions"), then the level starts as usual (start animation and 3-second start delay). Taps are ignored while it fades.
 
+## End-of-level interstitials
+
+* A level can name a picture for each outcome in its level file (`youWinInterstitial`, `gameOverInterstitial`: a PNG in `assets/interstitials/`). It's the first storytelling element. Without one, the level goes to its result screen as before.
+* When the end animation is over (the last life zoom on a loss, the core collapse on a win), the picture replaces the arena at once (a cut, no fade) and the HUD disappears at once. It stays until the player continues; then the Game Over or You Win! screen replaces it at once and plays its usual screen-in (no screen-out). See `docs/navigation.md` for how to continue.
+* It's drawn in the game canvas, full screen, scaled to fit whole and centered: black bars where the screen's shape differs from the picture's (e.g. 16:10 on the Steam Deck, wide phones). Pictures are made at 1920x1080, like the mockups, and are deliberately low fidelity.
+* With OLD TV on it goes through the same bloom and CRT layers as the arena, with the same values; it never gets the zoom blur (it radiates from the core, which the picture doesn't have). With OLD TV off it's drawn flat.
+* Presses are ignored for a short moment after it appears, so a stray tap at the end of the level doesn't skip it. The length is set in `src/game/interstitialSettings.js`.
+
 ## Game controller selection
 
 * When the menus are navigated with a game controller, the selected item is marked with a double border: its own border, a gap, and a second line outside it, all three as thick as the border (like CSS's `double` border style). The second line is drawn with `outline`, so nothing moves.
@@ -149,6 +158,7 @@ See the LEVEL MENU and LEVEL MENU (LOCKED LEVELS) mockups.
 
 * The game arena (the game canvas: ring, core, atoms, paddles, echoes and the black or dark red background) is shown as if on an old CRT screen. It's a post-process applied to the finished image, so the shapes themselves are still the same 2D vector drawings.
 * The HUD is not part of it: it stays flat and sharp on top, with no curvature, scanlines or blur.
+* The end-of-level interstitials are drawn in the game canvas in place of the arena, so they get the same bloom and CRT layers with OLD TV on, but no zoom blur (see "End-of-level interstitials").
 * The menu screens that show the menu background animation (Main Menu, Level Select, Settings, How To Play) get the CRT layers too: the animation, its `#D8D8D8` background and the Main Menu logo are on the same TV as the arena. Their buttons, texts, credits and the How To Play instructions and drawing stay flat and sharp on top, like the HUD, and inside the glass. They get no zoom blur (it radiates from the core, and the menus have none). The Intro, Game Over and You Win! screens don't change.
 * The player chooses: the Settings screen's **OLD TV** switch (`OLD TV ON` / `OLD TV OFF`, below SFX, as wide as the volume controls; see the SETTINGS MENU mockup) turns the CRT layers and the bloom (curved glass, chromatic aberration, scanlines, phosphor mask, vignette) on and off, on the arena and on those menu screens. Switching it on the Settings screen changes the screen behind it at once. The Pause overlay has the same switch, which changes the arena mid-level. It's **off by default** and saved like the volumes. The zoom blur isn't part of the switch: it's always on.
 * The effect is made of these layers, from the scene outward:

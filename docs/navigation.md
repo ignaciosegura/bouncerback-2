@@ -36,6 +36,10 @@ Every change from one screen to another plays the screen transition (see "Screen
   - The same controls as the Settings Screen (Music Volume, Sound FX Volume, Old TV toggle), so there's no separate Settings button
   - Exit To Menu Button (leaves the level → Main Menu; the level's progress is lost)
   - Resume Button (`<<< RESUME`, in place of Settings' `<<< BACK`; closes the overlay and the game continues)
+- **End-of-level interstitial** *(not a screen: a picture drawn on the Game Screen's canvas, only for levels whose file names one for the outcome; see "End-of-level interstitials" in `graphical-specs.md`)*
+  - Comes when the end animation is over (last life zoom or core collapse), in place of going to the result screen; the HUD disappears
+  - Continue: tap or click anywhere, the controller's bottom face button or RT, or Enter / Space, once its short input lock has passed. It continues on the release. The Game Over or You Win! screen then replaces the Game Screen at once (no screen-out, only its screen-in)
+  - The level's result (the score, and a win's level progress) is saved when the picture appears, not when the player continues
 - **Game Over Screen** *(replaces the Game Screen when the player runs out of lives)*
   - Score
   - Hi-Score
@@ -58,7 +62,7 @@ The Android system back button (and its gesture) follows the navigation below. I
 | Pause Overlay | Resumes the game (same as `<<< RESUME`) |
 | Intro, Main Menu | Leaves the app (the system default) |
 
-The Game Screen and the Pause Overlay are the exceptions on purpose: a player who taps the back button by mistake must not lose the current game. Leaving a level takes the deliberate EXIT TO MENU button of the Pause Overlay. While the game can't be paused (the 3-second start delay, the core collapse, the Game Over delay, the Gameplay Tips), the back button does nothing.
+The Game Screen and the Pause Overlay are the exceptions on purpose: a player who taps the back button by mistake must not lose the current game. Leaving a level takes the deliberate EXIT TO MENU button of the Pause Overlay. While the game can't be paused (the 3-second start delay, the core collapse, the Game Over delay, the Gameplay Tips, an end-of-level interstitial), the back button does nothing.
 
 ## Desktop Escape key
 
@@ -72,7 +76,7 @@ In the desktop builds, the Escape key follows the navigation below. Like taps, i
 | Gameplay Tips | Leaves the level → Main Menu (same as the Pause Overlay's EXIT TO MENU) |
 | Intro, Main Menu | Nothing (quitting takes the EXIT GAME button) |
 
-The Gameplay Tips and the Game Screen differ on purpose: before the level starts nothing is lost, so Escape is the quick way out after choosing the wrong level; once it has started, a stray key press must not lose the game, as with the mobile back button. Once READY is pressed, Escape does nothing while the tip fades out, and on the Game Screen it does nothing while the game can't be paused (the 3-second start delay, the core collapse, the Game Over delay).
+The Gameplay Tips and the Game Screen differ on purpose: before the level starts nothing is lost, so Escape is the quick way out after choosing the wrong level; once it has started, a stray key press must not lose the game, as with the mobile back button. Once READY is pressed, Escape does nothing while the tip fades out, and on the Game Screen it does nothing while the game can't be paused (the 3-second start delay, the core collapse, the Game Over delay, an end-of-level interstitial).
 
 ## Game controller
 

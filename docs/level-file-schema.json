@@ -129,6 +129,16 @@
             "items": {
                 "type": "string"
             }
+        },
+        "youWinInterstitial": {
+            "type": "string",
+            "pattern": "^(\\s*|[^/\\\\]+\\.png)$",
+            "description": "Optional file name (no folder) of the PNG in assets/interstitials/ shown full screen after the level is won, before the You Win! screen. If missing or blank, the You Win! screen comes straight away."
+        },
+        "gameOverInterstitial": {
+            "type": "string",
+            "pattern": "^(\\s*|[^/\\\\]+\\.png)$",
+            "description": "Optional file name (no folder) of the PNG in assets/interstitials/ shown full screen after the level is lost, before the Game Over screen. If missing or blank, the Game Over screen comes straight away."
         }
     },
     "additionalProperties": false
