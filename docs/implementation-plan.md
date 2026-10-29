@@ -35,6 +35,100 @@ The **desktop & Steam cycle** runs in parallel with the numbered cycles, on its 
 
 ## Pending Phases
 
+### Storytelling: end-of-level interstitials (Phases 56–57)
+
+First step of the storytelling elements: a level can show a full-screen picture after it is won or lost, before the You Win! or Game Over screen. Phase 56 adds the level file fields and their checks (no visible change); Phase 57 shows the picture. There are no pictures yet (`assets/interstitials/` is empty), so no level file gets the fields in these phases.
+
+**Choices** (confirmed with the user)
+
+- **Two optional level file fields**, `youWinInterstitial` and `gameOverInterstitial`: the file name of a PNG in `assets/interstitials/` (just the name, e.g. `level3_win.png`, no folder). Missing or blank (empty, or only spaces) means no picture: the level goes straight to the result screen, exactly as now.
+- **Drawn in the PixiJS game canvas**, not in React, so it goes through the same post-processing as the arena and follows OLD TV (curved glass, scanlines… with it on; flat with it off). No zoom blur: it radiates from the core, which the picture doesn't have.
+- **Cut in, cut out.** When the end animation finishes (after the last life zoom on a loss, after the core collapse on a win: the moment the result screen's screen-out starts today), the picture replaces the arena at once and the HUD disappears at once. On continue, the result screen replaces it at once and plays only its usual screen-in (no screen-out: nothing is left on the Game Screen to animate).
+- **Press to continue.** Tap or click anywhere, the controller's bottom face button or RT (the menus' activate buttons), or Enter / Space. It continues on the release, like the menus, so the release can't land on the result screen. Presses are ignored for a short moment after the picture appears, so a stray tap at the end of the level doesn't skip it; only a press that starts after that moment counts (a button held from gameplay doesn't). The moment's length goes in a new settings file, `src/game/interstitialSettings.js`.
+- **Contain fit.** The whole picture is always visible, scaled to fit the screen and centered, with black bars where the screen's shape differs from the picture's (e.g. the Steam Deck's 16:10, wide phones). Pictures are meant to be made at 1920×1080, like the mockups.
+- **Complete silence during the picture.** The level track and any sound effect still playing stop the moment the picture appears (cut, with only the few milliseconds of fade that keep a stop from clicking); nothing plays until the result screen, which plays its ambience as now. How the result ambiences are used will be reconsidered later.
+- **The result is saved when the level ends, not on continue.** The win (level progress) and the score are registered when the end animation finishes, as now, so closing the app on the picture loses nothing.
+- **Mobile back button and desktop Escape do nothing on the picture**, as during the other moments when the game can't be paused (core collapse, Game Over delay).
+- **An exception to "no images"** (`AGENTS.md`, "Visual & Style Rules", and `docs/graphical-specs.md`, "The background"): the interstitials are bitmaps. They come between player actions, after the level has ended, so gameplay itself (and the menus) still follows the rule: 2D vector only.
+- **Same CRT and bloom values as the arena.** The pictures are deliberately low fidelity, so they need no values of their own.
+
+### Phase 56 — Interstitial fields in the level files
+
+**Goal**
+
+The level files can name a You Win! and a Game Over picture; the loader checks them and gives the engine their URLs. No visible change.
+
+**Implementation**
+
+- `docs/level-file-schema.json`: two optional string properties, `youWinInterstitial` and `gameOverInterstitial`, not in `required`. Each has a `pattern` allowing a blank value or a single file name ending in `.png` (no `/` or `\`), and a description: the PNG in `assets/interstitials/` shown after the level is won / lost, before the result screen; missing or blank means none.
+- `src/game/levelLoader.js`:
+  - `checkSchema()` learns `pattern` (its subset of JSON Schema doesn't have it yet; without it the in-game check would silently skip the rule).
+  - Collects the pictures with `import.meta.glob('../../assets/interstitials/*.png', { eager: true, query: '?url', import: 'default' })`: file name → bundled URL (an empty folder gives an empty map). Only the PNGs there are bundled.
+  - `checkRanges()` adds a problem when a non-blank name isn't one of those files (catches typos when the game starts, like the other level checks).
+  - `loadLevel()` returns `youWinInterstitial` and `gameOverInterstitial`: the URL, or `null` when missing or blank.
+- `scripts/validate-levels.js`: after the schema check, checks that each non-blank name exists in `assets/interstitials/`, with the same kind of error line, so `npm run validate:levels` catches a missing picture too.
+- No level file changes (there are no pictures yet).
+
+**Docs** (as part of the implementation)
+
+- `AGENTS.md`, "Level Files": the two fields are optional and name a PNG that must exist in `assets/interstitials/`; `validate:levels` checks it.
+- `docs/project-structure.md`: `assets/interstitials/` (end-of-level PNGs named by the level files).
+- `docs/game-rules.md`, "Game over condition" and "Level end condition": a level can show a picture before the result screen (details in Phase 57's docs).
+
+**Verification**
+
+- `npm run validate:levels` passes on the five level files.
+- With a temporary test PNG in `assets/interstitials/` (removed afterwards, not committed): a level copy naming it passes; one naming a missing file, a name with a folder, or a `.jpg` fails with a clear error line; `""` and `"  "` pass. The same cases in-game: the missing file makes the loader throw at startup with the level's number; blank gives `null`.
+- The game plays exactly as before (build and dev run, no console errors).
+
+### Phase 57 — Interstitial display
+
+**Goal**
+
+After a level that names a picture for its outcome, the picture is shown in the game canvas, through the post-processing, until the player continues; then the result screen.
+
+**Implementation**
+
+- `src/game/interstitialSettings.js` (new): the input lock time after the picture appears.
+- `src/game/GameEngine.js`:
+  - **Loading.** At mount, starts loading the level's pictures with PixiJS `Assets.load()` (both, if present; it doesn't hold up the level). If the end comes before a picture is ready, the frozen last frame stays until it is; if it fails to load, a console warning and straight to the result screen, as with no picture.
+  - **New state `INTERSTITIAL`**, after `LOST` (Game Over delay) and `COLLAPSING` (core collapse), in place of going to `ENDED` when the outcome has a picture. Entering it: cuts the level track and every sound effect still playing (see `soundManager.js` below), resets the controller reader (no press carries over), shows the picture, and emits the result (`onGameOver` / `onLevelWin`) with `{ score, interstitial: true }`. Without a picture, `ENDED` and the result as now, with `interstitial: false`.
+  - **Drawing.** The picture is a `Sprite` in its own container, kept off the arena. With a picture shown, `buildPostProcessing()` builds the picture's chain instead of the arena's: the same effects minus the zoom blur (with OLD TV on: bloom and CRT, as on the arena; with it off: no effects, the container straight on the stage), cleared to black. `layout()` sizes the sprite with the contain fit; it follows resizes. The effects use the arena's settings as they are (no overrides).
+  - **Continue.** Once the lock time has passed: a pointer pressed on the stage and released, an Enter / Space press and release, or the controller's bottom face button or RT pressed and released (through the engine's `GamepadReader`). Then emits `onContinue` (once) and goes to `ENDED`.
+  - **Teardown.** The picture's textures come from `Assets`' cache: they're taken off the stage and released with `Assets.unload()` instead of being destroyed by `app.destroy(… texture: true)`, which would leave a broken texture in the cache for the next play of the level.
+  - The class comment's callback list gets `onContinue()` and the results' `interstitial` flag.
+- `src/screens/GameScreen.jsx`: hides the HUD at once when a result comes with `interstitial: true`; passes `onContinue` up. The back button and Escape handlers do nothing while the picture is shown.
+- `src/App.jsx`:
+  - `endLevel()` / `winLevel()` register the score and the win at once as now; with `interstitial: true` they keep the result screen pending instead of navigating.
+  - `onContinue` from the Game Screen goes to the pending result screen with a cut: `navigate()` gets an option to skip the screen-out (the screen changes at once and plays its screen-in). Taps are still ignored while that screen-in runs.
+- `src/audio/soundManager.js`: `stopTrack()` gets a `{ cut: true }` option that stops the track at once with the short anti-click fade the SFX voices already use, instead of the screen-change fade; and a `stopAllSfx()` that stops every SFX voice (one-shots and loops) the same way.
+- Music otherwise unchanged: the result screens start their ambience when they appear, as now (the ambience is still preloaded when the outcome is known).
+
+**Docs** (as part of the implementation)
+
+- `docs/graphical-specs.md`: a new "End-of-level interstitials" section (full screen in the game canvas, contain fit with black bars, made at 1920×1080, cut in and out, HUD hidden, through the CRT with OLD TV on and never the zoom blur); "The background" and "CRT effect" mention them; the "no textures" wording notes the interstitials as the exception.
+- `AGENTS.md`, "Visual & Style Rules": the interstitial PNGs are the one bitmap exception: shown between player actions, after a level ends, through the CRT post-process like the arena; gameplay stays vector only.
+- `docs/navigation.md`: the interstitial between the Game Screen and Game Over / You Win! (not a screen: drawn on the Game Screen's canvas), how to continue, the cut, and that the back button and Escape do nothing on it.
+- `docs/game-rules.md`, "Game over condition" and "Level end condition": the picture comes in place of going straight to the result screen; the result is saved when the level ends.
+- `docs/audio-map.md`, "Audio Lifecycle Rules": complete silence during an interstitial: the level track and any sound effect are cut when it appears; the result ambience still starts on the result screen.
+- `docs/game-controller.md`: bottom face button or RT continue from an interstitial.
+- `docs/post-processing.md`, "The chain in the game": the interstitial's chain (no zoom blur).
+- `docs/project-structure.md`: `interstitialSettings.js`.
+- `docs/design-decisions.md`: a new "Storytelling (interstitials)" section with the choices above and their reasons (PixiJS for OLD TV, contain for pictures with text, release to continue, saving at the level's end).
+- `docs/info-for-testers.md`: how to try an interstitial before the real pictures exist (put a PNG in `assets/interstitials/`, name it in a level file, don't commit it).
+- `docs/implementation-status.md`: Phases 56 and 57.
+
+**Verification** (with a temporary test PNG named in a level, not committed)
+
+- Losing that level: after the last life zoom, the picture replaces the arena at once, the HUD vanishes, and the music and any sound effect stop at once (silence until the result screen, no click). Winning: the same after the core collapse. A level with no picture (or a blank name) goes to the result screen with the usual transition, unchanged.
+- Contain fit at 16:9, 16:10 (Steam Deck size) and a wide phone shape, in portrait-sized windows during a resize too: the whole picture visible, centered, black bars.
+- OLD TV on: curved glass, scanlines and the rest on the picture; no zoom blur streaks. OLD TV off: flat and sharp.
+- Taps, clicks, Enter / Space and the controller during the lock time do nothing; a button held from gameplay doesn't continue; after it, a press and release continues; the result screen appears at once with its screen-in, shows the right score and hi-score, and its buttons don't react to that release. The result ambience plays on the result screen.
+- The level counts as won (Level Select) even if the app is reloaded while the picture is shown.
+- Mobile back button (Android) and Escape (desktop) do nothing on the picture. Auto-pause doesn't trigger on it.
+- Playing the same level again (TRY AGAIN) shows the picture again with no broken texture; no console errors or warnings; no leftover canvas after leaving.
+- On the Android emulator and the desktop build as well as the browser.
+
 ### Phase D1 — Desktop test build for the Steam Deck
 
 **Goal**
