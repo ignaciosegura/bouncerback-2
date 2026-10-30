@@ -103,6 +103,12 @@
                 "duration": {
                     "type": "number",
                     "description": "Duration of the paddle action measured in seconds, counted from the moment the paddle is set (pointer released). Suggested starting value: 3."
+                },
+                "count": {
+                    "type": "integer",
+                    "description": "How many paddles can be set at the same time. Setting one more removes the oldest (first in, first out). At least 1. Optional; if missing, 2.",
+                    "minimum": 1,
+                    "default": 2
                 }
             },
             "additionalProperties": false
