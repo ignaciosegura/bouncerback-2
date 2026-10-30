@@ -1,0 +1,21 @@
+{
+  "name": "QUANTAMORPHICA",
+  "tier": 2,
+  "duration": 64,
+  "timeSignature": {
+    "bpm": 136,
+    "signature": 4
+  },
+  "soundTrack": "quantamorphica.mp3",
+  "vfx": [],
+  "atoms": {
+    "travelTime": 6,
+    "barsInterval": 1
+  },
+  "paddles": {
+    "angle": 30,
+    "duration": 3
+  },
+  "lives": 3,
+  "additionalGameMechanics": ["atom capture", "supercharged atom", "charged atom hold"]
+}
