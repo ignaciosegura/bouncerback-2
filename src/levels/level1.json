@@ -13,7 +13,7 @@
     "barsInterval": 6
   },
   "paddles": {
-    "angle": 30,
+    "angle": 35,
     "duration": 5
   },
   "lives": 8,
