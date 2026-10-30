@@ -422,9 +422,34 @@ The Intro's `ENTER BOUNCERBACK` button blinks too. It's the player's first click
 - `docs/implementation-status.md`: Phase 55.
 - `docs/game-instructions.md` is not changed (decided with the user): How To Play doesn't explain the blink, and players work it out from the Intro and from how Level Select changes as they progress. No reduced-motion fallback either: the game, the menu animation and the transitions don't follow that setting, and a 0.5 Hz text blink isn't the motion it protects from.
 
-### Storytelling: end-of-level interstitials (Phases 56–57)
+### Phase 56 — Paddle count per level
 
-First step of the storytelling elements: a level can show a full-screen picture after it is won or lost, before the You Win! or Game Over screen. Phase 56 adds the level file fields and their checks (no visible change); Phase 57 shows the picture. There are no pictures yet (`assets/interstitials/` is empty), so no level file gets the fields in these phases.
+**Goal**
+
+How many paddles can be set at the same time becomes a per-level value instead of a fixed two, so fast, dense levels can allow more (four, say). The level file's `paddles` object gets an optional integer `count` (see `docs/level-file-schema.json`, "Paddles" in `docs/game-rules.md` and "Paddle count" in `docs/design-decisions.md`). Setting one more paddle than the count removes the oldest (first in, first out), as today. If `count` is missing it is 2, so every existing level plays exactly as before.
+
+Out of scope: changing any level's count (a level design choice, made afterwards by editing its file), and the How To Play text (`docs/game-instructions.md` says "Use the two paddles"; it is updated by hand, only if the user asks).
+
+**Implementation**
+
+- `docs/level-file-schema.json`: `paddles.count`, integer, optional, `"minimum": 1`, `"default": 2` (done with the docs). `npm run validate:levels` checks it with Ajv, `minimum` included.
+- `src/game/levelLoader.js`:
+  - `checkRanges`: `paddles.count`, when present, must be at least 1. The in-game schema check supports only a subset of JSON Schema, without `minimum`, so the game repeats the range here like the others.
+  - `loadLevel`: a new runtime value `paddleCount: data.paddles.count ?? DEFAULT_PADDLE_COUNT`, with `DEFAULT_PADDLE_COUNT = 2` as a named constant next to the loader's other constants, and a comment that it matches the schema's default.
+- `src/game/GameEngine.js`:
+  - Remove `MAX_ACTIVE_PADDLES`; `setPaddle` and `updatePaddleWarnings` use `this.level.paddleCount`. Their comments say "the level's paddle count" instead of "a third one".
+  - Nothing else changes: paddles come from the pool or are created on demand, so more paddles need no preallocation; the warning formula (`active + dragged − count`, oldest first) already handles any count, including two sticks dragging at once.
+- No change in the level files.
+
+**Docs** (with the plan)
+
+- `docs/level-file-schema.json`: `paddles.count`.
+- `docs/game-rules.md` ("Core mechanics", "Paddles"), `docs/game-controller.md` ("Gameplay"), `docs/graphical-specs.md` ("Paddle replacement warning") and `docs/design-decisions.md` ("Paddle count"): the paddle limit is the level's count, two by default.
+- `docs/game-instructions.md`: "Use the paddles" instead of "Use the two paddles" (updated by the user).
+
+### Storytelling: end-of-level interstitials (Phases 57–58)
+
+First step of the storytelling elements: a level can show a full-screen picture after it is won or lost, before the You Win! or Game Over screen. Phase 57 adds the level file fields and their checks (no visible change); Phase 58 shows the picture. There are no pictures yet (`assets/interstitials/` is empty), so no level file gets the fields in these phases.
 
 **Choices** (confirmed with the user)
 
@@ -439,7 +464,7 @@ First step of the storytelling elements: a level can show a full-screen picture 
 - **An exception to "no images"** (`AGENTS.md`, "Visual & Style Rules", and `docs/graphical-specs.md`, "The background"): the interstitials are bitmaps. They come between player actions, after the level has ended, so gameplay itself (and the menus) still follows the rule: 2D vector only.
 - **Same CRT and bloom values as the arena.** The pictures are deliberately low fidelity, so they need no values of their own.
 
-### Phase 56 — Interstitial fields in the level files
+### Phase 57 — Interstitial fields in the level files
 
 **Goal**
 
@@ -460,9 +485,9 @@ The level files can name a You Win! and a Game Over picture; the loader checks t
 
 - `AGENTS.md`, "Level Files": the two fields are optional and name a PNG that must exist in `assets/interstitials/`; `validate:levels` checks it.
 - `docs/project-structure.md`: `assets/interstitials/` (end-of-level PNGs named by the level files).
-- `docs/game-rules.md`, "Game over condition" and "Level end condition": a level can show a picture before the result screen (details in Phase 57's docs).
+- `docs/game-rules.md`, "Game over condition" and "Level end condition": a level can show a picture before the result screen (details in Phase 58's docs).
 
-### Phase 57 — Interstitial display
+### Phase 58 — Interstitial display
 
 **Goal**
 
@@ -497,7 +522,7 @@ After a level that names a picture for its outcome, the picture is shown in the 
 - `docs/project-structure.md`: `interstitialSettings.js`.
 - `docs/design-decisions.md`: a new "Storytelling (interstitials)" section with the choices above and their reasons (PixiJS for OLD TV, contain for pictures with text, release to continue, saving at the level's end).
 - `docs/info-for-testers.md`: how to try an interstitial before the real pictures exist (put a PNG in `assets/interstitials/`, name it in a level file, don't commit it).
-- `docs/implementation-status.md`: Phases 56 and 57.
+- `docs/implementation-status.md`: Phases 57 and 58.
 
 ---
 
@@ -525,14 +550,15 @@ After a level that names a picture for its outcome, the picture is shown in the 
 - Konami Code (Phase 53, Trust GXT pad): on Level Select with only tier 0 unlocked, up up down down left right left right on the d-pad unlocks every level at once (names replace the dashes) and nothing else happens: no level starts, the screen doesn't change. Entered again, every level but LEARN turns back to dashes; if the selection was on a level that got locked, it moves to the first button. The state survives a reload and an app restart; the high score and the settings don't change. An extra up at the start still works (up up up down down…); a wrong d-pad press, any other button or a stick push in the middle means starting over. The code does nothing on any other screen, and half a code entered there doesn't carry over to Level Select. Beating levels after the reset unlocks tiers as usual. Check in Chrome and Safari, and in the Android and iOS apps (also the first controller check in the native apps).
 - Gamepad indicator (Phase 54): With no controller connected, the Main Menu matches the MAIN MENU - gamepad not detected mockup (as updated to "You can use a gamepad"): text, `?` drawing, the drawing's left edge 350px right of the center, and its top and bottom level with the SETTINGS top and the HOW TO bottom at 1920x1080. Pressing a button on a connected controller while on the Main Menu switches it at once to "Gamepad detected" with the full drawing (MAIN MENU mockup). Unplugging it switches it back at once. A controller already exposed (a button pressed on the Intro) shows "Gamepad detected" as soon as the Main Menu appears. It fades, tints and shakes with the buttons in the screen transitions to and from the Main Menu. It scales with the viewport and stays in place at other desktop aspect ratios (4:3, and a narrow window at the 0.4px `--u` floor). It isn't shown in the Android or iOS app, or in a mobile browser (the browser's device emulation with touch). The rest of the Main Menu is unchanged there. Controller navigation of the Main Menu is unchanged (PLAY → SETTINGS → HOW TO only).
 - Blinking buttons (Phase 55): on launch, `ENTER BOUNCERBACK` blinks (1 s visible, 1 s invisible, hard on/off) inside its steady border, from the screen-in on; the headphones note doesn't blink. Holding the mouse on it shows the pressed look with the text still blinking; releasing makes the text steady at once, and it stays steady through the screen-out. On Level Select, on a fresh install, LEARN blinks and the locked rows show steady dashes. After beating LEARN, it's steady and the three tier 1 levels blink, all in sync; after beating one of them, only the other two blink. With every level beaten, nothing blinks. BACK, the Main Menu, Settings, How To Play, Game Over and You Win! buttons never blink. The buttons' borders and the layout never move, and the width is the same as before. With the controller, the selected level keeps blinking inside its double border; holding the bottom face button on it shows the inverted pressed look with the name still blinking. Activating a pending level (mouse click, tap, controller release) makes its name steady at once; it fades, tints and shakes steadily through the screen-out while the other pending names keep blinking. Back on Level Select after losing it (Game Over → Main Menu → PLAY), it blinks again; after winning it, it's steady. The Konami Code unlocking every level makes the newly unlocked unbeaten levels blink in sync with the others; entering it again turns them to dashes and LEARN blinks. Check in Safari, Firefox and Chrome, and in the iOS/Android apps.
-- Interstitial level fields (Phase 56): `npm run validate:levels` passes on the five level files.
-- Interstitial level fields (Phase 56): With a temporary test PNG in `assets/interstitials/` (removed afterwards, not committed): a level copy naming it passes; one naming a missing file, a name with a folder, or a `.jpg` fails with a clear error line; `""` and `"  "` pass. The same cases in-game: the missing file makes the loader throw at startup with the level's number; blank gives `null`.
-- Interstitial level fields (Phase 56): The game plays exactly as before (build and dev run, no console errors).
-- Interstitial display (Phase 57, with a temporary test PNG named in a level): Losing that level: after the last life zoom, the picture replaces the arena at once, the HUD vanishes, and the music and any sound effect stop at once (silence until the result screen, no click). Winning: the same after the core collapse. A level with no picture (or a blank name) goes to the result screen with the usual transition, unchanged.
-- Interstitial display (Phase 57, with a temporary test PNG named in a level): Contain fit at 16:9, 16:10 (Steam Deck size) and a wide phone shape, in portrait-sized windows during a resize too: the whole picture visible, centered, black bars.
-- Interstitial display (Phase 57, with a temporary test PNG named in a level): OLD TV on: curved glass, scanlines and the rest on the picture; no zoom blur streaks. OLD TV off: flat and sharp.
-- Interstitial display (Phase 57, with a temporary test PNG named in a level): Taps, clicks, Enter / Space and the controller during the lock time do nothing; a button held from gameplay doesn't continue; after it, a press and release continues; the result screen appears at once with its screen-in, shows the right score and hi-score, and its buttons don't react to that release. The result ambience plays on the result screen.
-- Interstitial display (Phase 57, with a temporary test PNG named in a level): The level counts as won (Level Select) even if the app is reloaded while the picture is shown.
-- Interstitial display (Phase 57, with a temporary test PNG named in a level): Mobile back button (Android) and Escape (desktop) do nothing on the picture. Auto-pause doesn't trigger on it.
-- Interstitial display (Phase 57, with a temporary test PNG named in a level): Playing the same level again (TRY AGAIN) shows the picture again with no broken texture; no console errors or warnings; no leftover canvas after leaving.
-- Interstitial display (Phase 57, with a temporary test PNG named in a level): On the Android emulator and the desktop build as well as the browser.
+- Paddle count per level (Phase 56): `npm run validate:levels` passes for every level (levels 5 and 6 set `count` to 4 since the implementation; the others leave it out). A level file with `"count": 0`, `-1` or `2.5` is reported as invalid by `npm run validate:levels`; `"count": "4"` too. With no `count`, play a level: two paddles at a time, the third removes the oldest, the warning turns the oldest red while dragging, exactly as before. Set `"count": 4` on a level temporarily: four paddles stay on the ring at once; the fifth removes the oldest; while dragging a fifth the oldest turns red, and with both controller sticks dragging the two oldest turn red. Revert the file afterwards. `"count": 1`: each new paddle replaces the previous one, and the set paddle turns red as soon as a new one is being dragged. `npm run lint` passes.
+- Interstitial level fields (Phase 57): `npm run validate:levels` passes on the five level files.
+- Interstitial level fields (Phase 57): With a temporary test PNG in `assets/interstitials/` (removed afterwards, not committed): a level copy naming it passes; one naming a missing file, a name with a folder, or a `.jpg` fails with a clear error line; `""` and `"  "` pass. The same cases in-game: the missing file makes the loader throw at startup with the level's number; blank gives `null`.
+- Interstitial level fields (Phase 57): The game plays exactly as before (build and dev run, no console errors).
+- Interstitial display (Phase 58, with a temporary test PNG named in a level): Losing that level: after the last life zoom, the picture replaces the arena at once, the HUD vanishes, and the music and any sound effect stop at once (silence until the result screen, no click). Winning: the same after the core collapse. A level with no picture (or a blank name) goes to the result screen with the usual transition, unchanged.
+- Interstitial display (Phase 58, with a temporary test PNG named in a level): Contain fit at 16:9, 16:10 (Steam Deck size) and a wide phone shape, in portrait-sized windows during a resize too: the whole picture visible, centered, black bars.
+- Interstitial display (Phase 58, with a temporary test PNG named in a level): OLD TV on: curved glass, scanlines and the rest on the picture; no zoom blur streaks. OLD TV off: flat and sharp.
+- Interstitial display (Phase 58, with a temporary test PNG named in a level): Taps, clicks, Enter / Space and the controller during the lock time do nothing; a button held from gameplay doesn't continue; after it, a press and release continues; the result screen appears at once with its screen-in, shows the right score and hi-score, and its buttons don't react to that release. The result ambience plays on the result screen.
+- Interstitial display (Phase 58, with a temporary test PNG named in a level): The level counts as won (Level Select) even if the app is reloaded while the picture is shown.
+- Interstitial display (Phase 58, with a temporary test PNG named in a level): Mobile back button (Android) and Escape (desktop) do nothing on the picture. Auto-pause doesn't trigger on it.
+- Interstitial display (Phase 58, with a temporary test PNG named in a level): Playing the same level again (TRY AGAIN) shows the picture again with no broken texture; no console errors or warnings; no leftover canvas after leaving.
+- Interstitial display (Phase 58, with a temporary test PNG named in a level): On the Android emulator and the desktop build as well as the browser.

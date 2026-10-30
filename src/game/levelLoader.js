@@ -16,6 +16,9 @@ function interstitialName (value) {
   return value?.trim() || null
 }
 
+// Paddles that can be set at once when the level file has no paddles.count (the schema's default)
+const DEFAULT_PADDLE_COUNT = 2
+
 /**
  * Checks a value against the subset of JSON Schema used by docs/level-file-schema.json
  * (type, enum, pattern, required, properties, additionalProperties, items). Returns a list of problems.
@@ -82,6 +85,7 @@ function checkRanges (level) {
     if (!(value > 0)) problems.push(`level.${key} must be greater than 0`)
   }
   if (level.paddles.angle >= 360) problems.push('level.paddles.angle must be less than 360')
+  if (level.paddles.count < 1) problems.push('level.paddles.count must be at least 1')
   if (level.name.trim() === '') problems.push('level.name must not be empty')
   if (level.name.length > LEVEL_NAME_MAX_LENGTH) problems.push(`level.name must be at most ${LEVEL_NAME_MAX_LENGTH} characters`)
   if (level.tier < 0) problems.push('level.tier must be 0 or greater')
@@ -136,6 +140,8 @@ export function loadLevel (data, number) {
     spawnInterval: data.atoms.barsInterval * secondsPerBar,
     paddleArc: data.paddles.angle * Math.PI / 180,
     paddleDuration: data.paddles.duration,
+    // Paddles that can be set at once; one more removes the oldest
+    paddleCount: data.paddles.count ?? DEFAULT_PADDLE_COUNT,
     vfx: (data.vfx ?? []).map(({ name, time }) => ({ name, time: time * secondsPerBar }))
   }
 }

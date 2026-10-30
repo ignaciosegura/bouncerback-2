@@ -13,9 +13,18 @@
     "barsInterval": 1
   },
   "paddles": {
-    "angle": 30,
-    "duration": 3
+    "angle": 35,
+    "duration": 3,
+    "count": 4
   },
   "lives": 3,
-  "additionalGameMechanics": ["atom capture", "supercharged atom", "charged atom hold"]
+  "additionalGameMechanics": [
+    "atom capture",
+    "supercharged atom",
+    "charged atom hold"
+  ],
+  "tip": [
+    "This level is faster",
+    "You can deploy four paddles instead of one."
+  ]
 }

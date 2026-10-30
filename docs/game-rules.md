@@ -30,7 +30,7 @@ When the level starts, the containment ring and then the core grow in from nothi
 
 At the center of the containment ring there's the atom emitter, or core. It will start emitting atoms (with a initial charge value of 1) in random directions at semi-random intervals. All atoms travel at the same speed, specified in the level settings file.
 
-The player can place paddles by clicking or tapping at the screen. These paddles will appear at the containment ring for a short period of time, and they will bounce the atoms back, reversing their course. The player can only set two paddles at a time. If it puts a third one, the first one will dissapear inmediately ("first in, first out").
+The player can place paddles by clicking or tapping at the screen. These paddles will appear at the containment ring for a short period of time, and they will bounce the atoms back, reversing their course. The player can only set a limited number of paddles at a time: the level's paddle count (the `paddles.count` value in the level file; two if the level doesn't set it). Fast, dense levels can allow more. If the player sets one more paddle than the count, the oldest one disappears immediately ("first in, first out").
 
 An atom escapes the containment ring when its center crosses the ring. Until then, a paddle set at the last moment still bounces it back, even if the atom already overlaps the paddle; the atom is then placed back where a bounce at the exact moment of contact would have left it, so it stays on the beat (a small visible jump back).
 
@@ -61,7 +61,7 @@ the mouse while holding the left-click button (or doing the equivalent gesture w
 
 The paddle's lifetime (the `paddles.duration` value in the level file) starts counting when the paddle is set (on release), not when the button is pressed. While the player is dragging, the paddle is inactive and doesn't expire. Once set, the paddle fades out gradually during the second half of its lifetime so the player can see how much time it has left, and it flashes every time it bounces an atom (see "Visual feedback" in `graphical-specs.md`; planned for the second development cycle).
 
-While the player is placing a new paddle and the two-paddle limit means an existing paddle will disappear when the new one is set ("first in, first out"), that paddle turns red, so its removal doesn't come as a surprise (see "Visual feedback" in `graphical-specs.md`).
+While the player is placing a new paddle and the paddle count means an existing paddle will disappear when the new one is set ("first in, first out"), that paddle turns red, so its removal doesn't come as a surprise (see "Visual feedback" in `graphical-specs.md`).
 
 ## Atom capture
 
