@@ -75,7 +75,7 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
 - [x] **Phase 53** — Konami Code (on Level Select, up up down down left right left right on the d-pad unlocks every level, or locks them again as on a fresh install when they're all unlocked; no B A; in every build)
 - [x] **Phase 54** — Gamepad indicator (Main Menu: a controller drawing with "You can use a gamepad" or "Gamepad detected", switching as soon as a controller is detected; 350px right of center, from the SETTINGS top to the HOW TO bottom; not on phones and tablets)
 - [x] **Phase 55** — Blinking buttons (the text of `ENTER BOUNCERBACK` and of unlocked levels not yet beaten blinks, 1 s on / 1 s off, all in sync; it keeps blinking under the controller's selection and the pressed look, and turns steady on activation)
-- [ ] **Phase 56** — Paddle count per level (optional `paddles.count` in the level file: how many paddles can be set at once before setting one more removes the oldest; 2 if missing, at least 1; replaces the fixed `MAX_ACTIVE_PADDLES`, the replacement warning follows it)
+- [x] **Phase 56** — Paddle count per level (optional `paddles.count` in the level file: how many paddles can be set at once before setting one more removes the oldest; 2 if missing, at least 1; replaces the fixed `MAX_ACTIVE_PADDLES`, the replacement warning follows it)
 
 ## Desktop & Steam Cycle (parallel) — ⏳ Pending
 

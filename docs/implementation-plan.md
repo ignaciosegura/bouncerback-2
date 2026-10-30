@@ -35,34 +35,6 @@ The **desktop & Steam cycle** runs in parallel with the numbered cycles, on its 
 
 ## Pending Phases
 
-### Phase 56 — Paddle count per level
-
-**Goal**
-
-How many paddles can be set at the same time becomes a per-level value instead of a fixed two, so fast, dense levels can allow more (four, say). The level file's `paddles` object gets an optional integer `count` (see `docs/level-file-schema.json`, "Paddles" in `docs/game-rules.md` and "Paddle count" in `docs/design-decisions.md`). Setting one more paddle than the count removes the oldest (first in, first out), as today. If `count` is missing it is 2, so every existing level plays exactly as before.
-
-Out of scope: changing any level's count (a level design choice, made afterwards by editing its file), and the How To Play text (`docs/game-instructions.md` says "Use the two paddles"; it is updated by hand, only if the user asks).
-
-**Implementation**
-
-- `docs/level-file-schema.json`: `paddles.count`, integer, optional, `"minimum": 1`, `"default": 2` (done with the docs). `npm run validate:levels` checks it with Ajv, `minimum` included.
-- `src/game/levelLoader.js`:
-  - `checkRanges`: `paddles.count`, when present, must be at least 1. The in-game schema check supports only a subset of JSON Schema, without `minimum`, so the game repeats the range here like the others.
-  - `loadLevel`: a new runtime value `paddleCount: data.paddles.count ?? DEFAULT_PADDLE_COUNT`, with `DEFAULT_PADDLE_COUNT = 2` as a named constant next to the loader's other constants, and a comment that it matches the schema's default.
-- `src/game/GameEngine.js`:
-  - Remove `MAX_ACTIVE_PADDLES`; `setPaddle` and `updatePaddleWarnings` use `this.level.paddleCount`. Their comments say "the level's paddle count" instead of "a third one".
-  - Nothing else changes: paddles come from the pool or are created on demand, so more paddles need no preallocation; the warning formula (`active + dragged − count`, oldest first) already handles any count, including two sticks dragging at once.
-- No change in the level files.
-
-**Verification**
-
-- `npm run validate:levels` passes for every level (none sets `count`).
-- A level file with `"count": 0`, `-1` or `2.5` is reported as invalid by `npm run validate:levels`; `"count": "4"` too.
-- With no `count`, play a level: two paddles at a time, the third removes the oldest, the warning turns the oldest red while dragging, exactly as before.
-- Set `"count": 4` on a level temporarily: four paddles stay on the ring at once; the fifth removes the oldest; while dragging a fifth the oldest turns red, and with both controller sticks dragging the two oldest turn red. Revert the file afterwards.
-- `"count": 1`: each new paddle replaces the previous one, and the set paddle turns red as soon as a new one is being dragged.
-- `npm run lint` passes.
-
 ### Phase D1 — Desktop test build for the Steam Deck
 
 **Goal**
