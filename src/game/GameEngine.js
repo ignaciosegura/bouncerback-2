@@ -39,7 +39,6 @@ const START_DELAY = 3 // seconds before the timer, spawns and music start: the m
 const RING_GROW_TIME = 0.25
 const CORE_GROW_TIME = 0.5
 const START_ANIMATION_TIME = RING_GROW_TIME + CORE_GROW_TIME // must stay ≤ START_DELAY
-const MAX_ACTIVE_PADDLES = 2
 // Controller: each stick drags and sets a paddle, like a finger; any of these buttons captures
 const STICKS = ['left', 'right']
 const CAPTURE_BUTTONS = [BUTTONS.A, BUTTONS.LT, BUTTONS.RT, BUTTONS.L3, BUTTONS.R3]
@@ -451,8 +450,8 @@ export default class GameEngine {
     this.draggedPaddles.get(input)?.setAngle(angle)
   }
 
-  // Release: the paddle is set and its lifetime starts; a third one removes the oldest, whatever
-  // input set it
+  // Release: the paddle is set and its lifetime starts; one beyond the level's paddle count removes
+  // the oldest, whatever input set it
   setPaddle (input) {
     const paddle = this.draggedPaddles.get(input)
     if (!paddle) return
@@ -460,15 +459,15 @@ export default class GameEngine {
     this.draggedPaddles.delete(input)
     paddle.activate()
     this.activePaddles.push(paddle)
-    while (this.activePaddles.length > MAX_ACTIVE_PADDLES) {
+    while (this.activePaddles.length > this.level.paddleCount) {
       this.releasePaddle(this.activePaddles.shift())
     }
   }
 
   // Set paddles that the paddles being dragged will push out when released turn red: the oldest
-  // ones beyond MAX_ACTIVE_PADDLES (activePaddles is ordered oldest first)
+  // ones beyond the level's paddle count (activePaddles is ordered oldest first)
   updatePaddleWarnings () {
-    const pushedOut = this.activePaddles.length + this.draggedPaddles.size - MAX_ACTIVE_PADDLES
+    const pushedOut = this.activePaddles.length + this.draggedPaddles.size - this.level.paddleCount
     this.activePaddles.forEach((paddle, i) => paddle.setWarning(i < pushedOut))
   }
 

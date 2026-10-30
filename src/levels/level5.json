@@ -14,7 +14,8 @@
   },
   "paddles": {
     "angle": 35,
-    "duration": 3
+    "duration": 3,
+    "count": 4
   },
   "lives": 3,
   "additionalGameMechanics": ["atom capture", "supercharged atom", "charged atom hold"]
