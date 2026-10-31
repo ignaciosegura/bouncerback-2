@@ -1,6 +1,6 @@
 @font-face {
-  font-family: 'C64 Angled';
-  src: url('../assets/fonts/c64_angled.ttf') format('truetype');
+  font-family: 'C64';
+  src: url('../assets/fonts/c64.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -26,7 +26,7 @@
   --color-white-bg: #D8D8D8;
   --color-tint-yellow: #666600;
   --color-tint-red: #660000;
-  --font-game: 'C64 Angled', monospace;
+  --font-game: 'C64', monospace;
 
   /*
    * One mockup pixel. Mockups are drawn at 1920x1080, so every UI size is

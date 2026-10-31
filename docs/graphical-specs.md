@@ -74,7 +74,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * Line height will be exactly 1.
 * Font weight normal/regular in all cases (no bold or italic).
 * All texts will be uppercase, except the non-interactive informative texts, which are written in mixed case: the Intro screen note, the Main Menu credits, the Main Menu gamepad indicator, the How To Play instructions and the Gameplay tips (see "Intro screen note", "Main Menu credits", "Main Menu gamepad indicator", "How To Play screen" and "Gameplay tips"). Buttons, including READY, are always uppercase.
-* The font used will be "C64 Angled", a monospaced font: `assets/fonts/c64_angled.ttf`.
+* The font used will be "C64", a monospaced font: `assets/fonts/c64.ttf` (see "Font license" in `docs/desktop-build.md` for its origin and the baseline fix applied to it).
 * All text boxes and buttons should put all the text in one line (no line-breaks). The only exception is the How To Play screen's instructions (see "How To Play screen").
 
 ## Blinking buttons
