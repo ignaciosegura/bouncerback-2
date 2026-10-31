@@ -72,9 +72,9 @@ The screen will be used in forced landscape mode. The visual style is based on e
     * 32px for all menu buttons, and for the Intro screen's note (see "Intro screen note")
     * 64px for the texts "GAME OVER" and "YOU WIN!" texts in those screens.
 * Line height will be exactly 1.
-* Font weight normal/regular in all cases (no bold or italic).
+* Font weight 700 (bold) in all cases, because the font is thin at its regular weight; no italic.
 * All texts will be uppercase, except the non-interactive informative texts, which are written in mixed case: the Intro screen note, the Main Menu credits, the Main Menu gamepad indicator, the How To Play instructions and the Gameplay tips (see "Intro screen note", "Main Menu credits", "Main Menu gamepad indicator", "How To Play screen" and "Gameplay tips"). Buttons, including READY, are always uppercase.
-* The font used will be "C64", a monospaced font: `assets/fonts/c64.ttf` (see "Font license" in `docs/desktop-build.md` for its origin and the baseline fix applied to it).
+* The font used will be "Kode Mono", a monospaced variable font (weight axis 400-700): `assets/fonts/KodeMono.ttf`, with its licence in `assets/fonts/OFL.txt`.
 * All text boxes and buttons should put all the text in one line (no line-breaks). The only exception is the How To Play screen's instructions (see "How To Play screen").
 
 ## Blinking buttons

@@ -1,7 +1,7 @@
 @font-face {
-  font-family: 'C64';
-  src: url('../assets/fonts/c64.ttf') format('truetype');
-  font-weight: normal;
+  font-family: 'Kode Mono';
+    src: url('../assets/fonts/KodeMono.ttf') format('truetype');
+    font-weight: 400 700;
   font-style: normal;
   font-display: block;
 }
@@ -26,7 +26,7 @@
   --color-white-bg: #D8D8D8;
   --color-tint-yellow: #666600;
   --color-tint-red: #660000;
-  --font-game: 'C64', monospace;
+  --font-game: 'Kode Mono', monospace;
 
   /*
    * One mockup pixel. Mockups are drawn at 1920x1080, so every UI size is
@@ -61,7 +61,7 @@ body,
 
 body {
   font-family: var(--font-game);
-  font-weight: normal;
+  font-weight: 700;
   line-height: 1;
   text-transform: uppercase;
   white-space: nowrap;
