@@ -10,7 +10,7 @@
   "vfx": [],
   "atoms": {
     "travelTime": 6,
-    "barsInterval": 1
+    "barsInterval": 2
   },
   "paddles": {
     "angle": 35,
