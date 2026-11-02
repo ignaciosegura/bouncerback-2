@@ -1,0 +1,30 @@
+{
+  "name": "QUANTAMORPHICA",
+  "tier": 3,
+  "duration": 64,
+  "timeSignature": {
+    "bpm": 136,
+    "signature": 4
+  },
+  "soundTrack": "quantamorphica.mp3",
+  "vfx": [],
+  "atoms": {
+    "travelTime": 4,
+    "barsInterval": 2
+  },
+  "paddles": {
+    "angle": 35,
+    "duration": 3,
+    "count": 4
+  },
+  "lives": 4,
+  "additionalGameMechanics": [
+    "atom capture",
+    "supercharged atom",
+    "charged atom hold"
+  ],
+  "tip": [
+    "This level is faster.",
+    "You can deploy four deflectors instead of two."
+  ]
+}
