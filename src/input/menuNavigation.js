@@ -42,7 +42,8 @@ function center (element) {
   return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
 }
 
-// The nearest item beyond `from` in `direction`; ties go to DOM order
+// The nearest item beyond `from` in `direction`; ties (within a pixel, so rounding can't decide)
+// go to DOM order: from a centered button, the leftmost of the row below
 function nearestItem (from, direction, items) {
   const origin = center(from)
   let best = null
@@ -54,7 +55,7 @@ function nearestItem (from, direction, items) {
     const along = dx * direction.x + dy * direction.y
     if (along < 1) continue // same row / column, or behind
     const score = along + CROSS_AXIS_WEIGHT * Math.abs(dx * direction.y - dy * direction.x)
-    if (score < bestScore) {
+    if (score < bestScore - 1) {
       best = item
       bestScore = score
     }
