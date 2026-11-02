@@ -18,13 +18,13 @@ Without a controller, use the methods below.
 
 ### Web browser
 
-Your own browser starts at tier 0, like a fresh install. To unlock everything for testing, open the browser's developer tools on the game's page and set `bouncerback.levelProgress` to `{"unlockedTier":2,"beatenLevels":[1,2,3,4]}` in local storage. From the console:
+Your own browser starts at tier 0, like a fresh install. To unlock everything for testing, open the browser's developer tools on the game's page and set `bouncerback.levelProgress` to `{"unlockedTier":3,"beatenLevels":[1,2,3,4,5,6]}` in local storage. From the console:
 
 ```js
-localStorage.setItem('bouncerback.levelProgress', '{"unlockedTier":2,"beatenLevels":[1,2,3,4]}')
+localStorage.setItem('bouncerback.levelProgress', '{"unlockedTier":3,"beatenLevels":[1,2,3,4,5,6]}')
 ```
 
-Then reload the page. The numbers match the current level files (three tiers, 0 to 2, and level 5 alone in the last one): if the tiers change, adjust them.
+Then reload the page. The numbers match the current level files (four tiers, 0 to 3, and levels 6 and 7 in the last one): if the tiers change, adjust them.
 
 To start again from a fresh install, delete the key (`localStorage.removeItem('bouncerback.levelProgress')`) and reload.
 

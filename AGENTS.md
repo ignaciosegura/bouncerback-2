@@ -86,7 +86,7 @@ Mobile browsers block audio until an explicit user interaction. Ensure Howler.js
 
 ## Level Files
 
-- Located in `src/levels/` (`level1.json` … `level5.json`).
+- Located in `src/levels/` (`level1.json` … `level7.json`).
 - Must strictly conform to `docs/level-file-schema.json`.
 - Level 1 is the easiest level — no special mechanics or tutorial logic.
 - Do not add fields not defined in the schema (`additionalProperties: false` is enforced).

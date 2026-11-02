@@ -97,7 +97,9 @@ root/
     │   ├── level2.json             # Level 2 data
     │   ├── level3.json             # Level 3 data
     │   ├── level4.json             # Level 4 data
-    │   └── level5.json             # Level 5 data
+    │   ├── level5.json             # Level 5 data
+    │   ├── level6.json             # Level 6 data
+    │   └── level7.json             # Level 7 data
     ├── screens/                    # React screens, built from the generic components above
     │   ├── IntroScreen.jsx         # First screen: ENTER BOUNCERBACK button (unlocks audio)
     │   ├── MainMenuScreen.jsx      # Main menu screen with the game logo (menu music and background animation start here)
