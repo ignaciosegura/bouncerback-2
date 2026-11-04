@@ -9,8 +9,8 @@
   "soundTrack": "mekanomancer.mp3",
   "vfx": [],
   "atoms": {
-    "travelTime": 8,
-    "barsInterval": 2
+    "travelTime": 10,
+    "barsInterval": 3
   },
   "paddles": {
     "angle": 35,

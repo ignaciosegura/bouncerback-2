@@ -1,0 +1,25 @@
+{
+  "name": "SOLITONIQ",
+  "tier": 3,
+  "duration": 66,
+  "timeSignature": {
+    "bpm": 159,
+    "signature": 4
+  },
+  "soundTrack": "solitoniq.mp3",
+  "vfx": [],
+  "atoms": {
+    "travelTime": 6,
+    "barsInterval": 2
+  },
+  "paddles": {
+    "angle": 35,
+    "duration": 3
+  },
+  "lives": 4,
+  "additionalGameMechanics": [
+    "atom capture",
+    "supercharged atom",
+    "charged atom hold"
+  ]
+}

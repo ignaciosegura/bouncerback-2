@@ -1,0 +1,31 @@
+{
+  "name": "NEUTRONIKA",
+  "tier": 4,
+  "duration": 66,
+  "timeSignature": {
+    "bpm": 120,
+    "signature": 4
+  },
+  "soundTrack": "neutronika.mp3",
+  "vfx": [],
+  "atoms": {
+    "travelTime": 4,
+    "barsInterval": 2
+  },
+  "paddles": {
+    "angle": 35,
+    "duration": 5,
+    "count": 4
+  },
+  "lives": 4,
+  "additionalGameMechanics": [
+    "atom capture",
+    "supercharged atom",
+    "charged atom hold"
+  ],
+  "tip": [
+    "This level is much faster and longer.",
+    "You can deploy four deflectors instead of two.",
+    "The paddles stay deployed longer."
+  ]
+}
