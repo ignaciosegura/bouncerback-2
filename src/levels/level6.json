@@ -1,12 +1,12 @@
 {
-  "name": "NEUTRONIKA",
-  "tier": 3,
-  "duration": 66,
+  "name": "QUANTAMORPHICA",
+  "tier": 2,
+  "duration": 56,
   "timeSignature": {
-    "bpm": 120,
+    "bpm": 136,
     "signature": 4
   },
-  "soundTrack": "neutronika.mp3",
+  "soundTrack": "quantamorphica.mp3",
   "vfx": [],
   "atoms": {
     "travelTime": 6,

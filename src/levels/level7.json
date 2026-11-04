@@ -1,12 +1,12 @@
 {
-  "name": "QUANTAMORPHICA",
+  "name": "NEUTRONIKA",
   "tier": 3,
-  "duration": 64,
+  "duration": 66,
   "timeSignature": {
-    "bpm": 136,
+    "bpm": 120,
     "signature": 4
   },
-  "soundTrack": "quantamorphica.mp3",
+  "soundTrack": "neutronika.mp3",
   "vfx": [],
   "atoms": {
     "travelTime": 4,
@@ -14,8 +14,8 @@
   },
   "paddles": {
     "angle": 35,
-    "duration": 3,
-    "count": 4
+    "duration": 5,
+    "count": 2
   },
   "lives": 4,
   "additionalGameMechanics": [
@@ -24,7 +24,8 @@
     "charged atom hold"
   ],
   "tip": [
-    "This level is faster.",
-    "You can deploy four deflectors instead of two."
+    "This level is much faster and longer.",
+    "You can deploy four deflectors instead of two.",
+    "The paddles stay deployed longer."
   ]
 }

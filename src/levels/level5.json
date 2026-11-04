@@ -1,12 +1,12 @@
 {
-  "name": "MEKANOMANCER",
+  "name": "PROTOGLYPH",
   "tier": 2,
-  "duration": 34,
+  "duration": 45,
   "timeSignature": {
-    "bpm": 180,
-    "signature": 3
+    "bpm": 133,
+    "signature": 4
   },
-  "soundTrack": "mekanomancer.mp3",
+  "soundTrack": "protoglyph.mp3",
   "vfx": [],
   "atoms": {
     "travelTime": 8,
@@ -20,5 +20,10 @@
   "additionalGameMechanics": [
     "atom capture",
     "charged atom hold"
+  ],
+  "tip": [
+    "You can now hold charged atoms for extra points.",
+    "Keep the capture button pressed to keep holding the atom.",
+    "The atom will be captured when you release it."
   ]
 }
