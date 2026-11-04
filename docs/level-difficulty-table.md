@@ -75,6 +75,6 @@ What to check for the progression to go up (a recommendation for the comments th
 
 * **Pace:** atom travel and spawn interval shrink (or atoms/min grow) from level to level, and lives and paddle life do not grow without a reason.
 * **Length:** the level gets longer, or denser, but not both easier on one side and shorter on the other.
-* **Mechanics:** new mechanics are added per tier, not per level, so they should appear at the first level of a tier.
+* **Mechanics:** new mechanics are only added at the first level of a tier (see "Additional game mechanics" in `docs/game-rules.md`), so the mechanics should be the same across a tier.
 * **Ceiling and demand:** both should go up. A drop is a sign that a level is out of place, or that it is much shorter than its neighbours.
 * **Tiers:** the levels of a tier should be similar in difficulty, and every tier harder than the one before.

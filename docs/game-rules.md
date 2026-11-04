@@ -18,7 +18,19 @@ The names live in one constant in the code (an enum), and the level file schema 
 
 **A level's additional mechanics are fixed for the whole level.** They are read when the level starts and can't be switched on or off while it is being played: the rules in force at the start stay in force until the level ends, through pauses and resumes, and TRY AGAIN starts the level again with the same ones.
 
-Currently only level 1 plays without `atom capture`; levels 2 to 7 include it. `charged atom hold` is also in level 4 onwards. `supercharged atom` is added at levels 6 and 7. 
+**New mechanics are only added at the first level of a tier** (see "Level unlocking"). The other levels of that tier have the same mechanics as its first level. A tier doesn't have to add one.
+
+Currently (the level files are the source of truth):
+
+| Tier | Levels | New mechanic |
+| :--- | :--- | :--- |
+| 0 | 1 | None: only the core mechanic |
+| 1 | 2 to 4 | `atom capture`, at level 2 |
+| 2 | 5 and 6 | `charged atom hold`, at level 5 |
+| 3 | 7 and 8 | `supercharged atom`, at level 7 |
+| 4 | 9 | None: it keeps the three mechanics above |
+
+Once added, a mechanic stays in every later level.
 
 ## Level start
 
@@ -125,7 +137,7 @@ Without `atom capture`, the charge value of every atom is always 1, so those two
  
 # Level unlocking
 
-The levels are grouped in tiers, set by the `tier` field of each level file (for example, level 1 is tier 0 and levels 2 and 3 are tier 1: the level files are the source of truth). Tiers run from 0 with no gaps.
+The levels are grouped in tiers, set by the `tier` field of each level file (for example, level 1 is tier 0 and levels 2 to 4 are tier 1: the level files are the source of truth). Tiers run from 0 with no gaps.
 
 * Tier 0 is unlocked from the start; every other tier starts locked.
 * A level is beaten when the player passes it (the You Win! screen). Losing it, or leaving it from the Pause Overlay, doesn't count.

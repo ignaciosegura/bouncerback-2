@@ -131,7 +131,7 @@ To be filled after testing the Phase D1 build, in both modes unless noted. Date 
 - **Starts?** Time to the Intro; any white flash; console output; `launch-info.txt` (is WebGL hardware-accelerated?):
 - **Display at 1280x800:** whole UI scaled correctly at 16:10, nothing cut off; menu background cropped as expected; arena and CRT glass fit:
 - **Text legibility:** HUD, credits, How To Play, gameplay tips:
-- **Performance:** 60 fps in menus and in level 7, OLD TV off and on; last life zoom; stutter at level start; battery draw:
+- **Performance:** 60 fps in menus and in level 9, OLD TV off and on; last life zoom; stutter at level start; battery draw:
 - **Audio:** music and effects, crackle, volume steps; after sleep and wake:
 - **Controller:** seen by the game in Desktop Mode? in Game Mode? Menus (d-pad, A, B), gameplay (both sticks, captures, holds), pause with the menu button; does one press of A enter from the Intro (Phase D4); any button acting in Steam and in the game at once:
 - **Gamepad indicator** (Main Menu): shown or hidden; switches to "Gamepad detected"?

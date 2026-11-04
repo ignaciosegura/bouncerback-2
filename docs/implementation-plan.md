@@ -83,7 +83,7 @@ Out of scope: Steamworks, the overlay, Proton, Steam depots, Windows and macOS b
 - Starts? Time to the Intro; any white flash; the console output and `launch-info.txt` (WebGL and GPU status).
 - Fullscreen at 1280x800: is the whole UI scaled correctly at 16:10, nothing cut off, menu background cropped as expected; the arena and the CRT glass fit.
 - Text legibility at the Deck's size: HUD, credits, How To Play, the tips (the smallest text).
-- Performance (Game Mode: the Deck's performance overlay, Quick Access → Performance, shows FPS and GPU load): smooth 60 fps in menus and in level 7, with OLD TV off and on; the last life zoom; any stutter when a level starts. Battery draw if visible.
+- Performance (Game Mode: the Deck's performance overlay, Quick Access → Performance, shows FPS and GPU load): smooth 60 fps in menus and in level 9, with OLD TV off and on; the last life zoom; any stutter when a level starts. Battery draw if visible.
 - Audio: music and effects play, no crackle, volume steps work; audio after the Deck sleeps and wakes.
 - Controller: is the built-in controller seen by the game at all in Desktop Mode (where Steam applies its desktop configuration) and in Game Mode; menus (d-pad, A to activate, B to go back), gameplay (both sticks, captures, holds), pause with the menu button; does any button do something in Steam and in the game at once.
 - Main Menu gamepad indicator: shown or hidden on the Deck (it hides on touch-only devices, and the Deck has a touchscreen and trackpads), and does it switch to "Gamepad detected".

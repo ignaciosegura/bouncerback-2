@@ -14,7 +14,7 @@ Every change from one screen to another plays the screen transition (see "Screen
   - Exit Game Button *(desktop builds only; see the MAIN MENU - desktop mockup)*: the screen-out plays and the music fades out, then the game quits. No confirmation.
   - Credits at the bottom: "A game by NIK NAK STUDIO" and "Music and sfx by MAN FROM SPACE". The names are links that open in a new tab: https://niknak.es and https://manfromspace.com
 - **Level Selection Screen**
-  - One button per level, labeled with the level file's `name` (LEARN, FEMTOCOSMOS, CHRONOSAEDR0N, PROTOGLYPH, MEKANOMANCER, NEUTRONIKA, QUANTAMORPHICA), arranged in one row per tier (see "Level unlocking" in `game-rules.md` and the LEVEL MENU mockup).
+  - One button per level, labeled with the level file's `name` (LEARN, FEMTOCOSMOS, CHRONOSAEDR0N, MEKANOMANCER, PROTOGLYPH, ANTICOHERENCE, QUANTAMORPHICA, SOLITONIQ, NEUTRONIKA), arranged in one row per tier (see "Level unlocking" in `game-rules.md` and the LEVEL MENU mockup).
   - Locked levels show 12 dashes instead of their name and can't be selected: clicks and taps do nothing, and the game controller skips them (see the LEVEL MENU (LOCKED LEVELS) mockup).
   - Back Button
 - **How To Play Screen**

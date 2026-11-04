@@ -40,13 +40,15 @@ No track loops: each plays once to its end, then leaves silence until the next s
 | `learn.mp3` | Level 1 |
 | `femtocosmos.mp3` | Level 2 |
 | `chronosaedron.mp3` | Level 3 |
-| `protoglyph.mp3` | Level 4 |
-| `mekanomancer.mp3` | Level 5 |
-| `neutronika.mp3` | Level 6 |
+| `mekanomancer.mp3` | Level 4 |
+| `protoglyph.mp3` | Level 5 |
+| `anticoherence.mp3` | Level 6 |
 | `quantamorphica.mp3` | Level 7 |
+| `solitoniq.mp3` | Level 8 |
+| `neutronika.mp3` | Level 9 |
 
 > [!NOTE]
-> The track assignment for levels 2–7 above is a suggested default. Adjust the `soundTrack` field in each level file to change the mapping without touching code.
+> The track assignment for levels 2–9 above is a suggested default. Adjust the `soundTrack` field in each level file to change the mapping without touching code.
 
 ---
 

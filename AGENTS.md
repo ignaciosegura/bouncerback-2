@@ -87,9 +87,10 @@ Mobile browsers block audio until an explicit user interaction. Ensure Howler.js
 
 ## Level Files
 
-- Located in `src/levels/` (`level1.json` … `level7.json`).
+- Located in `src/levels/` (`level1.json` … `level9.json`).
 - Must strictly conform to `docs/level-file-schema.json`.
 - Level 1 is the easiest level — no special mechanics or tutorial logic.
+- New game mechanics are only added at the first level of a tier (see "Additional game mechanics" in `docs/game-rules.md`).
 - Do not add fields not defined in the schema (`additionalProperties: false` is enforced).
 - **Validate after every change to a level file or to the schema:** run `npm run validate:levels` (all of `src/levels/*.json`) or `npm run validate:levels -- path/to/level.json`. It exits with a non-zero code and lists each error's path when a file is invalid. Run it yourself; do not rely on reading the JSON by eye.
 
