@@ -16,10 +16,14 @@
     "angle": 35,
     "duration": 3
   },
-  "lives": 4,
+  "lives": 3,
   "additionalGameMechanics": [
     "atom capture",
     "supercharged atom",
     "charged atom hold"
+  ],
+  "tip": [
+    "You will have three lives instead of four.",
+    "Be mindful managing your risks."
   ]
 }

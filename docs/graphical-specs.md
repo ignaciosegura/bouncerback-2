@@ -19,7 +19,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
 ## How To Play screen
 
 * Opened by the Main Menu's HOW TO button (see the HOW TO PLAY and MAIN MENU mockups). Light layout over the menu background animation, like Settings.
-* Left: the instructions, the text of `docs/game-instructions.md`, in mixed case (the `MOUSE` and `GAMEPAD` headings are uppercase), 24px, left-aligned, no border, wrapped at 38 characters, with one blank line between paragraphs. The single-line rule is unbreakable for buttons only: this text is exempt.
+* Left: the instructions, the text of `docs/game-instructions.md` (it wins over the text in the mockup, which is there for the layout only), in mixed case (the `MOUSE/TOUCHSCREEN` and `GAMEPAD` headings are uppercase), 24px, left-aligned, no border, wrapped at 38 characters, with one blank line between paragraphs. The single-line rule is unbreakable for buttons only: this text is exempt.
 * Right: the example drawing (`assets/images/HOW TO PLAY example vector.svg`, text converted to paths) in the foreground color, with the Back button below it, centered under the ring. At the 1920x1080 reference size the text starts at x = 202, the drawing's left edge is at x = 1083, and the Back button's top is at y = 903.
 * It's one of the screens' elements, so the text, the drawing and the button take part in the screen transitions (see "Screen transitions").
 

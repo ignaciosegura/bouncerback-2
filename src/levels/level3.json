@@ -19,5 +19,10 @@
   "lives": 4,
   "additionalGameMechanics": [
     "atom capture"
+  ],
+  "tip": [
+    "Captured atoms are valuable,",
+    "but keeping them until the end of the level",
+    "will give you a much higher score."
   ]
 }

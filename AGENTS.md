@@ -41,6 +41,9 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 
 - **Planning and implementation are separate steps.** When asked to plan, stop once the plan is delivered. Never go on to implementation without first asking for and getting explicit approval.
 - **Completed phases move to the archive.** New phases are planned in `docs/implementation-plan.md`. Once a phase is done, move its section and its verification items to its cycle's file in `docs/archive/`, and mark it in `docs/implementation-status.md`.
+- **Project knowledge lives in the repo.** Save rules, decisions and deferred issues in `AGENTS.md` or `docs/`, not in an agent's memory outside the project folder, so they move with the project.
+- **Never disable the sandbox.** Never run a command with `dangerouslyDisableSandbox`, even when it hangs or fails in the sandbox (for example, `xcodebuild` package resolution). Stop and say what is needed: the user runs it or adds a permission rule.
+- **Docs don't restate tunable values.** The settings files (e.g. `src/effects/**/*Settings.js`) are the only source of truth, because values are tuned by eye and copies go stale. Docs describe what a setting does, with behavior and formulas, and no "current value" columns. Any number used to explain something, in a doc or in a settings file's comments, must be labelled as an example. Historical decision records may keep the values decided at the time.
 
 ---
 
@@ -82,6 +85,12 @@ Mobile browsers block audio until an explicit user interaction. Ensure Howler.js
 - Font sizes (per `docs/graphical-specs.md`): **24px** for HUD text, the Main Menu credits and the Main Menu gamepad indicator, **32px** for menu buttons, **64px** for the "GAME OVER" and "YOU WIN!" titles — at the 1080px-tall reference; the whole UI scales with the viewport (see `docs/graphical-specs.md`).
 - All text/menus wrapped in a **thin-border transparent rectangle** with 0.5em padding.
 - All text boxes: **single line**, centered justification text, no breaks.
+
+---
+
+## Terminology
+
+- **Core, not "emitter", in anything a player reads** (How To Play instructions and drawing, level tips): "core" says clearly that it's at the center. The `AtomEmitter` class keeps its name on purpose: "core" is the concept and visual representation, `AtomEmitter` names its functional purpose (it emits atoms). This isn't an inconsistency to fix.
 
 ---
 

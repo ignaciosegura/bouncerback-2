@@ -10,7 +10,7 @@ Every doc, all seven mockups and the level schema were reviewed against each oth
 
 ## How this file works
 
-This file holds only the phases still pending. Completed phases are in `docs/archive/` (`cycle-1.md`, `cycle-2.md`, `cycle-3.md`), and the design decisions are in `docs/design-decisions.md`. New phases are planned here, numbered after the last one in `docs/implementation-status.md`; once a phase is done, its section and its verification items move to its cycle's archive file. The desktop & Steam cycle has its own numbering (Phase D1, D2…) and its own archive file, `docs/archive/desktop-steam.md` (see "Development Cycles").
+This file holds only the phases still pending and the issues deferred for later. Completed phases are in `docs/archive/` (`cycle-1.md`, `cycle-2.md`, `cycle-3.md`), and the design decisions are in `docs/design-decisions.md`. New phases are planned here, numbered after the last one in `docs/implementation-status.md`; once a phase is done, its section and its verification items move to its cycle's archive file. The desktop & Steam cycle has its own numbering (Phase D1, D2…) and its own archive file, `docs/archive/desktop-steam.md` (see "Development Cycles").
 
 ---
 
@@ -30,6 +30,14 @@ Implementation is split into development cycles. The **first development cycle**
 The **third development cycle** starts with game controller support (Phases 30–32). Pending cycle 2 phases (Pause, mobile packaging, optional VFX, level unlocking, results ambience track) stay in cycle 2.
 
 The **desktop & Steam cycle** runs in parallel with the numbered cycles, on its own: the Electron desktop build and the Steam release planned in `docs/desktop-build.md`. Its phases are numbered separately (Phase D1, D2…) so they never clash with the main cycles' numbers, are listed in their own section of `docs/implementation-status.md`, and move to `docs/archive/desktop-steam.md` when done.
+
+---
+
+## Deferred Issues
+
+Known issues the user chose to deal with later. Don't fix them unprompted.
+
+- **Intro screen layout (noted 2026-09-30):** the note and the button don't match `docs/mockups/INTRO.png`. When measured, the note's box was at 368–400px and the button at about 497–567px, against about 415–447px and 506–573px (button centered) in the mockup. `src/index.css` uses `.intro-screen__note { margin-bottom: 96u }` and `.intro-screen .menu { margin-bottom: 145u }`, while the Phase 28 plan specified 59 and 91. When this is picked up, first check whether 96 and 145 were intentional.
 
 ---
 

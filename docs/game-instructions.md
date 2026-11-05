@@ -6,9 +6,9 @@ Every time an atom bounces back, it gets a charge. When an atom has three charge
 
 But the more you keep an atom, the more points it gives you for every bounce, capture and at the end of the level.
 
-MOUSE
+MOUSE/TOUCHSCREEN
 
-Mouse click to place a deflector, release the mouse button to drop it. Click on the emitter to capture a charged atom crossing it.
+Mouse click/tap to place a deflector, release to drop it. Click on the core to capture a charged atom crossing it.
 
 GAMEPAD
 

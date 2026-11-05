@@ -19,5 +19,9 @@
   "lives": 4,
   "additionalGameMechanics": [
     "atom capture"
+  ],
+  "tip": [
+    "The more charged an atom is, the higher score it provides",
+    "for every bounce, capture and at core collapse."
   ]
 }

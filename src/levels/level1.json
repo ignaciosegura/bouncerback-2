@@ -17,5 +17,9 @@
     "duration": 5
   },
   "lives": 8,
-  "additionalGameMechanics": []
+  "additionalGameMechanics": [],
+  "tip": [
+    "You can not capture atoms yet.",
+    "Make sure they don't escape the containment ring."
+  ]
 }

@@ -8,7 +8,7 @@ A table that compares every level's difficulty, duration and maximum score, to c
 npm run level:table
 ```
 
-The script is `scripts/level-difficulty-table.js`. It reads every `src/levels/levelN.json`, in the order of `N`, and prints a Markdown table plus one footnote. When asked for a table summarizing the levels' difficulty, run it and present its output as it is (then add the observations: see "Reading the table").
+The script is `scripts/level-difficulty-table.js`. It reads every `src/levels/levelN.json`, in the order of `N`, and prints a Markdown table plus one footnote. When asked for a table summarizing the levels' difficulty, run it and present its output as it is (then add the observations: see "Reading the table"). Don't change the layout or recompute anything by hand: to change a column, edit the script and this doc together.
 
 The script takes the point formulas from `src/game/scoring.js` and the charge limits and the supercharged atom's speed factor from `src/game/entities/Atom.js` (`MAX_CHARGE`, `SUPERCHARGED_CHARGE`, `SUPERCHARGED_SPEED_FACTOR`), so a change to any of them shows up in the table. Nothing else is restated here: the level files and those two files are the only source of truth for the values.
 
