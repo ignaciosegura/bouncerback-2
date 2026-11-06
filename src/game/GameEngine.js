@@ -2,6 +2,7 @@ import { Application, Container } from 'pixi.js'
 import * as soundManager from '../audio/soundManager.js'
 import { bouncePoints, capturePoints, containmentPoints, livesBonus, timeBonus } from './scoring.js'
 import { lerpColor } from './color.js'
+import { livesShown } from './levelLoader.js'
 import { CHARGED_ATOM_HOLD_SETTINGS } from './chargedAtomHoldSettings.js'
 import { easeInOutQuad, easeInQuad, easeOutQuad } from './easing.js'
 import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
@@ -861,9 +862,9 @@ export default class GameEngine {
 
   // Background
 
-  // Stays dark red at 0 lives, through the Game Over delay
+  // Follows the lives the HUD shows. Stays dark red at 0 lives, through the Game Over delay
   backgroundTarget () {
-    return this.lives <= 1 ? BACKGROUND_COLORS.ONE_LIFE_LEFT : BACKGROUND_COLORS.DEFAULT
+    return livesShown(this.level, this.lives) <= 1 ? BACKGROUND_COLORS.ONE_LIFE_LEFT : BACKGROUND_COLORS.DEFAULT
   }
 
   fadeBackgroundTo (color) {

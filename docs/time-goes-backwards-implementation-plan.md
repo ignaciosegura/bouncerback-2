@@ -1,6 +1,6 @@
 # Time Goes Backwards — Implementation Plan (Phases T1–T5)
 
-Status: waiting for the user's review and go-ahead. Nothing here is implemented yet.
+Status: T1 complete (see `docs/archive/time-goes-backwards.md`). T2–T5 are pending.
 
 ## Goal
 
@@ -12,10 +12,10 @@ Bouncing is unchanged, and the core still emits atoms outward. Every other level
 
 | Area | Decision |
 | :--- | :--- |
-| Level file | New optional boolean `timeGoesBackwards`, false if missing. It is a level property, not an item of `additionalGameMechanics`. Anticoherence sets it and `lives: 5` |
+| Level file | New optional boolean `timeGoesBackwards`, false if missing. It is a level property, not an item of `additionalGameMechanics`. Anticoherence sets it |
 | Tier rules | This level is an exception to "new mechanics only at the first level of a tier" and "once added, a mechanic stays". The exception is documented in `game-rules.md` |
-| Lives | Start at 1 and go up with each escape. The level is lost when they reach `lives`, so 5 allows 4 escapes. There is no extra warning or HUD slot: not knowing the limit is part of the challenge |
-| Background | Red at 1 life, as today, so it starts red and turns black at 2. No code change in the color rule |
+| Lives | Computed as usual, counting down from `lives` to 0, and the score uses them as usual. Only the HUD changes: it shows 1 at the start and one more per escape (`lives` − lives left + 1), so `lives: 4` allows 4 escapes and shows 5 at the loss. There is no extra warning or HUD slot: not knowing the limit is part of the challenge |
+| Background | Red when the HUD shows 1 life, so it starts red and turns black when it shows 2 |
 | Timer | The engine counts as usual. Only the React layer shows elapsed time (initial timer minus time left) |
 | Core emission | Stays on, behind a flag in the settings file, so it can be switched off (and so a later "endless zen" level can reuse atom creation) |
 | Atom charge | Every atom is born with a random charge from 3 to 10, limited by the time left (see "The charge limit"). It loses one per bounce |
@@ -45,16 +45,6 @@ Consequences for atoms the player creates:
 - The press also needs to leave time for the creation animation to finish before the cutoff.
 
 If frame timing leaves an atom in play when the timer ends, it is removed at that moment. By then it is within a fraction of a second of disappearing anyway.
-
-## Phase T1 — Level property, lives and timer
-
-- `docs/level-file-schema.json`: `timeGoesBackwards`, and the new meaning of `lives` in its description.
-- `src/game/levelLoader.js`: exposes `timeGoesBackwards`, `startingLives` (1 or `lives`), `livesLostAt` (`lives` or 0) and `livesStep` (+1 or −1), so no other code has to tell the two cases apart for lives.
-- `src/game/GameEngine.js`: uses those three in the constructor, `checkContact` and the lose check in `updatePlaying`. `backgroundTarget` stays as it is.
-- `src/screens/GameScreen.jsx`: lives start from `level.startingLives`, and `HUD` receives elapsed time for this level. `timeTenths` from the engine doesn't change meaning.
-- `src/levels/level6.json`: `timeGoesBackwards: true`, `lives: 5`. Run `npm run validate:levels`.
-
-Check: the level starts red with one life and TIME 0, with no first-frame flash of other values. TIME reaches the level's full time as the collapse starts. The fourth escape after the start triggers the last life zoom and Game Over. Normal levels are unaffected.
 
 ## Phase T2 — Atom creation, charge loss and disappearing
 

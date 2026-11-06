@@ -103,6 +103,7 @@ export function loadLevel (data, number) {
     tier: data.tier,
     soundTrack: data.soundTrack,
     lives: data.lives,
+    timeGoesBackwards: data.timeGoesBackwards ?? false,
     tip: data.tip ?? null,
     // Fixed when the level is loaded: mechanics never change while a level is played
     additionalGameMechanics: Object.freeze([...data.additionalGameMechanics]),
@@ -122,6 +123,14 @@ export function loadLevel (data, number) {
     paddleCount: data.paddles.count ?? DEFAULT_PADDLE_COUNT,
     vfx: (data.vfx ?? []).map(({ name, time }) => ({ name, time: time * secondsPerBar }))
   }
+}
+
+/**
+ * The lives the player sees for `lives` lives left. When time runs backwards the player sees them
+ * count up, from 1 at the level's start; the game itself always counts them down to 0.
+ */
+export function livesShown (level, lives) {
+  return level.timeGoesBackwards ? level.lives - lives + 1 : lives
 }
 
 /**

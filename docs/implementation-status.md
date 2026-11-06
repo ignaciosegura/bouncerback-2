@@ -77,6 +77,16 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
 - [x] **Phase 55** — Blinking buttons (the text of `ENTER BOUNCERBACK` and of unlocked levels not yet beaten blinks, 1 s on / 1 s off, all in sync; it keeps blinking under the controller's selection and the pressed look, and turns steady on activation)
 - [x] **Phase 56** — Paddle count per level (optional `paddles.count` in the level file: how many paddles can be set at once before setting one more removes the oldest; 2 if missing, at least 1; replaces the fixed `MAX_ACTIVE_PADDLES`, the replacement warning follows it)
 
+## Time Goes Backwards (Anticoherence) — ⏳ Pending
+
+Planned in `docs/time-goes-backwards-implementation-plan.md`, with its own numbering (T1, T2…); completed phases go to `docs/archive/time-goes-backwards.md`.
+
+- [x] **Phase T1** — Level property, lives and timer (optional `timeGoesBackwards` in the level file; lives are computed as usual, but the HUD shows them counting up from 1 and the dark red background follows what it shows; the HUD shows elapsed time; set on level 6) — *TIME reaching the level's full time wasn't seen in the automated run*
+- [ ] **Phase T2** — Atom creation, charge loss and disappearing
+- [ ] **Phase T3** — Reversed effects during play
+- [ ] **Phase T4** — Reversed level start and end
+- [ ] **Phase T5** — Audio
+
 ## Desktop & Steam Cycle (parallel) — ⏳ Pending
 
 Runs on its own, in parallel with the numbered cycles (see `docs/desktop-build.md`). Phases numbered D1, D2…; completed ones go to `docs/archive/desktop-steam.md`.

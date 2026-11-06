@@ -117,6 +117,11 @@
             "type": "integer",
             "description": "Number of lives the player starts the level with."
         },
+        "timeGoesBackwards": {
+            "type": "boolean",
+            "description": "Whether time runs backwards in this level: the lives and the timer shown count up (see \"Time runs backwards\" in game-rules.md). Optional; if missing, false.",
+            "default": false
+        },
         "additionalGameMechanics": {
             "type": "array",
             "description": "Names of the additional game mechanics active in this level, fixed for the whole level. Required; if empty, the level only uses the core mechanic. Valid names: \"atom capture\", \"supercharged atom\" and \"charged atom hold\".",
