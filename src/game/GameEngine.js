@@ -4,10 +4,12 @@ import { bouncePoints, capturePoints, containmentPoints, livesBonus, timeBonus }
 import { lerpColor } from './color.js'
 import { livesShown } from './levelLoader.js'
 import { CHARGED_ATOM_HOLD_SETTINGS } from './chargedAtomHoldSettings.js'
+import { TIME_BACKWARDS_SETTINGS } from './timeBackwardsSettings.js'
+import { cutoffSeconds, maxChargeFor, randomCharge } from './timeBackwards.js'
 import { easeInOutQuad, easeInQuad, easeOutQuad } from './easing.js'
 import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
 import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
-import Atom, { ATOM_RADIUS, ATOM_STATE, CAPTURE_MIN_CHARGE } from './entities/Atom.js'
+import Atom, { ATOM_RADIUS, ATOM_STATE, CAPTURE_MIN_CHARGE, CREATE_TIME } from './entities/Atom.js'
 import CaptureCircle from './entities/CaptureCircle.js'
 import Paddle, { PADDLE_THICKNESS } from './entities/Paddle.js'
 import { BUTTONS, GamepadReader } from '../input/gamepad.js'
@@ -102,6 +104,7 @@ export default class GameEngine {
     this.timeTenths = level.timerTenths
     this.lastBeat = -1 // last beat of the music on which capturable atoms pulsed
     this.atomSpeed = CONTACT_DISTANCE * level.atomSpeed
+    this.travelTime = 1 / level.atomSpeed // seconds from the core to the paddles
     this.superchargedSpawned = false // the supercharged atom is generated once, halfway
     // Camera for the last life zoom. `offset` is the share of the focus point's normal offset from
     // the screen center still left (1: centered layout, 0: the focus is at the center)
@@ -125,8 +128,10 @@ export default class GameEngine {
     // Charged atom hold: only one atom can be held at a time. `input` ('pointer:<id>' or
     // 'button:<button>') is what holds it, `atomHoldScoringPerSecond` the points it earns per
     // second, `owed` the points earned and not paid yet
-    this.held = null // { input, atom, atomHoldScoringPerSecond, owed, loop } (loop: the hold loop's sound voice)
-    this.pausedHeld = null // the hold cancelled by the pause: its atom is captured on resume
+    // { input, atom, atomHoldScoringPerSecond, owed, loop, created } (loop: the hold loop's sound
+    // voice; created: the atom was created by the press, time goes backwards)
+    this.held = null
+    this.pausedHeld = null // the hold cancelled by the pause: its atom is captured (or launched) on resume
     this.paddles = [] // every paddle instance, active or pooled, to update their flashes
     this.gamepad = new GamepadReader()
   }
@@ -367,7 +372,10 @@ export default class GameEngine {
     // A press on a capturable atom places no paddle: with the hold mechanic it holds the atom,
     // otherwise it captures it on release
     if (Math.hypot(x, y) <= CAPTURE_TAP_RADIUS) {
-      if (this.level.chargedAtomHold) {
+      if (this.level.timeGoesBackwards) {
+        // Nothing is captured: a press on the core creates an atom (or, if it can't, sets a paddle)
+        if (this.createHeldAtom(`pointer:${event.pointerId}`)) return
+      } else if (this.level.chargedAtomHold) {
         if (this.holdNearest(`pointer:${event.pointerId}`)) return
       } else if (this.atoms.some((atom) => this.isCapturable(atom))) {
         this.corePresses.add(event.pointerId)
@@ -414,12 +422,14 @@ export default class GameEngine {
 
     // A button already held when play starts never captures: only one pressed during play does
     let released = false
+    const backwards = this.level.timeGoesBackwards
     for (const button of CAPTURE_BUTTONS) {
       if (this.gamepad.wasPressed(button)) {
-        if (this.level.chargedAtomHold) this.holdNearest(`button:${button}`)
+        if (backwards) this.createHeldAtom(`button:${button}`)
+        else if (this.level.chargedAtomHold) this.holdNearest(`button:${button}`)
         else this.heldCaptureButtons.add(button)
       } else if (this.gamepad.wasReleased(button)) {
-        if (this.level.chargedAtomHold) this.releaseHold(`button:${button}`)
+        if (backwards || this.level.chargedAtomHold) this.releaseHold(`button:${button}`)
         else if (this.heldCaptureButtons.delete(button)) released = true
       }
     }
@@ -527,8 +537,14 @@ export default class GameEngine {
 
   updatePlaying (dt) {
     this.time += dt
+    const timeLeft = this.level.timerTenths / 10 - this.time
 
-    for (let due = this.emitter.update(this.time); due > 0; due--) this.spawnAtom()
+    const emitted = this.emitter.update(this.time)
+    if (this.coreEmits(timeLeft)) {
+      for (let due = emitted; due > 0; due--) this.spawnAtom(false, timeLeft)
+    }
+    // Past the cutoff the player can't create atoms: a held one is launched
+    if (this.held?.created && this.pastCutoff(timeLeft)) this.releaseHold(this.held.input)
     if (this.level.superchargedAtom && !this.superchargedSpawned && this.time >= this.level.timerTenths / 20) {
       this.superchargedSpawned = true
       this.spawnAtom(true)
@@ -560,7 +576,18 @@ export default class GameEngine {
         this.updateCapturingAtom(atom, dt)
         continue
       }
+      if (atom.state === ATOM_STATE.CREATING) {
+        this.updateCreatingAtom(atom, dt)
+        continue
+      }
+      const previous = atom.distance
       atom.move(step * atom.speedFactor)
+      // Time goes backwards: an atom with no charge left disappears at the center of the core
+      if (this.level.timeGoesBackwards && atom.charge === 1 && previous * atom.distance < 0) {
+        this.releaseAtom(atom)
+        this.playSfx('launch')
+        continue
+      }
       if (atom.movingOutward && Math.abs(atom.distance) >= CONTACT_DISTANCE) this.checkContact(atom)
       atom.render(dt)
     }
@@ -589,15 +616,15 @@ export default class GameEngine {
     if (paddle) {
       paddle.bounce()
       this.addScore(bouncePoints(this.level.number, atom.charge))
-      atom.bounce(CONTACT_DISTANCE, this.level.atomCapture)
-      soundManager.playSfx('bounce')
+      atom.bounce(CONTACT_DISTANCE, this.level.timeGoesBackwards ? -1 : this.level.atomCapture ? 1 : 0)
+      this.playSfx('bounce')
     } else if (Math.abs(atom.distance) >= ESCAPE_DISTANCE) {
       atom.escape()
       this.lives = Math.max(0, this.lives - 1)
       this.emit('onLivesChange', this.lives)
       if (this.lives === 0 && !this.lastAtom) this.lastAtom = atom
       this.fadeBackgroundTo(this.backgroundTarget())
-      soundManager.playSfx('destroy')
+      this.playSfx('destroy')
     }
   }
 
@@ -611,6 +638,81 @@ export default class GameEngine {
 
   updateCapturingAtom (atom, dt) {
     if (!atom.updateCapture(dt)) this.releaseAtom(atom)
+  }
+
+  // Sound effects: where time goes backwards each one plays its `_reversed` copy (the supercharged
+  // launch has none: that mechanic isn't used there)
+  sfxName (name) {
+    return this.level.timeGoesBackwards && name !== 'launch_super' ? `${name}_reversed` : name
+  }
+
+  playSfx (name) {
+    soundManager.playSfx(this.sfxName(name))
+  }
+
+  startLoopSfx (name) {
+    return soundManager.startLoopSfx(this.sfxName(name))
+  }
+
+  // Time goes backwards
+
+  // Whether the core emits atoms now: not past the cutoff, and only if the settings allow it
+  coreEmits (timeLeft) {
+    if (!this.level.timeGoesBackwards) return true
+    return TIME_BACKWARDS_SETTINGS.CORE_EMITS_ATOMS && !this.pastCutoff(timeLeft)
+  }
+
+  pastCutoff (timeLeft) {
+    return timeLeft < cutoffSeconds(this.travelTime)
+  }
+
+  timeLeft () {
+    return this.level.timerTenths / 10 - this.time
+  }
+
+  // A press on the core creates an atom that grows at the center and is held until the input is
+  // released. Returns false if it can't: one is already held, or too little time is left for the
+  // atom to grow before the cutoff
+  createHeldAtom (input) {
+    if (this.held || this.timeLeft() < cutoffSeconds(this.travelTime) + CREATE_TIME) return false
+
+    const charge = randomCharge(this.timeLeft(), this.travelTime)
+    const atom = this.addAtom(false, charge)
+    atom.startCreate()
+    this.playSfx('capture')
+    this.held = {
+      input,
+      atom,
+      created: true,
+      atomHoldScoringPerSecond: CHARGED_ATOM_HOLD_SETTINGS.POINTS_PER_SECOND * this.level.number * charge,
+      owed: 0,
+      loop: this.startLoopSfx('hold_loop')
+    }
+    return true
+  }
+
+  // The hold of a created atom ends: it launches now, or as soon as it has grown
+  launchCreated (held) {
+    this.stopHoldLoop(held)
+    this.payRemainder(held)
+    if (held.atom.state === ATOM_STATE.CREATING) held.atom.launchPending = true
+    else this.launchAtom(held.atom)
+  }
+
+  // Leaves the core outward. Time has passed since the charge was drawn, so it is limited again
+  launchAtom (atom) {
+    atom.setCharge(Math.min(atom.charge, maxChargeFor(this.timeLeft(), this.travelTime)))
+    atom.launch()
+    this.addScore(capturePoints(this.level.number, atom.charge))
+    this.playSfx('hold_trigger')
+  }
+
+  updateCreatingAtom (atom, dt) {
+    if (!atom.updateCreate(dt)) {
+      if (atom.launchPending) this.launchAtom(atom)
+      else atom.startHold()
+    }
+    atom.render(dt)
   }
 
   // A charged atom overlapping the core. Shared by the capture and its pulse, so the cue always
@@ -677,7 +779,7 @@ export default class GameEngine {
     this.addScore(capturePoints(this.level.number, atom.charge))
     atom.startCapture()
     this.startCaptureCircle(atom.color)
-    soundManager.playSfx('capture')
+    this.playSfx('capture')
   }
 
   // Charged atom hold
@@ -691,14 +793,14 @@ export default class GameEngine {
 
     atom.startHold()
     // The trigger and the loop are made to fit together and start at the same moment
-    soundManager.playSfx('hold_trigger')
+    this.playSfx('hold_trigger')
     this.held = {
       input,
       atom,
       // A held atom can't bounce, so its charge, and with it the rate, is fixed for the whole hold
       atomHoldScoringPerSecond: CHARGED_ATOM_HOLD_SETTINGS.POINTS_PER_SECOND * this.level.number * atom.charge,
       owed: 0,
-      loop: soundManager.startLoopSfx('hold_loop')
+      loop: this.startLoopSfx('hold_loop')
     }
     return true
   }
@@ -715,6 +817,10 @@ export default class GameEngine {
 
   // Ends a hold with a capture: pays what is left, then the capture
   finishHold (held) {
+    if (held.created) {
+      this.launchCreated(held)
+      return
+    }
     this.stopHoldLoop(held)
     this.payRemainder(held)
     this.captureAtom(held.atom)
@@ -807,7 +913,7 @@ export default class GameEngine {
       atom.pulse.hide()
       if (atom.state === ATOM_STATE.MOVING || atom.state === ATOM_STATE.HELD) atom.startCollapse(this.atomSpeed * atom.speedFactor, CORE_COLLAPSE_SETTLE_TIME)
     }
-    soundManager.playSfx('vortex_creation')
+    this.playSfx('vortex_creation')
     // Ready to start when the You Win! screen appears
     soundManager.preloadTrack(soundManager.YOU_WIN_TRACK)
   }
@@ -888,14 +994,22 @@ export default class GameEngine {
 
   // Entity pools
 
-  spawnAtom (supercharged = false) {
+  // `timeLeft` (seconds) sets the random starting charge where time goes backwards
+  spawnAtom (supercharged = false, timeLeft = 0) {
+    const backwards = this.level.timeGoesBackwards
+    this.addAtom(supercharged, backwards ? randomCharge(timeLeft, this.travelTime) : 1)
+    this.playSfx(supercharged ? 'launch_super' : 'launch')
+  }
+
+  // A new atom at the core, in a random direction
+  addAtom (supercharged, charge) {
     const atom = this.atomPool.pop() ?? this.createAtom()
     // New atoms go behind all the others, so fresh atoms never hide charged ones. Pooled atoms
     // keep their old slot in the layer, so they are moved to the back too
     this.atomLayer.addChildAt(atom.view, 0)
-    atom.spawn(Math.random() * 2 * Math.PI, supercharged)
+    atom.spawn(Math.random() * 2 * Math.PI, supercharged, charge)
     this.atoms.push(atom)
-    soundManager.playSfx(supercharged ? 'launch_super' : 'launch')
+    return atom
   }
 
   createAtom () {

@@ -1,6 +1,6 @@
 # Time Goes Backwards — Implementation Plan (Phases T1–T5)
 
-Status: T1 complete (see `docs/archive/time-goes-backwards.md`). T2–T5 are pending.
+Status: T1, T2 and T5 complete (see `docs/archive/time-goes-backwards.md`). T3 and T4 are pending.
 
 ## Goal
 
@@ -46,25 +46,6 @@ Consequences for atoms the player creates:
 
 If frame timing leaves an atom in play when the timer ends, it is removed at that moment. By then it is within a fraction of a second of disappearing anyway.
 
-## Phase T2 — Atom creation, charge loss and disappearing
-
-- New `src/game/timeBackwardsSettings.js`: `CORE_EMITS_ATOMS`, plus the values added in Phase T4.
-- New `src/game/timeBackwards.js`, plain functions with no PixiJS: the charge limit, the cutoff and the random charge.
-- `src/game/entities/Atom.js`:
-  - `spawn` takes an optional starting charge, and the color matches it at once.
-  - `bounce` takes the charge change (+1 or −1). Below 3 charges an atom is white, through the existing color transition.
-  - New `CREATING` state, the capture's pull-in in reverse: the atom grows from radius zero at the center, using the same curve played backwards.
-- `src/game/GameEngine.js`:
-  - `onPointerDown` and `handleGamepad`: in this level a press on the core goes to a new `createAtom(input)` instead of `holdNearest`. A press that can't create (one is already held, or it is past the cutoff) behaves as today: a pointer places a paddle, and a button does nothing.
-  - `createAtom`: draws the charge, starts the atom in `CREATING`, starts the reversed capture burst, plays `capture_reversed`, and starts the hold loop and hold points through the existing `held` object. The input that created the atom is the one that launches it.
-  - Release: the atom launches at once, or when its animation ends if the release came first (a quick tap). The launch limits the charge, pays the capture points and plays `hold_trigger_reversed`, and `held` is cleared.
-  - Hold shake, one atom at a time, pause (launches on resume) and last life lost keep the existing rules.
-  - Cutoff, in `updatePlaying`: skips emission, and launches a held atom. `CORE_EMITS_ATOMS` skips emission too.
-  - Disappearing, in the moving-atom branch of `updatePlaying`: an atom at charge 1 whose distance changes sign is released and plays `launch_reversed`.
-  - Every atom emitted by the core uses the random, limited charge.
-
-Check: atoms lose charge and color on each bounce and vanish at the center at charge 1. Quick taps, long holds, a hold through a pause and a hold through the cutoff all launch one atom. Both pointer and controller work. A second finger or capture button during a hold creates nothing. Logging each disappearance confirms that none happens after the timer.
-
 ## Phase T3 — Reversed effects during play
 
 Each entity gets a `reversed` option at construction and runs its existing formula with progress mirrored, so forward and reverse can't drift apart:
@@ -103,29 +84,6 @@ Check: each effect, side by side with a normal level, looks like the same animat
 Pause stays limited to the playing state, so it isn't available during either animation.
 
 Check: at the start, atoms appear from the core with no jump in speed or position when play begins, and at least the minimum time passes before any first contact. At the end, the arena is empty when the timer runs out, and the You Win! screen follows. A normal level's collapse looks identical to before. Try Again repeats it all.
-
-## Phase T5 — Audio
-
-Depends on the user's files. Until they exist, the sound manager warns about the missing names and those sounds are silent.
-
-- Files, in `assets/audio/`, found by name without extension as usual: `bounce_reversed`, `capture_reversed`, `destroy_reversed`, `launch_reversed`, `hold_trigger_reversed`, `hold_loop_reversed` and `vortex_creation_reversed`. They are `.mp3` by convention, **except `hold_loop_reversed`, which must be `.flac`**: MP3's encoder padding would put a gap in the loop.
-- `GameEngine.js`: a small method plays each effect with the `_reversed` suffix when the level is backwards, and every `playSfx` and `startLoopSfx` call goes through it. The engine is the only code that plays effects, so `soundManager.js` needs no global mode.
-- Voice limits: the reversed names aren't in `SFX_VOICE_LIMITS`, so a new bounce doesn't cut the previous one off before its peak. Add a limit only if it sounds crowded. *Default.*
-- Event map for this level:
-
-| Event | Sound |
-| :--- | :--- |
-| Level start animation | `vortex_creation_reversed` |
-| Core emits an atom | `launch_reversed` |
-| Atom disappears at the core | `launch_reversed` |
-| Atom bounces | `bounce_reversed` |
-| Atom escapes | `destroy_reversed` |
-| Press on the core | `capture_reversed` and the `hold_loop_reversed` loop |
-| Launch of a created atom | `hold_trigger_reversed` |
-
-- The level's track stays the `soundTrack` field, and must keep the level's 52 bars at 140 BPM to stay in step with the timer and beats. The Game Over and You Win! tracks stay normal.
-
-Check: each event plays its reversed file, the loop has no gap, and pausing pauses the reversed sounds like any others.
 
 ## Docs (each with the phase it describes)
 
