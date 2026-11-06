@@ -1,6 +1,6 @@
 # Time Goes Backwards — Implementation Plan (Phases T1–T5)
 
-Status: T1, T2 and T5 complete (see `docs/archive/time-goes-backwards.md`). T3 and T4 are pending.
+Status: T1, T2, T3 and T5 complete (see `docs/archive/time-goes-backwards.md`). T4 is pending.
 
 ## Goal
 
@@ -45,19 +45,6 @@ Consequences for atoms the player creates:
 - The press also needs to leave time for the creation animation to finish before the cutoff.
 
 If frame timing leaves an atom in play when the timer ends, it is removed at that moment. By then it is within a fraction of a second of disappearing anyway.
-
-## Phase T3 — Reversed effects during play
-
-Each entity gets a `reversed` option at construction and runs its existing formula with progress mirrored, so forward and reverse can't drift apart:
-
-- `CaptureCircle.js`: the ring contracts into the center while fading in, then disappears.
-- `PaddleFlash.js`: the ghost starts drifted out and invisible, and arrives on the paddle at its strongest as it ends. It starts at the bounce and isn't anticipated, so its peak comes after the bounce by the effect's length.
-- `AtomPulse.js`: the disc shrinks onto the atom while fading in, peaking on the next beat.
-- `Paddle.js`: it starts faint, reaches full opacity at half its lifetime, stays there, and vanishes when it expires. The paddle being dragged stays at full opacity, and the red replacement warning is unchanged.
-
-The paddle fade is the one to watch for playability, because a fresh paddle is faint.
-
-Check: each effect, side by side with a normal level, looks like the same animation played backwards. Paddle lifetime and collisions are unchanged.
 
 ## Phase T4 — Reversed level start and end
 

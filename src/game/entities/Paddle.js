@@ -4,7 +4,9 @@ import PaddleFlash from './PaddleFlash.js'
 
 export const PADDLE_THICKNESS = 20
 const OUTLINE_WIDTH = 2
-// Lifetime fade: full opacity until FADE_START of the lifetime, then linear down to FADE_MIN_ALPHA
+// Lifetime fade: full opacity until FADE_START of the lifetime, then linear down to FADE_MIN_ALPHA.
+// Reversed (levels where time goes backwards) it is mirrored: FADE_MIN_ALPHA at the start, linear up
+// to full opacity at FADE_START of the lifetime, then full until it vanishes
 const FADE_START = 0.5
 const FADE_MIN_ALPHA = 0.2
 // A set paddle that the paddle being dragged will push out (first in, first out) turns red at once
@@ -20,12 +22,13 @@ function angleDifference (a, b) {
 // filled once set (active). Expires `duration` seconds after being set, fading out over the end
 // of its lifetime. Owns the flash shown when it bounces an atom. Turns red while it's about to be pushed out.
 export default class Paddle {
-  constructor (arc, duration) {
+  constructor (arc, duration, reversed = false) {
+    this.reversed = reversed
     this.arc = arc
     this.duration = duration
     this.view = new Graphics()
     this.view.visible = false
-    this.flash = new PaddleFlash()
+    this.flash = new PaddleFlash(reversed)
     this.warning = false
   }
 
@@ -46,7 +49,7 @@ export default class Paddle {
 
   activate () {
     this.active = true
-    this.view.alpha = 1
+    this.view.alpha = this.reversed ? FADE_MIN_ALPHA : 1
     this.draw()
   }
 
@@ -69,6 +72,11 @@ export default class Paddle {
   // Returns false once the paddle has expired
   update (dt) {
     this.age += dt
+    if (this.reversed) {
+      const progress = Math.min(this.age / (this.duration * FADE_START), 1)
+      this.view.alpha = FADE_MIN_ALPHA + (1 - FADE_MIN_ALPHA) * progress
+      return this.age < this.duration
+    }
     const fadeStart = this.duration * FADE_START
     const progress = Math.min(Math.max((this.age - fadeStart) / (this.duration - fadeStart), 0), 1)
     this.view.alpha = 1 - (1 - FADE_MIN_ALPHA) * progress

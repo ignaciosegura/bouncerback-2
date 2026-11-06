@@ -742,7 +742,7 @@ export default class GameEngine {
   }
 
   startCaptureCircle (color) {
-    const circle = new CaptureCircle(color)
+    const circle = new CaptureCircle(color, this.level.timeGoesBackwards)
     this.captureCircleLayer.addChild(circle.view)
     this.captureCircles.push(circle)
   }
@@ -1013,7 +1013,7 @@ export default class GameEngine {
   }
 
   createAtom () {
-    const atom = new Atom()
+    const atom = new Atom(this.level.timeGoesBackwards)
     this.pulseLayer.addChild(atom.pulse.view)
     return atom
   }
@@ -1025,7 +1025,7 @@ export default class GameEngine {
   }
 
   createPaddle () {
-    const paddle = new Paddle(this.level.paddleArc, this.level.paddleDuration)
+    const paddle = new Paddle(this.level.paddleArc, this.level.paddleDuration, this.level.timeGoesBackwards)
     this.paddleLayer.addChild(paddle.view)
     this.flashLayer.addChild(paddle.flash.view)
     this.paddles.push(paddle)

@@ -82,8 +82,8 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
 Planned in `docs/time-goes-backwards-implementation-plan.md`, with its own numbering (T1, T2…); completed phases go to `docs/archive/time-goes-backwards.md`.
 
 - [x] **Phase T1** — Level property, lives and timer (optional `timeGoesBackwards` in the level file; lives are computed as usual, but the HUD shows them counting up from 1 and the dark red background follows what it shows; the HUD shows elapsed time; set on level 6) — *TIME reaching the level's full time wasn't seen in the automated run*
-- [x] **Phase T2** — Atom creation, charge loss and disappearing (a press on the core creates an atom that grows and launches on release, or at the cutoff; atoms are born with a random charge limited by the time left, lose one per bounce and disappear at the core at charge 1; the core stops emitting at the cutoff; `CORE_EMITS_ATOMS` setting) — *the reversed capture burst waits for T3, the reversed sounds for T5*
-- [ ] **Phase T3** — Reversed effects during play
+- [x] **Phase T2** — Atom creation, charge loss and disappearing (a press on the core creates an atom that grows and launches on release, or at the cutoff; atoms are born with a random charge limited by the time left, lose one per bounce and disappear at the core at charge 1; the core stops emitting at the cutoff; `CORE_EMITS_ATOMS` setting) — *the reversed sounds waited for T5*
+- [x] **Phase T3** — Reversed effects during play (capture burst, paddle bounce echo, atom pulse and paddle lifetime fade run their normal formula on mirrored progress, through a `reversed` option)
 - [ ] **Phase T4** — Reversed level start and end
 - [x] **Phase T5** — Audio (every effect plays its `_reversed` copy in this level, added by the engine; voice limits unchanged) — *the reversed files are unedited placeholders*
 

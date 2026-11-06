@@ -53,12 +53,12 @@ function chargeColor (charge) {
 // Atoms only travel along a diameter of the ring: `angle` is that axis, `distance` the signed
 // position along it (negative past the core) and `direction` the sign of the velocity.
 export default class Atom {
-  constructor () {
+  constructor (reversed = false) {
     this.view = new Graphics()
       .poly(circlePoints(ATOM_RADIUS))
       .fill(ATOM_COLORS.WHITE)
     this.view.visible = false
-    this.pulse = new AtomPulse()
+    this.pulse = new AtomPulse(reversed)
   }
 
   // `charge`: the starting charge, for the levels where time goes backwards
