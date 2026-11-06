@@ -5,7 +5,7 @@ import { lerpColor } from './color.js'
 import { livesShown } from './levelLoader.js'
 import { CHARGED_ATOM_HOLD_SETTINGS } from './chargedAtomHoldSettings.js'
 import { TIME_BACKWARDS_SETTINGS } from './timeBackwardsSettings.js'
-import { cutoffSeconds, maxChargeFor, randomCharge } from './timeBackwards.js'
+import { cutoffSeconds, initialAtomPlan, maxChargeFor, randomCharge } from './timeBackwards.js'
 import { easeInOutQuad, easeInQuad, easeOutQuad } from './easing.js'
 import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
 import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
@@ -74,6 +74,7 @@ const STATE = {
   STARTING: 'starting',
   PLAYING: 'playing',
   COLLAPSING: 'collapsing',
+  ENDING: 'ending', // time goes backwards: the level start played in reverse
   LOST: 'lost',
   ENDED: 'ended'
 }
@@ -506,6 +507,9 @@ export default class GameEngine {
     case STATE.COLLAPSING:
       this.updateCollapsing(dt)
       break
+    case STATE.ENDING:
+      this.updateEnding(dt)
+      break
     case STATE.LOST:
       this.updateLost(dt)
       break
@@ -518,6 +522,10 @@ export default class GameEngine {
 
   // Start delay: the ring and core grow in, but the timer, spawns, music and input wait
   updateStarting (dt) {
+    if (this.level.timeGoesBackwards) {
+      this.updateStartingBackwards(dt)
+      return
+    }
     this.stateTime += dt
     // Progress is clamped, so the last call draws both at full size; no redraws after that
     if (this.stateTime - dt < START_ANIMATION_TIME) this.drawStartAnimation(this.stateTime)
@@ -526,6 +534,78 @@ export default class GameEngine {
     this.state = STATE.PLAYING
     soundManager.playTrack(this.level.soundTrack)
     this.updatePlaying(this.stateTime - START_DELAY)
+  }
+
+  // Time goes backwards: the full ring waits empty, then the core collapse plays in reverse so it
+  // ends exactly with the start delay. The atoms come out of the core and accelerate to full speed
+  updateStartingBackwards (dt) {
+    if (!this.reversedStartBuilt) {
+      this.reversedStartBuilt = true
+      this.startReversedCollapse()
+    }
+    this.stateTime += dt
+    const animationStart = START_DELAY - CORE_COLLAPSE_TIME
+    const t = Math.min(CORE_COLLAPSE_TIME, Math.max(0, this.stateTime - animationStart))
+    if (t > 0 && !this.vortexPlayed) {
+      this.vortexPlayed = true
+      this.playSfx('vortex_creation')
+    }
+    if (t > 0) this.drawCollapseFrame(CORE_COLLAPSE_TIME - t)
+    if (this.stateTime < START_DELAY) return
+
+    // Same frame as the first of the collapse: the atoms are where play starts
+    for (const atom of this.atoms) {
+      atom.state = ATOM_STATE.MOVING
+      atom.direction = atom.playDirection
+      atom.view.scale.set(1)
+    }
+    this.state = STATE.PLAYING
+    soundManager.playTrack(this.level.soundTrack)
+    this.updatePlaying(this.stateTime - START_DELAY)
+  }
+
+  // The ring at full size, no core, and the initial atoms in the core collapse's mirrored state
+  startReversedCollapse () {
+    this.ring.draw(RING_RADIUS)
+    const timer = this.level.timerTenths / 10
+    const plan = initialAtomPlan({
+      count: TIME_BACKWARDS_SETTINGS.INITIAL_ATOM_COUNT,
+      minContact: TIME_BACKWARDS_SETTINGS.INITIAL_FIRST_CONTACT_MIN_BEATS * this.level.secondsPerBeat,
+      travel: this.travelTime,
+      settle: CORE_COLLAPSE_SETTLE_TIME,
+      speed: this.atomSpeed,
+      contactDistance: CONTACT_DISTANCE,
+      timer
+    })
+    for (const { distance, direction, charge } of plan) {
+      const atom = this.addAtom(false, charge)
+      atom.distance = distance
+      atom.playDirection = direction
+      // The drift of the forward collapse runs against the direction of play
+      atom.direction = -direction
+      atom.startCollapse(this.atomSpeed, CORE_COLLAPSE_SETTLE_TIME)
+    }
+  }
+
+  // One frame of the core collapse, `t` seconds into it. Played forward at the end of a level, and
+  // with reversed time at the start of the levels where time goes backwards
+  drawCollapseFrame (t) {
+    const settleProgress = Math.min(1, t / CORE_COLLAPSE_SETTLE_TIME)
+    const grow = easeInOutQuad(settleProgress)
+    const settle = easeOutQuad(settleProgress)
+    const collapse = easeInQuad(Math.min(1, Math.max(0,
+      (t - CORE_COLLAPSE_SETTLE_TIME) / (CORE_COLLAPSE_TIME - CORE_COLLAPSE_SETTLE_TIME))))
+
+    const radius = t < CORE_COLLAPSE_SETTLE_TIME
+      ? CORE_RADIUS + (RING_RADIUS - CORE_RADIUS) * grow
+      : RING_RADIUS * (1 - collapse)
+    this.emitter.draw(radius, grow)
+
+    for (const atom of this.atoms) {
+      if (atom.state !== ATOM_STATE.COLLAPSING) continue
+      atom.updateCollapse(settle, collapse)
+      atom.render(0)
+    }
   }
 
   drawStartAnimation (t) {
@@ -604,7 +684,10 @@ export default class GameEngine {
       this.timeTenths = timeTenths
       this.emit('onTimeChange', timeTenths)
     }
-    if (timeTenths === 0) this.startCoreCollapse()
+    if (timeTenths === 0) {
+      if (this.level.timeGoesBackwards) this.startEnding()
+      else this.startCoreCollapse()
+    }
   }
 
   // An atom between the paddles and the ring: bounced if a paddle covers it (mirrored around the
@@ -922,26 +1005,35 @@ export default class GameEngine {
   // collisions, nothing escapes). Collapse: the core shrinks to 0, taking the atoms with it.
   updateCollapsing (dt) {
     this.stateTime += dt
-    const t = this.stateTime
-    const settleProgress = Math.min(1, t / CORE_COLLAPSE_SETTLE_TIME)
-    const grow = easeInOutQuad(settleProgress)
-    const settle = easeOutQuad(settleProgress)
-    const collapse = easeInQuad(Math.min(1, Math.max(0,
-      (t - CORE_COLLAPSE_SETTLE_TIME) / (CORE_COLLAPSE_TIME - CORE_COLLAPSE_SETTLE_TIME))))
-
-    const radius = t < CORE_COLLAPSE_SETTLE_TIME
-      ? CORE_RADIUS + (RING_RADIUS - CORE_RADIUS) * grow
-      : RING_RADIUS * (1 - collapse)
-    this.emitter.draw(radius, grow)
-
     this.updateVanishingAtoms(dt)
-    for (const atom of this.atoms) {
-      if (atom.state !== ATOM_STATE.COLLAPSING) continue
-      atom.updateCollapse(settle, collapse)
-      atom.render(dt)
-    }
+    this.drawCollapseFrame(this.stateTime)
+    if (this.stateTime >= CORE_COLLAPSE_TIME) this.win()
+  }
 
-    if (t >= CORE_COLLAPSE_TIME) this.win()
+  // Time goes backwards, timer reached 0: no atoms are left apart from those finishing an escape.
+  // After a pause the level start plays in reverse: the core shrinks away, then the ring
+  startEnding () {
+    this.state = STATE.ENDING
+    this.stateTime = 0
+    this.clearPaddles()
+    this.endHold()
+    // Frame timing can leave an atom a fraction of a second from the core: it goes now
+    for (const atom of [...this.atoms]) {
+      if (atom.state === ATOM_STATE.MOVING || atom.state === ATOM_STATE.HELD || atom.state === ATOM_STATE.CREATING) this.releaseAtom(atom)
+    }
+    soundManager.preloadTrack(soundManager.YOU_WIN_TRACK)
+  }
+
+  updateEnding (dt) {
+    this.stateTime += dt
+    this.updateVanishingAtoms(dt)
+    const t = this.stateTime - TIME_BACKWARDS_SETTINGS.END_DELAY_SECONDS
+    if (t <= 0) return
+
+    this.drawStartAnimation(Math.max(0, START_ANIMATION_TIME - t))
+    if (t >= START_ANIMATION_TIME) {
+      this.win()
+    }
   }
 
   win () {

@@ -1,6 +1,6 @@
-# Time Goes Backwards — Implementation Plan (Phases T1–T5)
+# Time Goes Backwards — Implementation Plan (Phases T1–T6)
 
-Status: T1, T2, T3 and T5 complete (see `docs/archive/time-goes-backwards.md`). T4 is pending.
+Status: T1–T5 complete (see `docs/archive/time-goes-backwards.md`). T6 is pending.
 
 ## Goal
 
@@ -46,31 +46,18 @@ Consequences for atoms the player creates:
 
 If frame timing leaves an atom in play when the timer ends, it is removed at that moment. By then it is within a fraction of a second of disappearing anyway.
 
-## Phase T4 — Reversed level start and end
+## Phase T6 — Safe initial atoms
 
-**Start.** `updateStarting` for this level:
+A safety mechanism, so the start isn't randomly punishing: an initial atom must never begin play close to the ring while heading outward, with no time to react.
 
-1. The ring is shown at full size at once, with no atoms and no core, as a normal level's last frame looks. It waits until the animation has to start (start delay minus collapse time).
-2. The core collapse plays in reverse, ending exactly when the start delay does, so the timer, the music and input start as the atoms reach full speed. `vortex_creation_reversed` plays with it. Input stays disabled.
-3. The atoms come out of the center with the expanding core, slow to a stop at their resting points while the core shrinks back to normal, then accelerate. They become normal moving atoms when play starts.
+- **Rule:** an initial atom heading outward starts at most **75%** of the way from the core to the paddle contact distance (`CONTACT_DISTANCE`). Atoms heading inward are not affected: they cross the core first.
+- **Setting:** `INITIAL_ATOM_MAX_OUTWARD_PROGRESS` (0.75) in `timeBackwardsSettings.js`.
+- **Where:** `initialAtomPlan` in `timeBackwards.js`. An outward atom's start is `contactDistance − speed × contact`, so the rule is the same as a minimum first-contact time of `(1 − 0.75) × travel`.
+- **No clamping:** the rule moves the *lower end of the range* the first-contact times are spread over, it never pushes an atom that fell outside it onto the limit. That would pile atoms at 75% and make that position more likely than the rest. The range runs from the larger of the two minimums to the latest allowed time, and the times are spread evenly across it as before, so every allowed starting position is equally likely. Charge, direction and the inward atoms are unchanged.
+- **Interaction with `INITIAL_FIRST_CONTACT_MIN_BEATS`:** the larger of the two minimums applies. With today's values the beats minimum is already the stricter one, so the rule only matters if that setting or `atoms.travelTime` is lowered. *Default: nothing else changes at the current values.*
+- **Open point, default taken:** "on their way out" is measured to the contact distance, where the paddles are, not to the ring itself, because that is where the player has to react.
 
-`updateCollapsing`'s per-frame calculation moves to one shared function, called with reversed time for this animation, so the two stay exact mirrors. Atoms reuse `startCollapse` and `updateCollapse` with a mirrored drift.
-
-**The initial atoms.** Settings: `INITIAL_ATOM_COUNT` and `INITIAL_FIRST_CONTACT_MIN_BEATS`. Each atom is defined by when it first reaches the paddles, not by a random position:
-
-- First-contact times are spread evenly, from the minimum up to the latest that works, so they don't all arrive together and no atom reaches a paddle before the player can react.
-- The latest time is 2t minus half the settle time. Beyond that, an atom heading inward would have its resting point outside the ring.
-- Direction is random. Charge is random from 3 to 10, limited as above, starting from its first contact. They score nothing at the start.
-
-**End.** The timer reaching zero goes to a new `ENDING` state for this level, instead of the core collapse:
-
-1. Paddles clear and input stops, as in the collapse. The arena has no atoms left, apart from any finishing an escape fade. The You Win! track preloads.
-2. After `END_DELAY_SECONDS`, the level start animation plays in reverse (`drawStartAnimation` with reversed time): the core shrinks away, then the ring. It has no sound, as the level start has none.
-3. `win()`. It takes no atoms, so no containment points are paid in this level.
-
-Pause stays limited to the playing state, so it isn't available during either animation.
-
-Check: at the start, atoms appear from the core with no jump in speed or position when play begins, and at least the minimum time passes before any first contact. At the end, the arena is empty when the timer runs out, and the You Win! screen follows. A normal level's collapse looks identical to before. Try Again repeats it all.
+Check: with `INITIAL_FIRST_CONTACT_MIN_BEATS` set to 0, no outward initial atom starts past 75% over many reloads, and the starting positions are spread evenly with none piling up at 75%. At the current values the start is identical to before.
 
 ## Docs (each with the phase it describes)
 

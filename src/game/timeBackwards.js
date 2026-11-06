@@ -25,3 +25,27 @@ export function randomCharge (timeLeft, travel, random = Math.random) {
   const max = Math.max(MIN_START_CHARGE, maxChargeFor(timeLeft, travel))
   return MIN_START_CHARGE + Math.floor(random() * (max - MIN_START_CHARGE + 1))
 }
+
+// The atoms already in the arena when play starts. Each is defined by when it first reaches the
+// paddles, spread evenly from `minContact` to the latest that works (2 × travel − settle / 2: later,
+// the resting point of an atom heading inward would be outside the ring). Returns, for each, its
+// signed `distance` at the start of play, its `direction` (+1 or −1 along its axis) and `charge`
+// (limited by the time left at its first contact). `speed` and `contactDistance` are in px.
+export function initialAtomPlan ({ count, minContact, travel, settle, speed, contactDistance, timer }, random = Math.random) {
+  const latest = 2 * travel - settle / 2
+  const plan = []
+  for (let i = 0; i < count; i++) {
+    const contact = count === 1 ? minContact : minContact + (latest - minContact) * i / (count - 1)
+    const direction = random() < 0.5 ? -1 : 1
+    // Heading outward it starts short of the contact distance; heading inward it starts on the far
+    // side, and crosses the core first
+    const distance = contact <= travel
+      ? direction * (contactDistance - speed * contact)
+      : -direction * (speed * contact - contactDistance)
+    // Back at the center at charge 1 once the contact (which costs one charge) and the bounces
+    // that follow are done: the same as an atom launched from the center `travel` before
+    const charge = randomCharge(timer - contact + travel, travel, random)
+    plan.push({ distance, direction, charge })
+  }
+  return plan
+}
