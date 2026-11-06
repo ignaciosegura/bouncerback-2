@@ -43,18 +43,26 @@ function center (element) {
 }
 
 // The nearest item beyond `from` in `direction`; ties (within a pixel, so rounding can't decide)
-// go to DOM order: from a centered button, the leftmost of the row below
+// go to DOM order: from a centered button, the leftmost of the row below. Moving up or down only
+// considers the nearest row beyond (a row that is all disabled doesn't count), so it never skips
+// a row, however well another row lines up
 function nearestItem (from, direction, items) {
   const origin = center(from)
-  let best = null
-  let bestScore = Infinity
+  const rowTolerance = from.getBoundingClientRect().height / 2
+  const candidates = []
   for (const item of items) {
     const target = center(item)
     const dx = target.x - origin.x
     const dy = target.y - origin.y
     const along = dx * direction.x + dy * direction.y
     if (along < 1) continue // same row / column, or behind
-    const score = along + CROSS_AXIS_WEIGHT * Math.abs(dx * direction.y - dy * direction.x)
+    candidates.push({ item, along, score: along + CROSS_AXIS_WEIGHT * Math.abs(dx * direction.y - dy * direction.x) })
+  }
+  const nearestAlong = Math.min(...candidates.map((candidate) => candidate.along))
+  let best = null
+  let bestScore = Infinity
+  for (const { item, along, score } of candidates) {
+    if (direction.x === 0 && along > nearestAlong + rowTolerance) continue
     if (score < bestScore - 1) {
       best = item
       bestScore = score

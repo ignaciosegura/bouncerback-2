@@ -32,7 +32,7 @@ Other terms:
 
 ### Menus
 
-* **d-pad or left stick:** moves the selection to the nearest button in that direction. One step per push: holding doesn't repeat, and there's no wrap-around. Only buttons can be selected (menu buttons and the Settings `-` / `+` steps); the Main Menu credit links are skipped.
+* **d-pad or left stick:** moves the selection to the nearest button in that direction. One step per push: holding doesn't repeat, and there's no wrap-around. Up and down only go to the nearest row, so on Level Select they never skip a tier (a row with every level locked is passed over). Only buttons can be selected (menu buttons and the Settings `-` / `+` steps); the Main Menu credit links are skipped.
 * **bottom face button or RT:** activates the selected button, exactly like a click: the button shows pressed (inverted, as under a held mouse button) while the control is held, and it activates on release.
 * **right face button:** goes back, by activating the screen's `<<< BACK` button (Level Select, Settings and How To Play) or the Pause overlay's `<<< RESUME` button, with the same press and release: the button shows pressed while it's held. It does nothing on the other screens.
 * **Cancelling a press:** like dragging the mouse off a button before releasing it, a held press is cancelled without activating anything if the selection moves, a mouse click or touch happens, the button leaves the screen, or the controller is disconnected or another one takes over.
