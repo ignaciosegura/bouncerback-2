@@ -1,4 +1,4 @@
-# Time Goes Backwards — Implementation Plan (Phases 57–61)
+# Time Goes Backwards — Implementation Plan (Phases T1–T5)
 
 Status: waiting for the user's review and go-ahead. Nothing here is implemented yet.
 
@@ -30,12 +30,12 @@ Bouncing is unchanged, and the core still emits atoms outward. Every other level
 
 ## The charge limit
 
-The level must end with an empty arena, so no atom may outlive the timer. This can be calculated exactly, because an atom covers the core-to-contact distance in exactly `atoms.travelTime` beats (call it T seconds), bouncing keeps it on that schedule, and it can only leave early by escaping.
+The level must end with an empty arena, so no atom may outlive the timer. This can be calculated exactly, because an atom covers the core-to-contact distance in exactly `atoms.travelTime` beats (call it t seconds), bouncing keeps it on that schedule, and it can only leave early by escaping.
 
-- From the center, an atom's first bounce comes after T, and the next ones every 2T. It loses a charge on each, so with charge c it is back at the center at charge 1 after **2T(c − 1)** seconds.
-- The highest charge allowed for an atom launched from the center with L seconds left is therefore **1 + floor(L / 2T)**, and never more than 10.
-- **Cutoff:** charges start at 3, so once fewer than **4T** seconds are left, the core stops emitting and the player can't create atoms.
-- Example with Anticoherence's current values (T = 3 s, level about 89 s): the cutoff is the last 12 s, and a charge of 10 is only possible with at least 54 s left. So the limit lowers charges through the last 60% of the level.
+- From the center, an atom's first bounce comes after t, and the next ones every 2t. It loses a charge on each, so with charge c it is back at the center at charge 1 after **2t(c − 1)** seconds.
+- The highest charge allowed for an atom launched from the center with L seconds left is therefore **1 + floor(L / 2t)**, and never more than 10.
+- **Cutoff:** charges start at 3, so once fewer than **4t** seconds are left, the core stops emitting and the player can't create atoms.
+- Example with Anticoherence's current values (t = 3 s, level about 89 s): the cutoff is the last 12 s, and a charge of 10 is only possible with at least 54 s left. So the limit lowers charges through the last 60% of the level.
 
 Consequences for atoms the player creates:
 
@@ -46,7 +46,7 @@ Consequences for atoms the player creates:
 
 If frame timing leaves an atom in play when the timer ends, it is removed at that moment. By then it is within a fraction of a second of disappearing anyway.
 
-## Phase 57 — Level property, lives and timer
+## Phase T1 — Level property, lives and timer
 
 - `docs/level-file-schema.json`: `timeGoesBackwards`, and the new meaning of `lives` in its description.
 - `src/game/levelLoader.js`: exposes `timeGoesBackwards`, `startingLives` (1 or `lives`), `livesLostAt` (`lives` or 0) and `livesStep` (+1 or −1), so no other code has to tell the two cases apart for lives.
@@ -56,9 +56,9 @@ If frame timing leaves an atom in play when the timer ends, it is removed at tha
 
 Check: the level starts red with one life and TIME 0, with no first-frame flash of other values. TIME reaches the level's full time as the collapse starts. The fourth escape after the start triggers the last life zoom and Game Over. Normal levels are unaffected.
 
-## Phase 58 — Atom creation, charge loss and disappearing
+## Phase T2 — Atom creation, charge loss and disappearing
 
-- New `src/game/timeBackwardsSettings.js`: `CORE_EMITS_ATOMS`, plus the values added in Phase 60.
+- New `src/game/timeBackwardsSettings.js`: `CORE_EMITS_ATOMS`, plus the values added in Phase T4.
 - New `src/game/timeBackwards.js`, plain functions with no PixiJS: the charge limit, the cutoff and the random charge.
 - `src/game/entities/Atom.js`:
   - `spawn` takes an optional starting charge, and the color matches it at once.
@@ -75,7 +75,7 @@ Check: the level starts red with one life and TIME 0, with no first-frame flash 
 
 Check: atoms lose charge and color on each bounce and vanish at the center at charge 1. Quick taps, long holds, a hold through a pause and a hold through the cutoff all launch one atom. Both pointer and controller work. A second finger or capture button during a hold creates nothing. Logging each disappearance confirms that none happens after the timer.
 
-## Phase 59 — Reversed effects during play
+## Phase T3 — Reversed effects during play
 
 Each entity gets a `reversed` option at construction and runs its existing formula with progress mirrored, so forward and reverse can't drift apart:
 
@@ -88,7 +88,7 @@ The paddle fade is the one to watch for playability, because a fresh paddle is f
 
 Check: each effect, side by side with a normal level, looks like the same animation played backwards. Paddle lifetime and collisions are unchanged.
 
-## Phase 60 — Reversed level start and end
+## Phase T4 — Reversed level start and end
 
 **Start.** `updateStarting` for this level:
 
@@ -101,7 +101,7 @@ Check: each effect, side by side with a normal level, looks like the same animat
 **The initial atoms.** Settings: `INITIAL_ATOM_COUNT` and `INITIAL_FIRST_CONTACT_MIN_BEATS`. Each atom is defined by when it first reaches the paddles, not by a random position:
 
 - First-contact times are spread evenly, from the minimum up to the latest that works, so they don't all arrive together and no atom reaches a paddle before the player can react.
-- The latest time is 2T minus half the settle time. Beyond that, an atom heading inward would have its resting point outside the ring.
+- The latest time is 2t minus half the settle time. Beyond that, an atom heading inward would have its resting point outside the ring.
 - Direction is random. Charge is random from 3 to 10, limited as above, starting from its first contact. They score nothing at the start.
 
 **End.** The timer reaching zero goes to a new `ENDING` state for this level, instead of the core collapse:
@@ -114,7 +114,7 @@ Pause stays limited to the playing state, so it isn't available during either an
 
 Check: at the start, atoms appear from the core with no jump in speed or position when play begins, and at least the minimum time passes before any first contact. At the end, the arena is empty when the timer runs out, and the You Win! screen follows. A normal level's collapse looks identical to before. Try Again repeats it all.
 
-## Phase 61 — Audio
+## Phase T5 — Audio
 
 Depends on the user's files. Until they exist, the sound manager warns about the missing names and those sounds are silent.
 
