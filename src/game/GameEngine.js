@@ -571,6 +571,7 @@ export default class GameEngine {
     const plan = initialAtomPlan({
       count: TIME_BACKWARDS_SETTINGS.INITIAL_ATOM_COUNT,
       minContact: TIME_BACKWARDS_SETTINGS.INITIAL_FIRST_CONTACT_MIN_BEATS * this.level.secondsPerBeat,
+      maxOutwardProgress: TIME_BACKWARDS_SETTINGS.INITIAL_ATOM_MAX_OUTWARD_PROGRESS,
       travel: this.travelTime,
       settle: CORE_COLLAPSE_SETTLE_TIME,
       speed: this.atomSpeed,

@@ -31,8 +31,12 @@ export function randomCharge (timeLeft, travel, random = Math.random) {
 // the resting point of an atom heading inward would be outside the ring). Returns, for each, its
 // signed `distance` at the start of play, its `direction` (+1 or −1 along its axis) and `charge`
 // (limited by the time left at its first contact). `speed` and `contactDistance` are in px.
-export function initialAtomPlan ({ count, minContact, travel, settle, speed, contactDistance, timer }, random = Math.random) {
+// An atom heading outward (first contact within `travel`) starts at most `maxOutwardProgress` of the
+// way to the contact distance: that raises the lower end of the range, it never clamps an atom, so
+// every allowed starting position stays equally likely.
+export function initialAtomPlan ({ count, minContact: minContactSetting, maxOutwardProgress, travel, settle, speed, contactDistance, timer }, random = Math.random) {
   const latest = 2 * travel - settle / 2
+  const minContact = Math.max(minContactSetting, (1 - maxOutwardProgress) * travel)
   const plan = []
   for (let i = 0; i < count; i++) {
     const contact = count === 1 ? minContact : minContact + (latest - minContact) * i / (count - 1)

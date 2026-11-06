@@ -1,6 +1,6 @@
 # Time Goes Backwards — Implementation Plan (Phases T1–T6)
 
-Status: T1–T5 complete (see `docs/archive/time-goes-backwards.md`). T6 is pending.
+Status: T1–T6 complete (see `docs/archive/time-goes-backwards.md`).
 
 ## Goal
 
@@ -45,19 +45,6 @@ Consequences for atoms the player creates:
 - The press also needs to leave time for the creation animation to finish before the cutoff.
 
 If frame timing leaves an atom in play when the timer ends, it is removed at that moment. By then it is within a fraction of a second of disappearing anyway.
-
-## Phase T6 — Safe initial atoms
-
-A safety mechanism, so the start isn't randomly punishing: an initial atom must never begin play close to the ring while heading outward, with no time to react.
-
-- **Rule:** an initial atom heading outward starts at most **75%** of the way from the core to the paddle contact distance (`CONTACT_DISTANCE`). Atoms heading inward are not affected: they cross the core first.
-- **Setting:** `INITIAL_ATOM_MAX_OUTWARD_PROGRESS` (0.75) in `timeBackwardsSettings.js`.
-- **Where:** `initialAtomPlan` in `timeBackwards.js`. An outward atom's start is `contactDistance − speed × contact`, so the rule is the same as a minimum first-contact time of `(1 − 0.75) × travel`.
-- **No clamping:** the rule moves the *lower end of the range* the first-contact times are spread over, it never pushes an atom that fell outside it onto the limit. That would pile atoms at 75% and make that position more likely than the rest. The range runs from the larger of the two minimums to the latest allowed time, and the times are spread evenly across it as before, so every allowed starting position is equally likely. Charge, direction and the inward atoms are unchanged.
-- **Interaction with `INITIAL_FIRST_CONTACT_MIN_BEATS`:** the larger of the two minimums applies. With today's values the beats minimum is already the stricter one, so the rule only matters if that setting or `atoms.travelTime` is lowered. *Default: nothing else changes at the current values.*
-- **Open point, default taken:** "on their way out" is measured to the contact distance, where the paddles are, not to the ring itself, because that is where the player has to react.
-
-Check: with `INITIAL_FIRST_CONTACT_MIN_BEATS` set to 0, no outward initial atom starts past 75% over many reloads, and the starting positions are spread evenly with none piling up at 75%. At the current values the start is identical to before.
 
 ## Docs (each with the phase it describes)
 

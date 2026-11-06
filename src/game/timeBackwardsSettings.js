@@ -8,6 +8,9 @@ export const TIME_BACKWARDS_SETTINGS = Object.freeze({
   // The earliest an initial atom reaches the paddles, in beats from the start of play, so the
   // player has time to react
   INITIAL_FIRST_CONTACT_MIN_BEATS: 4,
+  // How far to the paddles (0 to 1, as a share of the core-to-contact distance) an initial atom
+  // heading outward can start, so it never begins right at the ring with no time to react
+  INITIAL_ATOM_MAX_OUTWARD_PROGRESS: 0.75,
   // Seconds the arena stays empty at the end of the level before the level start plays in reverse
   END_DELAY_SECONDS: 1
 })
