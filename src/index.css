@@ -242,7 +242,7 @@ button {
 }
 
 .menu__items {
-  animation: blink 2s step-end infinite;
+  animation: blink 1.2s step-end infinite;
 }
 
 .button__label--blinking {
