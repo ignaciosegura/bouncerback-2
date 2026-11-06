@@ -20,10 +20,12 @@ export function maxChargeFor (timeLeft, travel) {
   return Math.max(1, Math.min(MAX_CHARGE, 1 + Math.floor(timeLeft / (2 * travel))))
 }
 
-// Random whole charge from MIN_START_CHARGE to the limit (only called before the cutoff)
+// Random whole charge from MIN_START_CHARGE to the limit (only called before the cutoff). Drawn
+// from 0 to the limit and rounded up to MIN_START_CHARGE, so MIN_START_CHARGE is the most likely
+// (with a limit of 10 it has 4 chances in 11, every other charge 1 in 11)
 export function randomCharge (timeLeft, travel, random = Math.random) {
   const max = Math.max(MIN_START_CHARGE, maxChargeFor(timeLeft, travel))
-  return MIN_START_CHARGE + Math.floor(random() * (max - MIN_START_CHARGE + 1))
+  return Math.max(MIN_START_CHARGE, Math.floor(random() * (max + 1)))
 }
 
 // The atoms already in the arena when play starts. Each is defined by when it first reaches the

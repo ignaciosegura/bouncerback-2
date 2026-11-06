@@ -18,7 +18,7 @@ Bouncing is unchanged, and the core still emits atoms outward. Every other level
 | Background | Red when the HUD shows 1 life, so it starts red and turns black when it shows 2 |
 | Timer | The engine counts as usual. Only the React layer shows elapsed time (initial timer minus time left) |
 | Core emission | Stays on, behind a flag in the settings file, so it can be switched off (and so a later "endless zen" level can reuse atom creation) |
-| Atom charge | Every atom is born with a random charge from 3 to 10, limited by the time left (see "The charge limit"). It loses one per bounce |
+| Atom charge | Every atom is born with a random charge from 3 to 10, limited by the time left (drawn from 0 to the limit and rounded up to 3, so 3 is the most common) (see "The charge limit"). It loses one per bounce |
 | Disappearing | An atom at charge 1 disappears when it crosses the center of the core and plays `launch_reversed` |
 | Capture input | A press on the core always creates an atom, at any time until the cutoff, even while an atom is crossing the core. There is no capture |
 | Capture pulse | Kept, reversed. It no longer means anything: the player discovers that trying to capture creates an atom instead |

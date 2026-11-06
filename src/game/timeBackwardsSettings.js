@@ -4,7 +4,7 @@ export const TIME_BACKWARDS_SETTINGS = Object.freeze({
   // Whether the core emits atoms by itself. With false, only the player's presses create atoms
   CORE_EMITS_ATOMS: true,
   // Atoms already in the arena when play starts, coming out of the reversed core collapse
-  INITIAL_ATOM_COUNT: 5,
+  INITIAL_ATOM_COUNT: 4,
   // The earliest an initial atom reaches the paddles, in beats from the start of play, so the
   // player has time to react
   INITIAL_FIRST_CONTACT_MIN_BEATS: 4,
