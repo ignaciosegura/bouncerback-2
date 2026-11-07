@@ -14,6 +14,7 @@
     "cap:ios": "npm run cap:sync && cap open ios",
     "cap:android": "npm run cap:sync && cap open android",
     "build:android-install": "npm run cap:sync && cd android && ./gradlew installDebug",
+    "build:deploy": "npm run build && npm run deploy:ftp",
     "cap:assets": "capacitor-assets generate --ios --android --assetPath assets/native --iconBackgroundColor \"#000000\" --iconBackgroundColorDark \"#000000\" --splashBackgroundColor \"#000000\" --splashBackgroundColorDark \"#000000\"",
     "desktop:start": "vite build && electron .",
     "desktop:build:linux": "vite build && electron-builder --linux tar.gz --x64",
