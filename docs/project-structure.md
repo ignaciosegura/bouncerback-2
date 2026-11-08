@@ -76,6 +76,8 @@ root/
     │   └── menuSettings.js         # Its tunable values (resolution cap)
     ├── game/                       # Pure game logic & PixiJS implementation
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
+    │   ├── timeBackwards.js        # Time goes backwards: the charge limit, the cutoff and the random charge (no PixiJS)
+    │   ├── timeBackwardsSettings.js # Tunable values of the time goes backwards property
     │   ├── levelLoader.js          # Validates level JSON and derives runtime values (timer, speeds, intervals)
     │   ├── additionalMechanics.js    # Enum constant with the names of the additional game mechanics
     │   ├── chargedAtomHoldSettings.js # Its tunable values (points per second while an atom is held, size of each score step)

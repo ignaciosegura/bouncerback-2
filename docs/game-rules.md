@@ -116,11 +116,20 @@ The game can also be played with a game controller, alongside mouse and touch: e
 
 The player loses a live every time an atom escapes the containment ring. 
 
+In a level where time runs backwards, the player sees the count go up instead: see "Time runs backwards".
+
 # Time
 
 The timer specifies the time remaining to beat the level, in tenths of a second. For example, a 2 minutes long level will have an initial time value of 1200 (120 * 10). The timer will decrease 1 unit every 0.1 seconds.
 
 The level file will specify the length of the level in musical notation format: tempo (in BPM), time signature and number of bars. The timer will start counting down from the calculated time.
+
+# Time runs backwards
+
+This section applies only to levels with `timeGoesBackwards: true` in their level file (Anticoherence, level 6). It is a level property, not an additional game mechanic.
+
+* **The lives shown count up.** The game counts lives as usual: the player has the level's `lives` value, each escape takes one, the level is lost at zero, and the score uses them as in any other level. Only what the player sees changes: the HUD shows one life at the start and one more with each escape (`lives` − lives left + 1). For example, with 4 lives it shows 1, 2, 3, 4, and 5 on the fourth escape, which loses the level. Nothing tells the player the limit. The dark red background follows the lives shown, so the level starts dark red and turns black when the HUD shows two.
+* **The timer shown counts up.** The HUD shows the time elapsed, from 0 up to the level's full time, instead of the time remaining. The level ends at the same moment as it would otherwise.
 
 # Score
 

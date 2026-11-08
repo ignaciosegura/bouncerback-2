@@ -10,24 +10,29 @@ const MAX_RADIUS = RING_RADIUS * 1.25
 
 // Capture burst: a ring in the captured atom's color that grows from the center behind everything
 // and fades out. One per capture, so several captures overlap and none interrupts another.
+// `reversed` (levels where time goes backwards) runs the same formula on mirrored time: the ring
+// contracts into the center while fading in, then disappears.
 export default class CaptureCircle {
-  constructor (color) {
+  constructor (color, reversed = false) {
     this.color = color
+    this.reversed = reversed
     this.time = 0
     this.view = new Graphics()
     this.view.alpha = 0
-    this.draw(0)
+    this.draw(reversed ? MAX_RADIUS : 0)
   }
 
   // Returns false once it has finished and can be destroyed
   update (dt) {
     this.time += dt
     if (this.time >= DURATION) return false
-    if (this.time < FADE_IN_TIME) {
-      this.view.alpha = PEAK_ALPHA * (this.time / FADE_IN_TIME)
+    const time = this.reversed ? DURATION - this.time : this.time
+    if (time < FADE_IN_TIME) {
+      this.view.alpha = PEAK_ALPHA * (time / FADE_IN_TIME)
+      if (this.reversed) this.draw(0)
       return true
     }
-    const progress = (this.time - FADE_IN_TIME) / (DURATION - FADE_IN_TIME)
+    const progress = (time - FADE_IN_TIME) / (DURATION - FADE_IN_TIME)
     this.view.alpha = PEAK_ALPHA * (1 - progress)
     this.draw(MAX_RADIUS * easeOutQuad(progress))
     return true

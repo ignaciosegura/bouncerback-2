@@ -16,7 +16,8 @@ export const ATOM_STATE = {
   ESCAPING: 'escaping',
   COLLAPSING: 'collapsing',
   CAPTURING: 'capturing',
-  HELD: 'held' // by the player (charged atom hold): stopped, shaking
+  HELD: 'held', // by the player (charged atom hold): stopped, shaking
+  CREATING: 'creating' // time goes backwards: grows from nothing at the core, on a press
 }
 
 const ESCAPE_FADE_TIME = 0.5
@@ -31,6 +32,7 @@ const SHAKE_DISTANCE = 2 // px at the 1080px reference
 const ESCAPE_TINT_YELLOW = 0x666600
 const ESCAPE_TINT_RED = 0x660000
 const CAPTURE_TIME = 0.5
+export const CREATE_TIME = CAPTURE_TIME // the capture's pull-in played backwards
 const COLOR_TRANSITION_TIME = 0.5
 
 export const ATOM_COLORS = {
@@ -51,21 +53,22 @@ function chargeColor (charge) {
 // Atoms only travel along a diameter of the ring: `angle` is that axis, `distance` the signed
 // position along it (negative past the core) and `direction` the sign of the velocity.
 export default class Atom {
-  constructor () {
+  constructor (reversed = false) {
     this.view = new Graphics()
       .poly(circlePoints(ATOM_RADIUS))
       .fill(ATOM_COLORS.WHITE)
     this.view.visible = false
-    this.pulse = new AtomPulse()
+    this.pulse = new AtomPulse(reversed)
   }
 
-  spawn (angle, supercharged = false) {
+  // `charge`: the starting charge, for the levels where time goes backwards
+  spawn (angle, supercharged = false, charge = 1) {
     this.supercharged = supercharged
     this.angle = angle
     this.distance = 0
     this.direction = 1
-    this.charge = supercharged ? SUPERCHARGED_CHARGE : 1
-    const startColor = supercharged ? ATOM_COLORS.SUPERCHARGED : ATOM_COLORS.WHITE
+    this.charge = supercharged ? SUPERCHARGED_CHARGE : charge
+    const startColor = supercharged ? ATOM_COLORS.SUPERCHARGED : chargeColor(this.charge)
     this.state = ATOM_STATE.MOVING
     this.escapeTime = 0
     this.shakeTime = 0
@@ -78,6 +81,7 @@ export default class Atom {
     this.colorTime = COLOR_TRANSITION_TIME
     this.view.tint = startColor
     this.pulse.hide()
+    this.launchPending = false // CREATING: launch as soon as it has grown
     this.pulseCount = 0 // pulses emitted during the current core crossing
     this.render()
   }
@@ -112,14 +116,19 @@ export default class Atom {
   }
 
   // Exact reversal at `contact` distance: the atom heads straight back through the core. With
-  // `charges` (the atom capture mechanic) it also gains a charge and starts its color change. A
-  // supercharged atom never changes its charge or color
-  bounce (contact, charges) {
+  // `chargeChange` (+1 with the atom capture mechanic, −1 when time goes backwards) it also changes
+  // its charge and starts its color change. A supercharged atom never changes its charge or color
+  bounce (contact, chargeChange) {
     const overshoot = Math.abs(this.distance) - contact
     this.distance = Math.sign(this.distance) * (contact - overshoot)
     this.direction = -this.direction
-    if (!charges || this.supercharged) return
-    this.charge = Math.min(MAX_CHARGE, this.charge + 1)
+    if (!chargeChange || this.supercharged) return
+    this.setCharge(this.charge + chargeChange)
+  }
+
+  // Sets the charge (1 to MAX_CHARGE) and starts the color change toward its color
+  setCharge (charge) {
+    this.charge = Math.min(MAX_CHARGE, Math.max(1, charge))
     const target = chargeColor(this.charge)
     if (target !== this.colorTo) {
       this.colorFrom = this.color
@@ -147,6 +156,32 @@ export default class Atom {
     this.state = ATOM_STATE.HELD
     this.shakeTime = 0
     this.pulse.hide()
+  }
+
+  // Time goes backwards: appears at the center of the core, growing from radius zero
+  startCreate () {
+    this.state = ATOM_STATE.CREATING
+    this.distance = 0
+    this.createTime = 0
+    this.launchPending = false
+    this.view.scale.set(0)
+    this.pulse.hide()
+  }
+
+  // Same curve as the capture's pull-in, played backwards; returns false once fully grown
+  updateCreate (dt) {
+    this.createTime += dt
+    const p = Math.min(1, this.createTime / CREATE_TIME)
+    this.view.scale.set(1 - easeInQuad(1 - p))
+    return p < 1
+  }
+
+  // Leaves the core outward as a normal moving atom
+  launch () {
+    this.state = ATOM_STATE.MOVING
+    this.direction = 1
+    this.launchPending = false
+    this.view.scale.set(1)
   }
 
   // Captured: stops and is pulled into the center of the core, shrinking to 0

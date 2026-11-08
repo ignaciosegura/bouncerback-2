@@ -38,6 +38,10 @@ The **desktop & Steam cycle** runs in parallel with the numbered cycles, on its 
 Known issues the user chose to deal with later. Don't fix them unprompted.
 
 - **Intro screen layout (noted 2026-09-30):** the note and the button don't match `docs/mockups/INTRO.png`. When measured, the note's box was at 368–400px and the button at about 497–567px, against about 415–447px and 506–573px (button centered) in the mockup. `src/index.css` uses `.intro-screen__note { margin-bottom: 96u }` and `.intro-screen .menu { margin-bottom: 145u }`, while the Phase 28 plan specified 59 and 91. When this is picked up, first check whether 96 and 145 were intentional.
+- **Lives bonus, all levels (noted 2026-11-06):** `win()` in `GameEngine.js` pays the bonus on the level's starting lives (`this.level.lives`), while `docs/game-rules.md` says remaining lives, so the bonus is the same however many lives were lost. The bonus is to be reconsidered for every level.
+- **Anticoherence atom escape (noted 2026-11-06):** the escape keeps its normal animation in the time-backwards level (Phases T1–T5) until a reversed version that still shows the player where the atom left is designed.
+- **Anticoherence tip and How To Play (noted 2026-11-06):** the level has no `tip`, and `docs/game-instructions.md` doesn't describe time running backwards. Both are to be written after the level is playable.
+- **Anticoherence score balance (noted 2026-11-06):** creating atoms scores capture points with no limit, and hold points are paid while one is held, so tapping the core can inflate the high score shared by all levels. Accepted for now; review it if it turns out to be a problem.
 
 ---
 
@@ -116,3 +120,9 @@ Out of scope: Steamworks, the overlay, Proton, Steam depots, Windows and macOS b
 - On the Mac: `npm run desktop:start` opens the game fullscreen, with no white flash, no menu bar and no console errors; it plays as in the browser (music from the Intro button, menus, a level with the controller and the mouse, OLD TV on and off). The credit links open in the default browser and no second window appears. F11 leaves and re-enters fullscreen. Settings and progress survive a restart. `launch-info.txt` is written. The web build (`npm run build`, `npm run dev`) and the mobile builds (`npm run cap:sync`) are unchanged.
 - `npm run desktop:build:linux` produces a `.tar.gz` in `release/` containing an executable `bouncerback`, with no `node_modules` from the project inside the app archive.
 - On the Deck: the steps in "Running it on the Deck" work in both modes, and every item in "Feedback to collect" has an answer written into `docs/desktop-build.md`.
+
+---
+
+### Phases T1–T5 — Time runs backwards (Anticoherence)
+
+Planned in its own document, `docs/time-goes-backwards-implementation-plan.md`, with its own numbering (T1, T2…). T1 is complete; T2–T5 are pending.

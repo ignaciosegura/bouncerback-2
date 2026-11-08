@@ -4,6 +4,7 @@ import HUD from '../components/HUD.jsx'
 import PauseOverlay from './PauseOverlay.jsx'
 import GameplayTips from './GameplayTips.jsx'
 import GameEngine from '../game/GameEngine.js'
+import { livesShown } from '../game/levelLoader.js'
 
 export default function GameScreen ({ level, hiScore, settings, onScoreChange, onGameOver, onLevelWin, onExitToMenu, backRef, escapeRef }) {
   const canvasContainerRef = useRef(null)
@@ -70,7 +71,12 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
   return (
     <Screen variant="dark" className="game-screen">
       <div ref={canvasContainerRef} className="game-screen__canvas" />
-      <HUD score={score} timeTenths={timeTenths} hiScore={Math.max(hiScore, score)} lives={lives} />
+      <HUD
+        score={score}
+        timeTenths={level.timeGoesBackwards ? level.timerTenths - timeTenths : timeTenths}
+        hiScore={Math.max(hiScore, score)}
+        lives={livesShown(level, lives)}
+      />
       {tip && (
         <GameplayTips
           lines={level.tip}

@@ -8,8 +8,11 @@ const PULSE_START_ALPHA = 0.5
 // Capture window cue: a disc in the atom's color that grows and fades behind a charged atom
 // crossing the core, once per beat. One per atom: a new beat restarts it. It has its own view
 // because PixiJS v8 Graphics can't hold children.
+// `reversed` (levels where time goes backwards) mirrors the progress: the disc shrinks onto the
+// atom while fading in.
 export default class AtomPulse {
-  constructor () {
+  constructor (reversed = false) {
+    this.reversed = reversed
     // Atom.js imports this module, so its constants are only read here, never at load time
     this.view = new Graphics()
       .circle(0, 0, ATOM_RADIUS)
@@ -39,7 +42,8 @@ export default class AtomPulse {
       this.hide()
       return
     }
-    const progress = this.time / this.duration
+    const forward = this.time / this.duration
+    const progress = this.reversed ? 1 - forward : forward
     this.view.position.set(x, y)
     this.view.scale.set(1 + (PULSE_MAX_SCALE - 1) * easeOutQuad(progress))
     this.view.alpha = PULSE_START_ALPHA * (1 - progress)
