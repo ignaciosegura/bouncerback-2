@@ -1,16 +1,16 @@
 {
   "name": "ANTICOHERENCE",
   "tier": 2,
-  "duration": 52,
+  "duration": 36,
   "timeSignature": {
-    "bpm": 140,
+    "bpm": 155,
     "signature": 4
   },
   "soundTrack": "anticoherence.mp3",
   "vfx": [],
   "atoms": {
-    "travelTime": 7,
-    "barsInterval": 2
+    "travelTime": 8,
+    "barsInterval": 3
   },
   "paddles": {
     "angle": 35,
