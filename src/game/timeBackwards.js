@@ -6,7 +6,7 @@
 // each, so with charge c it is back at the center at charge 1 after 2 × travel × (c − 1) seconds.
 import { MAX_CHARGE, CAPTURE_MIN_CHARGE } from './entities/Atom.js'
 
-export const MIN_START_CHARGE = CAPTURE_MIN_CHARGE
+const MIN_START_CHARGE = CAPTURE_MIN_CHARGE
 
 // Seconds left under which the core stops emitting and the player can't create atoms: charges
 // start at MIN_START_CHARGE, which needs 2 × travel × (MIN_START_CHARGE − 1) seconds to run out

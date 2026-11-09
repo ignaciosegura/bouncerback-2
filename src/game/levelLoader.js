@@ -77,7 +77,7 @@ function checkRanges (level) {
   return problems
 }
 
-export function validateLevel (level) {
+function validateLevel (level) {
   const problems = checkSchema(level, schema, 'level')
   return problems.length > 0 ? problems : checkRanges(level)
 }
@@ -87,7 +87,7 @@ export function validateLevel (level) {
  * `number` is the level's number (1–5), used by the score formulas.
  * Throws if the file doesn't match docs/level-file-schema.json.
  */
-export function loadLevel (data, number) {
+function loadLevel (data, number) {
   const problems = validateLevel(data)
   if (problems.length > 0) {
     throw new Error(`Invalid level ${number}:\n  ${problems.join('\n  ')}`)

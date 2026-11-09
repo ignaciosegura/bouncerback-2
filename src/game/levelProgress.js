@@ -7,7 +7,7 @@ const STORAGE_KEY = 'bouncerback.levelProgress'
 const DEFAULT_PROGRESS = { unlockedTier: 0, beatenLevels: [] }
 
 // Raises the unlocked tier while every level of it is beaten and a higher tier exists
-export function unlockTiers (allLevels, { unlockedTier, beatenLevels }) {
+function unlockTiers (allLevels, { unlockedTier, beatenLevels }) {
   const maxTier = Math.max(...allLevels.map((level) => level.tier))
   let tier = unlockedTier
   while (tier < maxTier && allLevels

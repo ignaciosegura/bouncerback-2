@@ -35,7 +35,7 @@ const CAPTURE_TIME = 0.5
 export const CREATE_TIME = CAPTURE_TIME // the capture's pull-in played backwards
 const COLOR_TRANSITION_TIME = 0.5
 
-export const ATOM_COLORS = {
+const ATOM_COLORS = {
   WHITE: 0xffffff,
   YELLOW: 0xffff00, // charge CAPTURE_MIN_CHARGE
   RED: 0xff0000, // charge MAX_CHARGE
