@@ -367,41 +367,52 @@ button {
   display: block;
   width: calc(1518 * var(--u));
   aspect-ratio: 965.894 / 82.105;
-  margin-bottom: calc(132 * var(--u));
+  margin-bottom: var(--logo-gap);
   pointer-events: none;
 }
 
-/* A button is 1em of text plus 0.5em of padding on each side, plus its borders */
+/* A button is 1em of text plus 0.5em of padding on each side, plus its borders. Web builds have
+   four buttons (PLAY, SETTINGS, HOW TO, CREDITS), 64px apart, 132px below the logo; the desktop
+   builds a fifth (EXIT GAME), 32px apart and 96px below the logo (MAIN MENU - desktop mockup). The
+   menu's bottom margin keeps the logo's top at 182px: 716 is the screen's height (1080) minus twice
+   182, and the group is the logo (1518 wide, 965.894 / 82.105 in proportion), its gap and the menu */
 .main-menu-screen {
   --button-height: calc(2 * var(--font-menu) + 2 * var(--border-width));
+  --logo-gap: calc(132 * var(--u));
+  --button-gap: calc(64 * var(--u));
+  --button-count: 4;
+}
+
+.main-menu-screen--desktop {
+  --logo-gap: calc(96 * var(--u));
+  --button-gap: calc(32 * var(--u));
+  --button-count: 5;
 }
 
 .main-menu-screen .menu {
   position: relative;
-  margin-bottom: calc(123 * var(--u));
+  margin-bottom: calc(
+    716 * var(--u)
+    - 1518 * 82.105 / 965.894 * var(--u)
+    - var(--logo-gap)
+    - var(--button-count) * var(--button-height)
+    - (var(--button-count) - 1) * var(--button-gap)
+  );
 }
 
-/* Desktop builds (MAIN MENU - desktop mockup): a fourth button, EXIT GAME. The gaps between buttons
-   shrink to a third of a button's height to make room for it, and the logo's gap gives up whatever
-   is left (the 64px gap is a bit short of a button), so the logo and the last button's bottom stay
-   where they are on the web build */
-.main-menu-screen--desktop .menu__items {
-  gap: calc(var(--button-height) / 3);
-}
-
-.main-menu-screen--desktop .main-menu__logo {
-  margin-bottom: calc(132 * var(--u) - (2 * var(--button-height) - 2 * 64 * var(--u)));
+.main-menu-screen .menu__items {
+  gap: var(--button-gap);
 }
 
 /* Gamepad indicator (MAIN MENU mockups): the drawing's left edge 350px right of the screen's center
    (the menu is centered on it), spanning from the SETTINGS top to the HOW TO bottom: two buttons and
-   the 64px gap. On desktop it keeps that size, its bottom level with EXIT GAME's (MAIN MENU - desktop
-   mockup), so its height doesn't follow the desktop gap. Placed with left / bottom, not a transform:
-   it shakes with the menu in the screen-out */
+   the 64px gap. On desktop it keeps that size and place (MAIN MENU - desktop mockup), so neither
+   follows the desktop gaps: its top is the web build's, measured from the menu's top. Placed with
+   left / top, not a transform: it shakes with the menu in the screen-out */
 .gamepad-indicator {
   position: absolute;
   left: calc(50% + 350 * var(--u));
-  bottom: 0;
+  top: calc(var(--button-height) + 64 * var(--u) + 132 * var(--u) - var(--logo-gap));
   height: calc(2 * var(--button-height) + 64 * var(--u));
   aspect-ratio: 818 / 571;
   pointer-events: none;
@@ -423,29 +434,34 @@ button {
   text-transform: none;
 }
 
-/* Pinned 109px from the bottom (MAIN MENU mockup). Centered with inset + flex, not a translate:
-   the screen-out's shake animates transform on the screen's children and would wipe it out */
-.main-menu__credits {
+/* Credits (CREDITS mockup): 24px mixed-case text, centered, wrapped at 38 characters, one blank line
+   between paragraphs, its first line's top 178px from the top. The buttons are pinned 109px from the
+   bottom, 64px apart, all 393px wide (the longest label, MAN FROM SPACE, needs more than the usual 283px). Centered with inset + flex, not a translate: the screen-out's
+   shake animates transform on the screen's children and would wipe it out */
+.credits__text {
   position: absolute;
+  top: max(calc(178 * var(--u)), env(safe-area-inset-top));
   inset-inline: 0;
-  bottom: max(calc(109 * var(--u)), env(safe-area-inset-bottom));
+  margin-inline: auto;
+  width: 38ch;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: calc(23 * var(--u));
+  gap: calc(24 * var(--u));
+  font-size: var(--font-hud);
+  text-align: center;
   text-transform: none;
+  white-space: normal;
 }
 
-/* The links look like the text around them and give no feedback */
-.main-menu__credits a,
-.main-menu__credits a:visited,
-.main-menu__credits a:hover,
-.main-menu__credits a:active,
-.main-menu__credits a:focus,
-.main-menu__credits a:focus-visible {
-  color: inherit;
-  text-decoration: none;
-  outline: none;
+.credits__menu {
+  position: absolute;
+  inset-inline: 0;
+  margin-inline: auto;
+  bottom: max(calc(109 * var(--u)), env(safe-area-inset-bottom));
+}
+
+.credits__menu .button {
+  min-width: calc(393 * var(--u));
 }
 
 /* How To Play (HOW TO PLAY mockup): text on the left (x 202, 38 characters wide), the drawing and BACK on the right.

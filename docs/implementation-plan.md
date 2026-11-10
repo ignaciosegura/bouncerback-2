@@ -75,7 +75,7 @@ Out of scope: Steamworks, the overlay, Proton, Steam depots, Windows and macOS b
   - Registers the `app://` scheme as privileged (standard, secure, fetch, streaming for audio) and serves files from `dist/` through it, refusing any path that leaves `dist/`.
   - Creates one `BrowserWindow`: fullscreen, black background (no white flash at start), no menu bar, the window title "Bouncerback", context isolation and the sandbox on, no Node in the page, no preload.
   - Loads `app://bouncerback/index.html`.
-  - Links that open a new window (the Main Menu credits) go to the system browser (`shell.openExternal`), and the app never opens a second Electron window.
+  - Links that open a new window (the Credits screen's LICENSES button) go to the system browser (`shell.openExternal`), and the app never opens a second Electron window.
   - F11 toggles fullscreen. Ctrl+Shift+I opens DevTools (test build convenience; reconsider before release).
   - On Linux, appends the `ozone-platform=x11` switch.
   - At startup writes a short `launch-info.txt` to the app's user-data folder (`~/.config/bouncerback/` on Linux): Electron and Chromium versions, `app.getGPUFeatureStatus()`, the display size and scale factor. On the Deck in Game Mode there are no DevTools at hand, so this is how to tell whether WebGL is hardware-accelerated.

@@ -11,14 +11,19 @@ Every change from one screen to another plays the screen transition (see "Screen
   - Play Button
   - Settings Button
   - How To Button
+  - Credits Button
   - Exit Game Button *(desktop builds only; see the MAIN MENU - desktop mockup)*: the screen-out plays and the music fades out, then the game quits. No confirmation.
-  - Credits at the bottom: "A game by NIK NAK STUDIO" and "Music and sfx by MAN FROM SPACE". The names are links that open in a new tab: https://niknak.es and https://manfromspace.com
 - **Level Selection Screen**
   - One button per level, labeled with the level file's `name` (LEARN, FEMTOCOSMOS, CHRONOSAEDR0N, MEKANOMANCER, PROTOGLYPH, ANTICOHERENCE, QUANTAMORPHICA, SOLITONIQ, NEUTRONIKA), arranged in one row per tier (see "Level unlocking" in `game-rules.md` and the LEVEL MENU mockup).
   - Locked levels show 12 dashes instead of their name and can't be selected: clicks and taps do nothing, and the game controller skips them (see the LEVEL MENU (LOCKED LEVELS) mockup).
   - Back Button
 - **How To Play Screen**
   - The game's instructions (`docs/game-instructions.md`) and an example drawing of the arena (Paddle, Atom, Core, Containment ring)
+  - Back Button
+- **Credits Screen** *(see the CREDITS mockup)*
+  - Who made the game (text only)
+  - Nik Nak Studio and Man From Space Buttons: open https://www.niknak.es and https://www.manfromspace.com in a new tab
+  - Licenses Button: opens the third-party licenses file on GitHub in a new tab
   - Back Button
 - **Settings Screen**
   - Music Volume dual-button
@@ -53,7 +58,7 @@ The Android system back button (and its gesture) follows the navigation below. I
 
 | Screen | Back button |
 | :--- | :--- |
-| Level Selection, How To Play, Settings, Game Over, You Win! | → Main Menu |
+| Level Selection, How To Play, Credits, Settings, Game Over, You Win! | → Main Menu |
 | Game Screen | Opens the Pause Overlay (never leaves the game) |
 | Pause Overlay | Resumes the game (same as `<<< RESUME`) |
 | Intro, Main Menu | Leaves the app (the system default) |
@@ -66,7 +71,7 @@ In the desktop builds, the Escape key follows the navigation below. Like taps, i
 
 | Screen | Escape |
 | :--- | :--- |
-| Level Selection, How To Play, Settings, Game Over, You Win! | → Main Menu |
+| Level Selection, How To Play, Credits, Settings, Game Over, You Win! | → Main Menu |
 | Game Screen | Opens the Pause Overlay (never leaves the game) |
 | Pause Overlay | Resumes the game (same as `<<< RESUME`) |
 | Gameplay Tips | Leaves the level → Main Menu (same as the Pause Overlay's EXIT TO MENU) |

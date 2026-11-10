@@ -108,6 +108,7 @@ root/
     │   ├── IntroScreen.jsx         # First screen: ENTER BOUNCERBACK button (unlocks audio)
     │   ├── MainMenuScreen.jsx      # Main menu screen with the game logo (menu music and background animation start here)
     │   ├── SettingsMenuScreen.jsx  # Settings menu screen
+    │   ├── CreditsScreen.jsx       # Credits screen: who made the game, LICENSES (opens the licenses file on GitHub), Back
     │   ├── HowToPlayScreen.jsx     # How To Play screen: instructions text, example drawing, Back
     │   ├── LevelSelectionMenuScreen.jsx  # Level selection menu screen
     │   ├── GameScreen.jsx          # Houses the PixiCanvas component & HUD overlay

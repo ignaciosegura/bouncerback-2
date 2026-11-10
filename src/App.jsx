@@ -9,6 +9,7 @@ import MainMenuScreen from './screens/MainMenuScreen.jsx'
 import LevelSelectionMenuScreen from './screens/LevelSelectionMenuScreen.jsx'
 import SettingsMenuScreen from './screens/SettingsMenuScreen.jsx'
 import HowToPlayScreen from './screens/HowToPlayScreen.jsx'
+import CreditsScreen from './screens/CreditsScreen.jsx'
 import GameScreen from './screens/GameScreen.jsx'
 import GameOverScreen from './screens/GameOverScreen.jsx'
 import YouWinScreen from './screens/YouWinScreen.jsx'
@@ -23,6 +24,7 @@ const SCREENS = {
   LEVEL_SELECT: 'levelSelect',
   SETTINGS: 'settings',
   HOW_TO: 'howTo',
+  CREDITS: 'credits',
   GAME: 'game',
   GAME_OVER: 'gameOver',
   YOU_WIN: 'youWin'
@@ -32,7 +34,7 @@ const SCREENS = {
 const EXIT_GAME = 'exitGame'
 
 // Screens drawn over the menu background animation; it plays uninterrupted between them
-const MENU_BACKGROUND_SCREENS = [SCREENS.MAIN_MENU, SCREENS.LEVEL_SELECT, SCREENS.SETTINGS, SCREENS.HOW_TO]
+const MENU_BACKGROUND_SCREENS = [SCREENS.MAIN_MENU, SCREENS.LEVEL_SELECT, SCREENS.SETTINGS, SCREENS.HOW_TO, SCREENS.CREDITS]
 
 export default function App () {
   const [screen, setScreen] = useState(SCREENS.INTRO)
@@ -225,6 +227,7 @@ export default function App () {
           onPlay={() => navigate(SCREENS.LEVEL_SELECT)}
           onSettings={() => navigate(SCREENS.SETTINGS)}
           onHowTo={() => navigate(SCREENS.HOW_TO)}
+          onCredits={() => navigate(SCREENS.CREDITS)}
           onExit={exitGame}
           onLogoRect={setLogoRect}
         />
@@ -247,6 +250,9 @@ export default function App () {
 
     case SCREENS.HOW_TO:
       return <HowToPlayScreen onBack={goToMainMenu} />
+
+    case SCREENS.CREDITS:
+      return <CreditsScreen onBack={goToMainMenu} />
 
     case SCREENS.GAME:
       return (

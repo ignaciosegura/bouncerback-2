@@ -10,9 +10,9 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 ## Menu background animation
 
-* The Main Menu, Level Select, Settings and How To Play screens show the vector animation `assets/motion/intro_animation.json` (Lottie) on top of the white (#D8D8D8) background and behind the text and buttons. Its light-grey and white lines are meant to be subtle, tone on tone. The Intro screen (ENTER BOUNCERBACK) doesn't show it: it's a plain white (#D8D8D8) background.
+* The Main Menu, Level Select, Settings, How To Play and Credits screens show the vector animation `assets/motion/intro_animation.json` (Lottie) on top of the white (#D8D8D8) background and behind the text and buttons. Its light-grey and white lines are meant to be subtle, tone on tone. The Intro screen (ENTER BOUNCERBACK) doesn't show it: it's a plain white (#D8D8D8) background.
 * It starts at the same moment as the menu music (they were made together), and stays still until the music starts.
-* It plays continuously while the player moves between those four screens: changing screens never restarts or pauses it. It starts again from the beginning when the player comes back to the menus after playing a level.
+* It plays continuously while the player moves between those five screens: changing screens never restarts or pauses it. It starts again from the beginning when the player comes back to the menus after playing a level.
 * It covers the whole screen (cropped at the top and bottom on screens wider than 16:9) and loops: the content (about 125 s) plus 5 seconds of empty background, then back to the start.
 * It's drawn on a PixiJS canvas behind the menus' HTML layer (`src/menu/MenuScene.js`): Lottie's canvas renderer draws each frame into an off-screen canvas, which PixiJS shows as a full-screen texture. It looks the same as when Lottie drew it as SVG; drawing it in PixiJS lets the CRT effect process it (see "CRT on the menus" in `docs/design-decisions.md`).
 
@@ -34,22 +34,21 @@ The screen will be used in forced landscape mode. The visual style is based on e
 
 ## Game logo
 
-* The game logo (source art: `assets/images/game_logo.svg`, vector, black) is shown at the top of the Main Menu, above its buttons: PLAY, SETTINGS and HOW TO (see the MAIN MENU mockup), plus EXIT GAME in the desktop builds (see the MAIN MENU - desktop mockup). It isn't shown on any other screen, How To Play included. It's drawn by PixiJS in the menu scene, behind the HTML layer (`src/menu/MenuLogo.js`), from the same vector paths, one shape per piece so each piece can blink on its own; an empty box in the Main Menu's layout (`src/components/Logo.jsx`) holds its place and names it for screen readers. Drawing it in PixiJS lets the CRT effect process it with the background (see "CRT on the menus" in `docs/design-decisions.md`). It looks and behaves as any other element of the screen: it fades, tints and shakes with the buttons in the screen transitions (see "Screen transitions").
+* The game logo (source art: `assets/images/game_logo.svg`, vector, black) is shown at the top of the Main Menu, above its buttons: PLAY, SETTINGS, HOW TO and CREDITS (see the MAIN MENU mockup), plus EXIT GAME in the desktop builds (see the MAIN MENU - desktop mockup). It isn't shown on any other screen, How To Play and Credits included. It's drawn by PixiJS in the menu scene, behind the HTML layer (`src/menu/MenuLogo.js`), from the same vector paths, one shape per piece so each piece can blink on its own; an empty box in the Main Menu's layout (`src/components/Logo.jsx`) holds its place and names it for screen readers. Drawing it in PixiJS lets the CRT effect process it with the background (see "CRT on the menus" in `docs/design-decisions.md`). It looks and behaves as any other element of the screen: it fades, tints and shakes with the buttons in the screen transitions (see "Screen transitions").
 * At the 1920x1080 reference size it's 1518px wide, horizontally centered, with its top edge 182px from the top of the screen. The PLAY button's top edge is 132px below the logo's bottom edge, and the buttons keep the usual 64px gap between them.
-* **Desktop builds** (MAIN MENU - desktop mockup): the fourth button, EXIT GAME, goes under HOW TO. To make room for it, the gap between the buttons shrinks to a third of a button's height (about 23.3px; a button is 70px tall), and the gap between the logo and PLAY shrinks by whatever extra height is left (to 120px), so the logo and the last button's bottom stay where they are on the other builds. The mockup draws these gaps at 32px and 96px; the rule above wins.
+* **Desktop builds** (MAIN MENU - desktop mockup): a fifth button, EXIT GAME, goes under CREDITS. The gap between the buttons shrinks to 32px and the gap between the logo and PLAY to 96px, as the mockup draws them; the logo's top stays at 182px (the group stays centered).
 * The logo's pieces blink at random. About once every 2 seconds, at irregular moments (0.5 to 3.5 s apart), one piece turns white (#FFFFFF) at once, then fades back to the logo's color in 0.15 s. A piece is a letter or one of the E's three bars; the O's ring and dot blink together. The same piece never blinks twice in a row, and two pieces never blink at once. Blinking continues during screen transitions; a piece blinking during the screen-out fades to the tint color instead of black.
 
-## Main Menu credits
+## Credits screen
 
-* The Main Menu shows two lines of credits at the bottom of the screen (see the MAIN MENU mockup):
-    * "A game by NIK NAK STUDIO"
-    * "Music and sfx by MAN FROM SPACE"
-* They're written in mixed case exactly as above, not all uppercase, like the Intro screen note.
-* They're 24px, in the screen's foreground color (black on the white #D8D8D8 background), with no border. Each line is horizontally centered on its own.
-* At the 1920x1080 reference size, there are 23px between the two lines, and the bottom of the second line is 109px above the bottom of the screen. The logo and the buttons don't move to make room for them.
-* The names are links that open in a new tab: NIK NAK STUDIO → https://niknak.es, MAN FROM SPACE → https://manfromspace.com. The rest of each line isn't a link.
-* The links look exactly like the text around them: same color, no underline, no change once visited. They give no feedback on hover, press, tap or focus.
-* They're one of the screen's elements, so they take part in the screen transitions together with the logo and the buttons (see "Screen transitions").
+* Opened by the Main Menu's CREDITS button (see the CREDITS and MAIN MENU mockups). Light layout over the menu background animation, like Settings. The Main Menu itself no longer shows credits text.
+* The text, in mixed case exactly as written (a non-interactive informative text, like the How To Play instructions), 24px, centered, no border, wrapped at 38 characters, one blank line between paragraphs:
+    * "BOUNCERBACK is a game designed and developed by Nik Nak Studio in 2026."
+    * "Gameplay design and development:" and, on its own line, "Ignacio Segura"
+    * "Music and SFX:" and, on its own line, "Man from Space"
+* Four buttons at the bottom, 64px apart and 393px wide (wider than the usual 283px for the longest label, MAN FROM SPACE): NIK NAK STUDIO and MAN FROM SPACE, which open https://www.niknak.es and https://www.manfromspace.com in a new tab; LICENSES, which opens the third-party licenses file on GitHub in a new tab (`THIRD-PARTY-LICENSES.md`), and `<<< BACK`, which returns to the Main Menu.
+* At the 1920x1080 reference size, the text's first line starts 178px from the top, and the bottom of BACK is 109px above the bottom of the screen.
+* All of it takes part in the screen transitions (see "Screen transitions").
 
 ## Main Menu gamepad indicator
 
@@ -59,7 +58,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
     * Controller detected: "Gamepad detected", with the full drawing: sticks, d-pad and face buttons (`assets/images/gamepad_detected.svg`).
 * It switches as soon as a controller is connected or disconnected. Browsers only expose a controller once one of its buttons has been pressed on the page, so any menu interaction with the controller switches it to "Gamepad detected". Only the controllers the game can use count (see "Supported controllers" in `docs/game-controller.md`).
 * The text is 24px, in sentence case exactly as above (a non-interactive informative text, like the credits), in the screen's foreground color, with no border, on one line, horizontally centered over the drawing (it's wider than the drawing). The drawing is in the foreground color too.
-* At the 1920x1080 reference size, the drawing's left edge is 350px right of the screen's center, its top is level with the SETTINGS button's top and its bottom with the HOW TO button's bottom. In the desktop builds it keeps the same size and place: its bottom is level with EXIT GAME's bottom, and its top no longer lines up with a button. The bottom of the text line is 27px above the drawing's top. The logo, the buttons and the credits don't move to make room for it.
+* At the 1920x1080 reference size, the drawing's left edge is 350px right of the screen's center, its top is level with the SETTINGS button's top and its bottom with the HOW TO button's bottom. In the desktop builds it keeps the same size and place, which no longer line up with the buttons (MAIN MENU - desktop mockup). The bottom of the text line is 27px above the drawing's top. The logo and the buttons don't move to make room for it.
 * It isn't shown on phones and tablets: in the native apps, and in browsers whose primary input is touch only.
 * It's one of the screen's elements, so it takes part in the screen transitions together with the logo and the buttons (see "Screen transitions"). Controller navigation never selects it.
 
@@ -68,12 +67,12 @@ The screen will be used in forced landscape mode. The visual style is based on e
 * All menus and texts will be wrapped in a transparent rectangle with a thin border, the same color as the text.
 * The distance between the text and the border will always be 0.5 em, meaning that it will scale with the font size (matches the mockups).
 * Font size should always be (at the 1920x1080 reference size of the mockups; see "Scaling" below):
-    * 24px for HUD text during gameplay, and for the Main Menu credits and gamepad indicator (see "Main Menu credits" and "Main Menu gamepad indicator")
+    * 24px for HUD text during gameplay, and for the Credits screen's text and the Main Menu gamepad indicator (see "Credits screen" and "Main Menu gamepad indicator")
     * 32px for all menu buttons, and for the Intro screen's note (see "Intro screen note")
     * 64px for the texts "GAME OVER" and "YOU WIN!" texts in those screens.
 * Line height will be exactly 1.
 * Font weight normal/regular in all cases (no bold or italic).
-* All texts will be uppercase, except the non-interactive informative texts, which are written in mixed case: the Intro screen note, the Main Menu credits, the Main Menu gamepad indicator, the How To Play instructions and the Gameplay tips (see "Intro screen note", "Main Menu credits", "Main Menu gamepad indicator", "How To Play screen" and "Gameplay tips"). Buttons, including READY, are always uppercase.
+* All texts will be uppercase, except the non-interactive informative texts, which are written in mixed case: the Intro screen note, the Credits screen's text, the Main Menu gamepad indicator, the How To Play instructions and the Gameplay tips (see "Intro screen note", "Credits screen", "Main Menu gamepad indicator", "How To Play screen" and "Gameplay tips"). Buttons, including READY, are always uppercase.
 * The font used will be "C64 Angled", a monospaced font: `assets/fonts/c64_angled.ttf`.
 * All text boxes and buttons should put all the text in one line (no line-breaks). The only exception is the How To Play screen's instructions (see "How To Play screen").
 
@@ -149,7 +148,7 @@ See the LEVEL MENU and LEVEL MENU (LOCKED LEVELS) mockups.
 
 * The game arena (the game canvas: ring, core, atoms, paddles, echoes and the black or dark red background) is shown as if on an old CRT screen. It's a post-process applied to the finished image, so the shapes themselves are still the same 2D vector drawings.
 * The HUD is not part of it: it stays flat and sharp on top, with no curvature, scanlines or blur.
-* The menu screens that show the menu background animation (Main Menu, Level Select, Settings, How To Play) get the CRT layers too: the animation, its `#D8D8D8` background and the Main Menu logo are on the same TV as the arena. Their buttons, texts, credits and the How To Play instructions and drawing stay flat and sharp on top, like the HUD, and inside the glass. They get no zoom blur (it radiates from the core, and the menus have none). The Intro, Game Over and You Win! screens don't change.
+* The menu screens that show the menu background animation (Main Menu, Level Select, Settings, How To Play, Credits) get the CRT layers too: the animation, its `#D8D8D8` background and the Main Menu logo are on the same TV as the arena. Their buttons, texts, credits and the How To Play instructions and drawing stay flat and sharp on top, like the HUD, and inside the glass. They get no zoom blur (it radiates from the core, and the menus have none). The Intro, Game Over and You Win! screens don't change.
 * The player chooses: the Settings screen's **OLD TV** switch (`OLD TV ON` / `OLD TV OFF`, below SFX, as wide as the volume controls; see the SETTINGS MENU mockup) turns the CRT layers and the bloom (curved glass, chromatic aberration, scanlines, phosphor mask, vignette) on and off, on the arena and on those menu screens. Switching it on the Settings screen changes the screen behind it at once. The Pause overlay has the same switch, which changes the arena mid-level. It's **off by default** and saved like the volumes. The zoom blur isn't part of the switch: it's always on.
 * The effect is made of these layers, from the scene outward:
     * Zoom blur: a copy of the arena blurred into streaks that point away from the core, mixed over the arena at a low opacity, so it stays subtle (aesthetic reference: Resolume Avenue's Radial Blur). Streak length grows with an object's distance from the core, so the paddles and atoms streak, while the core and the thin ring only get a faint halo. The streaks always come from the core, also while it moves during the last life zoom.
