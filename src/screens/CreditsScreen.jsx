@@ -4,8 +4,7 @@ import Button from '../components/Button.jsx'
 
 const NIK_NAK_URL = 'https://www.niknak.es'
 const MAN_FROM_SPACE_URL = 'https://www.manfromspace.com'
-// TODO: the exact link to the licenses file on GitHub is still to be provided
-const LICENSES_URL = 'https://github.com/'
+const LICENSES_URL = 'https://github.com/ignaciosegura/bouncerback-2/blob/master/THIRD-PARTY-LICENSES.md'
 
 // Buttons rather than links, so the game controller can select them. They open in a new tab; the
 // desktop build hands them to the system browser
