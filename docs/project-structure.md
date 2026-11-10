@@ -11,7 +11,7 @@ root/
 ├── electron-builder.json           # Desktop packaging config (`npm run desktop:build:linux`, `npm run desktop:build:win`)
 ├── release/                        # Desktop builds made by electron-builder (not committed)
 ├── package.json                  
-├── scripts/                        # Node scripts run through npm (deploy-ftp.js, validate-levels.js: checks src/levels/*.json against docs/level-file-schema.json, `npm run validate:levels`; level-difficulty-table.js: prints the level difficulty table, `npm run level:table`, see docs/level-difficulty-table.md)
+├── scripts/                        # Node scripts run through npm (deploy-ftp.js, validate-levels.js: checks src/levels/*.json against docs/level-file-schema.json, `npm run validate:levels`; level-difficulty-table.js: prints the level difficulty table, `npm run level:table`, see docs/level-difficulty-table.md; third-party-licenses.js: regenerates THIRD-PARTY-LICENSES.md from the installed dependencies, `npm run licenses`)
 └── assets/                         # Static assets
     ├── audio/                      # Sound effects & music files for Howler.js
     ├── images/                     # SVG vector assets and mobile app icon

@@ -21,6 +21,7 @@
     "desktop:build:win": "vite build && electron-builder --win zip --x64",
     "validate:levels": "node scripts/validate-levels.js",
     "level:table": "node scripts/level-difficulty-table.js",
+    "licenses": "node scripts/third-party-licenses.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "deploy:ftp": "node --env-file=.env.ftp scripts/deploy-ftp.js",
