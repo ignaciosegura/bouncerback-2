@@ -3,6 +3,7 @@ import Screen from '../components/Screen.jsx'
 import HUD from '../components/HUD.jsx'
 import PauseOverlay from './PauseOverlay.jsx'
 import GameplayTips from './GameplayTips.jsx'
+import InterstitialText from './InterstitialText.jsx'
 import GameEngine from '../game/GameEngine.js'
 import { livesShown } from '../game/levelLoader.js'
 
@@ -18,6 +19,8 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
   const [tip, setTip] = useState(level.tip !== null ? 'shown' : null)
   // The level's end-of-level picture is on the canvas: the HUD is hidden at once
   const [interstitial, setInterstitial] = useState(false)
+  // The lines over that picture, if its level file gives any
+  const [interstitialText, setInterstitialText] = useState(null)
   const handleScoreChange = useEffectEvent((value) => onScoreChange(value))
   const handleGameOver = useEffectEvent((result) => onGameOver(result))
   const handleLevelWin = useEffectEvent((result) => onLevelWin(result))
@@ -28,13 +31,17 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
 
   // PixiJS owns the canvas and the game loop; React only receives the engine's low-frequency updates
   useEffect(() => {
+    const showInterstitial = ({ interstitial, interstitialText }) => {
+      setInterstitial(interstitial)
+      setInterstitialText(interstitialText)
+    }
     const engine = new GameEngine(level, {
       onScoreChange: (value) => { setScore(value); handleScoreChange(value) },
       onLivesChange: setLives,
       onTimeChange: setTimeTenths,
       onPauseChange: ({ paused, backgroundColor }) => setPause(paused ? { backgroundColor } : null),
-      onGameOver: (result) => { setInterstitial(result.interstitial); handleGameOver(result) },
-      onLevelWin: (result) => { setInterstitial(result.interstitial); handleLevelWin(result) },
+      onGameOver: (result) => { showInterstitial(result); handleGameOver(result) },
+      onLevelWin: (result) => { showInterstitial(result); handleLevelWin(result) },
       onContinue: () => handleContinue()
     }, { oldTv: getOldTv(), waitForBegin: level.tip !== null })
     engineRef.current = engine
@@ -75,13 +82,15 @@ export default function GameScreen ({ level, hiScore, settings, onScoreChange, o
   return (
     <Screen variant="dark" className="game-screen">
       <div ref={canvasContainerRef} className="game-screen__canvas" />
-      {!interstitial && <HUD score={score} timeTenths={timeTenths} hiScore={Math.max(hiScore, score)} lives={lives} />}
-      <HUD
-        score={score}
-        timeTenths={level.timeGoesBackwards ? level.timerTenths - timeTenths : timeTenths}
-        hiScore={Math.max(hiScore, score)}
-        lives={livesShown(level, lives)}
-      />
+      {!interstitial && (
+        <HUD
+          score={score}
+          timeTenths={level.timeGoesBackwards ? level.timerTenths - timeTenths : timeTenths}
+          hiScore={Math.max(hiScore, score)}
+          lives={livesShown(level, lives)}
+        />
+      )}
+      {interstitialText && <InterstitialText lines={interstitialText} />}
       {tip && (
         <GameplayTips
           lines={level.tip}

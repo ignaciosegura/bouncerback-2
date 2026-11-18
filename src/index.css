@@ -633,6 +633,22 @@ button {
   text-transform: none;
 }
 
+/* End-of-level interstitial text: the tip's top edge (359px) and size, left-aligned with the HUD's
+   SCORE (same left padding as .hud) plus 5 characters */
+
+.interstitial-text {
+  padding:
+    calc(359 * var(--u))
+    0
+    0
+    calc(max(calc(97 * var(--u)), env(safe-area-inset-left)) + 5em);
+  color: var(--color-black);
+  font-size: var(--font-menu);
+  line-height: 1;
+  text-align: left;
+  text-transform: none;
+}
+
 /* Game */
 
 .game-screen__canvas {
