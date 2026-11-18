@@ -21,5 +21,12 @@
   "tip": [
     "You can not capture atoms yet.",
     "Make sure they don't escape the containment ring."
-  ]
+  ],
+  "youWinInterstitial": {
+    "screen": "doctor_1.png",
+    "text": [
+      "Something's odd",
+      "It works, but it seems awake."
+    ]
+  }
 }

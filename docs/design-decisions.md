@@ -120,7 +120,7 @@ Decisions taken with the user while planning, with their reasons, moved here fro
 - **Cost:** new on screens that cost almost nothing today. Per frame: the canvas renderer draws the animation on the CPU, one full-screen texture upload (only when Lottie drew a new frame), and with OLD TV on, the CRT's final pass (as on the arena, minus the zoom blur). If a phone struggles, `menuSettings.js` can lower the off-screen canvas' resolution: the CRT softens the picture anyway.
 
 ### Storytelling: end-of-level interstitials (cycle 3)
-- **Goal:** the first storytelling element: a level can show a picture after it's won or lost, before the result screen (Phases 57–58). Named per outcome in the level file (`youWinInterstitial`, `gameOverInterstitial`); missing or blank means no picture and the level ends as before.
+- **Goal:** the first storytelling element: a level can show a picture after it's won or lost, before the result screen (Phases 57–58). Named per outcome in the level file (`youWinInterstitial`, `gameOverInterstitial`, each an object with a `screen` and an optional `text`); missing, or a blank `screen`, means no picture and the level ends as before.
 - **Choices made with the user:**
   - **Drawn in the PixiJS game canvas**, not in React, so it follows OLD TV like the arena: same bloom and CRT values (the pictures are deliberately low fidelity, so they need none of their own), never the zoom blur, which radiates from the core.
   - **Cut in and cut out.** The picture replaces the arena at once and the HUD goes with it; on continue, the result screen replaces it at once and plays only its screen-in (a screen-out would leave the picture standing still for a second with nothing animating).

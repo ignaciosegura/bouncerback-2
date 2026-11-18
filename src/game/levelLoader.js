@@ -4,7 +4,7 @@ import { ADDITIONAL_MECHANICS } from './additionalMechanics.js'
 // Level Select buttons are sized for names this long (the longest planned: QUANTAMORPHICA)
 export const LEVEL_NAME_MAX_LENGTH = 14
 
-// The end-of-level pictures named by youWinInterstitial / gameOverInterstitial: file name → bundled URL
+// The end-of-level pictures named by the `screen` of youWinInterstitial / gameOverInterstitial: file name → bundled URL
 const interstitialFiles = Object.fromEntries(
   Object.entries(import.meta.glob('../../assets/interstitials/*.png', { eager: true, query: '?url', import: 'default' }))
     .map(([path, url]) => [path.split('/').pop(), url])
@@ -14,6 +14,12 @@ const INTERSTITIAL_FIELDS = ['youWinInterstitial', 'gameOverInterstitial']
 // Missing or blank (empty, or only spaces): no picture
 function interstitialName (value) {
   return value?.trim() || null
+}
+
+function loadInterstitial (data) {
+  const screen = interstitialFiles[interstitialName(data?.screen)]
+  if (!screen) return null
+  return { screen, text: data.text?.length ? data.text : null }
 }
 
 // Paddles that can be set at once when the level file has no paddles.count (the schema's default)
@@ -90,11 +96,11 @@ function checkRanges (level) {
   if (level.name.length > LEVEL_NAME_MAX_LENGTH) problems.push(`level.name must be at most ${LEVEL_NAME_MAX_LENGTH} characters`)
   if (level.tier < 0) problems.push('level.tier must be 0 or greater')
   for (const field of INTERSTITIAL_FIELDS) {
-    const name = interstitialName(level[field])
-    if (name && !(name in interstitialFiles)) problems.push(`level.${field}: assets/interstitials/${name} doesn't exist`)
-  }
-  if (level.youWinInterstitialText?.length && !interstitialName(level.youWinInterstitial)) {
-    problems.push('level.youWinInterstitialText needs a youWinInterstitial to be drawn over')
+    const interstitial = level[field]
+    if (!interstitial) continue
+    const name = interstitialName(interstitial.screen)
+    if (name && !(name in interstitialFiles)) problems.push(`level.${field}.screen: assets/interstitials/${name} doesn't exist`)
+    if (!name && interstitial.text?.length) problems.push(`level.${field}.text needs a screen to be drawn over`)
   }
   return problems
 }
@@ -127,11 +133,9 @@ function loadLevel (data, number) {
     lives: data.lives,
     timeGoesBackwards: data.timeGoesBackwards ?? false,
     tip: data.tip ?? null,
-    // URLs of the end-of-level pictures, or null for none
-    youWinInterstitial: interstitialFiles[interstitialName(data.youWinInterstitial)] ?? null,
-    // Lines drawn over the win picture, or null for none
-    youWinInterstitialText: data.youWinInterstitialText?.length ? data.youWinInterstitialText : null,
-    gameOverInterstitial: interstitialFiles[interstitialName(data.gameOverInterstitial)] ?? null,
+    // The end-of-level interstitials: { screen: URL of the picture, text: lines drawn over it or null }, or null for none
+    youWinInterstitial: loadInterstitial(data.youWinInterstitial),
+    gameOverInterstitial: loadInterstitial(data.gameOverInterstitial),
     // Fixed when the level is loaded: mechanics never change while a level is played
     additionalGameMechanics: Object.freeze([...data.additionalGameMechanics]),
     atomCapture: data.additionalGameMechanics.includes(ADDITIONAL_MECHANICS.ATOM_CAPTURE),

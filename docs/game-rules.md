@@ -50,7 +50,7 @@ If an atom escapes the containment ring, the player will lose one life immediate
 
 ## Game over condition
 
-If the player runs out of lives (it reaches zero), the game will end in a "Game over" screen. Before it, the game freezes and then zooms in on the atom that took the last life (see "Last life lost" in `docs/graphical-specs.md`); the "Game over" screen comes 2 seconds after the loss. If the level file names a `gameOverInterstitial`, its picture comes first, until the player continues (see "End-of-level interstitials" in `docs/graphical-specs.md`).
+If the player runs out of lives (it reaches zero), the game will end in a "Game over" screen. Before it, the game freezes and then zooms in on the atom that took the last life (see "Last life lost" in `docs/graphical-specs.md`); the "Game over" screen comes 2 seconds after the loss. If the level file has a `gameOverInterstitial`, its `screen` picture comes first, until the player continues (see "End-of-level interstitials" in `docs/graphical-specs.md`).
 
 ## Level end condition
 
@@ -60,7 +60,7 @@ The core collapse is safe for the player:
 
 * When the timer reaches zero, the core stops emitting atoms, all paddles disappear and player input is disabled.
 * Every atom still inside the containment ring is pulled into the core. No atom can escape during the core collapse, so no lives can be lost. Atoms that were already fading out after escaping are ignored.
-* The core collapse lasts 2 seconds and plays together with the `vortex_creation` sound effect. The core grows to the size of the ring while every atom slows down to a stop, then the core collapses and takes all atoms with it (see "Level end (core collapse)" in `graphical-specs.md`). Then the "YOU WIN!" screen is shown, or first the level's `youWinInterstitial` picture, if its file names one, until the player continues (see "End-of-level interstitials" in `graphical-specs.md`). The win counts (level unlocking) when the core collapse ends, picture or not.
+* The core collapse lasts 2 seconds and plays together with the `vortex_creation` sound effect. The core grows to the size of the ring while every atom slows down to a stop, then the core collapses and takes all atoms with it (see "Level end (core collapse)" in `graphical-specs.md`). Then the "YOU WIN!" screen is shown, or first the level's `youWinInterstitial` picture (its `screen`), if the level file has one, until the player continues (see "End-of-level interstitials" in `graphical-specs.md`). The win counts (level unlocking) when the core collapse ends, picture or not.
 
 # Player input mechanics
 

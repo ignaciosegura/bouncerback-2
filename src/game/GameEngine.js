@@ -1101,14 +1101,14 @@ export default class GameEngine {
       this.releaseAtom(atom)
     }
     this.addScore(bonus)
-    this.end('onLevelWin', this.level.youWinInterstitial, this.level.youWinInterstitialText)
+    this.end('onLevelWin', this.level.youWinInterstitial)
   }
 
   // End-of-level interstitials
 
   // Loading starts with the level, so the pictures are ready when it ends
   loadInterstitials () {
-    for (const url of [this.level.youWinInterstitial, this.level.gameOverInterstitial]) {
+    for (const url of [this.level.youWinInterstitial?.screen, this.level.gameOverInterstitial?.screen]) {
       if (!url || this.interstitialTextures.has(url)) continue
       const image = new Image()
       image.src = url
@@ -1131,16 +1131,16 @@ export default class GameEngine {
   // The end animation is over: the outcome's picture, if it has one, else straight to the result.
   // The result is emitted at once either way, so React saves it now. If the picture isn't loaded
   // yet, the last frame stays until it is; if it failed, there's no picture.
-  end (event, url, lines = null) {
+  end (event, interstitial) {
     this.state = STATE.ENDED
-    const texture = url && this.interstitialTextures.get(url)
+    const texture = interstitial && this.interstitialTextures.get(interstitial.screen)
     if (!texture) {
       this.emit(event, { score: this.score, interstitial: false })
       return
     }
     texture.then((loaded) => {
       if (this.destroyed) return
-      if (loaded) this.showInterstitial(loaded, lines)
+      if (loaded) this.showInterstitial(loaded, interstitial.text)
       this.emit(event, { score: this.score, interstitial: Boolean(loaded) })
     })
   }

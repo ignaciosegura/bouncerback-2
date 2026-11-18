@@ -36,12 +36,12 @@ for (const file of files) {
   // The schema can't tell whether a named picture exists: missing or blank names none
   if (errors.length === 0) {
     for (const field of INTERSTITIAL_FIELDS) {
-      const picture = level[field]?.trim()
-      if (picture && !existsSync(join(interstitialsDir, picture))) errors.push(`.${field} assets/interstitials/${picture} doesn't exist`)
+      const interstitial = level[field]
+      if (!interstitial) continue
+      const picture = interstitial.screen.trim()
+      if (picture && !existsSync(join(interstitialsDir, picture))) errors.push(`.${field}.screen assets/interstitials/${picture} doesn't exist`)
+      if (!picture && interstitial.text?.length) errors.push(`.${field}.text needs a screen to be drawn over`)
     }
-  }
-  if (errors.length === 0 && level.youWinInterstitialText?.length && !level.youWinInterstitial?.trim()) {
-    errors.push('.youWinInterstitialText needs a youWinInterstitial to be drawn over')
   }
   if (errors.length === 0) {
     console.log(`OK   ${name}`)
