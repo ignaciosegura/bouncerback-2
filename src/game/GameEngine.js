@@ -86,7 +86,7 @@ const STATE = {
  */
 export default class GameEngine {
   // `oldTv`: the Settings "OLD TV" switch (the CRT layers); changed mid-level with setOldTv()
-  constructor (level, callbacks, { oldTv = false, waitForBegin = false } = {}) {
+  constructor (level, callbacks, { oldTv = true, waitForBegin = false } = {}) {
     this.oldTv = oldTv
     this.postProcessing = POST_PROCESSING_ENABLED && (ZOOM_BLUR_ENABLED || oldTv)
     this.level = level
