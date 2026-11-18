@@ -19,8 +19,8 @@
   "lives": 5,
   "additionalGameMechanics": ["atom capture"],
   "tip": [
-    "You can capture charged atoms",
-    "while they’re crossing the emitter.",
+    "You can now capture charged atoms",
+    "while they’re crossing the core.",
     "Charged atoms are very valuable."
   ]
 }

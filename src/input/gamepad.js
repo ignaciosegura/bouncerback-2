@@ -6,10 +6,10 @@
 // Sticks count as pushed from 75% deflection and as released below 35%. Worn sticks often rest at
 // 10–30%: they never engage, and a stick resting a bit off-center still counts as released. The
 // gap between the two (hysteresis) stops a stick near one threshold from toggling on and off.
-export const STICK_ENGAGE = 0.75
-export const STICK_RELEASE = 0.35
+const STICK_ENGAGE = 0.75
+const STICK_RELEASE = 0.35
 // Triggers are analog: pressed from half travel
-export const TRIGGER_THRESHOLD = 0.5
+const TRIGGER_THRESHOLD = 0.5
 
 // Button indices in the standard mapping
 export const BUTTONS = {

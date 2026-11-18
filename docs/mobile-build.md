@@ -55,6 +55,8 @@ cd android
 ./gradlew installDebug
 ```
 
+`npm run build:android-install` fails if there is no suitable device or emulator to install on. It also fails if the connected device does not have developer mode and USB debugging enabled. Check `adb devices` first (see "Choose the target device").
+
 **Start an emulator** (names come from `emulator -list-avds`):
 
 ```

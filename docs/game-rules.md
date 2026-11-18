@@ -18,7 +18,19 @@ The names live in one constant in the code (an enum), and the level file schema 
 
 **A level's additional mechanics are fixed for the whole level.** They are read when the level starts and can't be switched on or off while it is being played: the rules in force at the start stay in force until the level ends, through pauses and resumes, and TRY AGAIN starts the level again with the same ones.
 
-Currently only level 1 plays without `atom capture`; levels 2 to 5 include it. `charged atom hold` is also in level 3 onwards. `supercharged atom` is added at levels 4 and 5. 
+**New mechanics are only added at the first level of a tier** (see "Level unlocking"). The other levels of that tier have the same mechanics as its first level. A tier doesn't have to add one.
+
+Currently (the level files are the source of truth):
+
+| Tier | Levels | New mechanic |
+| :--- | :--- | :--- |
+| 0 | 1 | None: only the core mechanic |
+| 1 | 2 to 4 | `atom capture`, at level 2 |
+| 2 | 5 and 6 | `charged atom hold`, at level 5 |
+| 3 | 7 and 8 | `supercharged atom`, at level 7 |
+| 4 | 9 | None: it keeps the three mechanics above |
+
+Once added, a mechanic stays in every later level.
 
 ## Level start
 
@@ -104,11 +116,20 @@ The game can also be played with a game controller, alongside mouse and touch: e
 
 The player loses a live every time an atom escapes the containment ring. 
 
+In a level where time runs backwards, the player sees the count go up instead: see "Time runs backwards".
+
 # Time
 
 The timer specifies the time remaining to beat the level, in tenths of a second. For example, a 2 minutes long level will have an initial time value of 1200 (120 * 10). The timer will decrease 1 unit every 0.1 seconds.
 
 The level file will specify the length of the level in musical notation format: tempo (in BPM), time signature and number of bars. The timer will start counting down from the calculated time.
+
+# Time runs backwards
+
+This section applies only to levels with `timeGoesBackwards: true` in their level file (Anticoherence, level 6). It is a level property, not an additional game mechanic.
+
+* **The lives shown count up.** The game counts lives as usual: the player has the level's `lives` value, each escape takes one, the level is lost at zero, and the score uses them as in any other level. Only what the player sees changes: the HUD shows one life at the start and one more with each escape (`lives` − lives left + 1). For example, with 4 lives it shows 1, 2, 3, 4, and 5 on the fourth escape, which loses the level. Nothing tells the player the limit. The dark red background follows the lives shown, so the level starts dark red and turns black when the HUD shows two.
+* **The timer shown counts up.** The HUD shows the time elapsed, from 0 up to the level's full time, instead of the time remaining. The level ends at the same moment as it would otherwise.
 
 # Score
 

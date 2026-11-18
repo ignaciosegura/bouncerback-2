@@ -96,7 +96,7 @@ function checkRanges (level) {
   return problems
 }
 
-export function validateLevel (level) {
+function validateLevel (level) {
   const problems = checkSchema(level, schema, 'level')
   return problems.length > 0 ? problems : checkRanges(level)
 }
@@ -106,7 +106,7 @@ export function validateLevel (level) {
  * `number` is the level's number (1–5), used by the score formulas.
  * Throws if the file doesn't match docs/level-file-schema.json.
  */
-export function loadLevel (data, number) {
+function loadLevel (data, number) {
   const problems = validateLevel(data)
   if (problems.length > 0) {
     throw new Error(`Invalid level ${number}:\n  ${problems.join('\n  ')}`)
@@ -122,6 +122,7 @@ export function loadLevel (data, number) {
     tier: data.tier,
     soundTrack: data.soundTrack,
     lives: data.lives,
+    timeGoesBackwards: data.timeGoesBackwards ?? false,
     tip: data.tip ?? null,
     // URLs of the end-of-level pictures, or null for none
     youWinInterstitial: interstitialFiles[interstitialName(data.youWinInterstitial)] ?? null,
@@ -144,6 +145,14 @@ export function loadLevel (data, number) {
     paddleCount: data.paddles.count ?? DEFAULT_PADDLE_COUNT,
     vfx: (data.vfx ?? []).map(({ name, time }) => ({ name, time: time * secondsPerBar }))
   }
+}
+
+/**
+ * The lives the player sees for `lives` lives left. When time runs backwards the player sees them
+ * count up, from 1 at the level's start; the game itself always counts them down to 0.
+ */
+export function livesShown (level, lives) {
+  return level.timeGoesBackwards ? level.lives - lives + 1 : lives
 }
 
 /**

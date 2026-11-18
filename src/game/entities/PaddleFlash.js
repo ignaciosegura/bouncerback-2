@@ -11,8 +11,11 @@ const FLASH_DURATION = 0.2 // seconds
 
 // A subtle arc echo of a paddle that has just bounced an atom, like a slight recoil. One per paddle: a new bounce
 // restarts it. It has its own view, so it keeps playing after its paddle is hidden.
+// `reversed` (levels where time goes backwards) mirrors the progress: the echo starts drifted out
+// and invisible and arrives on the paddle at its strongest as it ends.
 export default class PaddleFlash {
-  constructor () {
+  constructor (reversed = false) {
+    this.reversed = reversed
     this.view = new Graphics()
     this.view.visible = false
     this.playing = false
@@ -43,7 +46,8 @@ export default class PaddleFlash {
   }
 
   draw () {
-    const progress = this.time / FLASH_DURATION
+    const forward = this.time / FLASH_DURATION
+    const progress = this.reversed ? 1 - forward : forward
     // Paddle.js imports this module, so its constants are only read here, never at load time
     const radius = RING_RADIUS + PADDLE_THICKNESS * (FLASH_DRIFT * easeOutQuad(progress))
     const half = this.arc / 2

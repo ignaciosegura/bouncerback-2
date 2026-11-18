@@ -77,7 +77,7 @@ Extended Steamworks features, listed so they can be picked up later. None of the
 - **Rich Presence.** What friends see in their Steam friends list, e.g. "In the menus" / "Playing LEVEL NAME". A few calls on screen changes.
 - **Steam Input API** (full integration, beyond the default configuration): named actions ("place paddle", "capture", "pause") and action sets for menus and gameplay, so players can remap them in Steam, and Steam's own button glyphs for whatever controller is in use. Large change: it would replace or sit beside the Gamepad API handling, and all of `docs/game-controller.md`.
 - **Game recording timeline** (Steam's game recording feature): markers on the recording's timeline for moments like a capture, a life lost, a level won, so players find their highlights easily.
-- **Overlay web browser** for the Main Menu credit links (niknak.es, manfromspace.com), so they open inside the Steam overlay instead of switching to the desktop browser (better on the Deck, where there is no desktop in Game Mode).
+- **Overlay web browser** for the Credits screen's LICENSES link, so it opens inside the Steam overlay instead of switching to the desktop browser (better on the Deck, where there is no desktop in Game Mode).
 - **Steam Deck detection** to adapt defaults on the Deck, e.g. the OLD TV switch or a lighter post-processing if the performance check in section 3 asks for it.
 - **Steam Workshop** for player-made levels: the levels are already JSON files with a schema (`docs/level-file-schema.json`). Large feature: a way to make and test levels, upload, browse and play them, validation of untrusted files.
 - **Steam Trading Cards, badges, profile items.** No code: art and Steamworks setup only, and Valve enables them only once the game has enough sales.
@@ -131,7 +131,7 @@ To be filled after testing the Phase D1 build, in both modes unless noted. Date 
 - **Starts?** Time to the Intro; any white flash; console output; `launch-info.txt` (is WebGL hardware-accelerated?):
 - **Display at 1280x800:** whole UI scaled correctly at 16:10, nothing cut off; menu background cropped as expected; arena and CRT glass fit:
 - **Text legibility:** HUD, credits, How To Play, gameplay tips:
-- **Performance:** 60 fps in menus and in level 5, OLD TV off and on; last life zoom; stutter at level start; battery draw:
+- **Performance:** 60 fps in menus and in level 9, OLD TV off and on; last life zoom; stutter at level start; battery draw:
 - **Audio:** music and effects, crackle, volume steps; after sleep and wake:
 - **Controller:** seen by the game in Desktop Mode? in Game Mode? Menus (d-pad, A, B), gameplay (both sticks, captures, holds), pause with the menu button; does one press of A enter from the Intro (Phase D4); any button acting in Steam and in the game at once:
 - **Gamepad indicator** (Main Menu): shown or hidden; switches to "Gamepad detected"?

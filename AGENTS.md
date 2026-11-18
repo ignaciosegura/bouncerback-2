@@ -27,6 +27,7 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 | `docs/desktop-build.md` | The desktop (Electron) and Steam release plan, how to build and run the desktop test builds, and the Steam Deck test results | Building, running or changing the desktop build (`electron/`, `electron-builder.json`), or working on the Steam integration |
 | `docs/mobile-build.md` | Where the iOS and Android test builds are, and how to build and launch them from the command line | Building, launching or testing the iOS or Android app, or changing Capacitor or native settings |
 | `docs/info-for-testers.md` | Tricks and information for game testers (e.g. unlocking every level) | Testing something that needs a trick (such as unlocked levels), or changing one of those tricks (update it afterwards) |
+| `docs/level-difficulty-table.md` | How to generate the level difficulty table (`npm run level:table`) and how each column is calculated | Asked for a table summarizing the levels' difficulty, duration or maximum score: always generate this one |
 | `docs/implementation-status.md` | Which implementation phases are completed and which are pending | Planning a new phase (for its number) or completing one (to mark it) |
 | `docs/implementation-plan.md` | The phases still pending, and where new phases are planned | Planning a new phase, or implementing a pending one |
 | `docs/design-decisions.md` | Design decisions taken while planning, with their reasons | Changing how an existing area works, to know why it is the way it is. Read only the section for that area |
@@ -40,6 +41,9 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 
 - **Planning and implementation are separate steps.** When asked to plan, stop once the plan is delivered. Never go on to implementation without first asking for and getting explicit approval.
 - **Completed phases move to the archive.** New phases are planned in `docs/implementation-plan.md`. Once a phase is done, move its section and its verification items to its cycle's file in `docs/archive/`, and mark it in `docs/implementation-status.md`.
+- **Project knowledge lives in the repo.** Save rules, decisions and deferred issues in `AGENTS.md` or `docs/`, not in an agent's memory outside the project folder, so they move with the project.
+- **Never disable the sandbox.** Never run a command with `dangerouslyDisableSandbox`, even when it hangs or fails in the sandbox (for example, `xcodebuild` package resolution). Stop and say what is needed: the user runs it or adds a permission rule.
+- **Docs don't restate tunable values.** The settings files (e.g. `src/effects/**/*Settings.js`) are the only source of truth, because values are tuned by eye and copies go stale. Docs describe what a setting does, with behavior and formulas, and no "current value" columns. Any number used to explain something, in a doc or in a settings file's comments, must be labelled as an example. Historical decision records may keep the values decided at the time.
 
 ---
 
@@ -77,18 +81,25 @@ Mobile browsers block audio until an explicit user interaction. Ensure Howler.js
 - Forced **landscape** orientation.
 - **Black background** (`#000000`) during gameplay, except dark red (`#550000`) when the player has only one life left (see "Visual feedback" in `docs/graphical-specs.md`); white (`#D8D8D8`) background only for inverted menu layouts.
 - All graphics: **2D vector only**, no textures, no images. White lines and filled circles on black; the only color exceptions are the gameplay feedback colors in "Visual feedback" and the tint of the screen transitions ("Screen transitions": transition dark yellow `#666600` and transition dark red `#660000`, separate from the `#550000` background; see "Colors"), both in `docs/graphical-specs.md`. The menu screens' Lottie background animation (`assets/motion/`) is vector too and is allowed (see "Menu background animation" in `docs/graphical-specs.md`). The one bitmap exception is the end-of-level interstitials (PNGs in `assets/interstitials/`): they come between player actions, after a level has ended, so gameplay itself stays vector only (see "End-of-level interstitials" in `docs/graphical-specs.md`). The game arena is shown through a CRT post-process (zoom blur, curved glass, scanlines…) applied to the finished image, and with the OLD TV switch on so are the menu background animation and the Main Menu logo; the shapes themselves stay vector (see "CRT effect" in `docs/graphical-specs.md` and `docs/post-processing.md`).
-- Font: **"C64 Angled"** monospaced — `assets/fonts/c64_angled.ttf`. Weight normal, line height 1, always uppercase (the exceptions are the non-interactive informative texts, which are mixed case: the Intro screen note, the Main Menu credits and gamepad indicator, the How To Play instructions and the Gameplay tips: see "Text and menus" in `docs/graphical-specs.md`).
-- Font sizes (per `docs/graphical-specs.md`): **24px** for HUD text, the Main Menu credits and the Main Menu gamepad indicator, **32px** for menu buttons, **64px** for the "GAME OVER" and "YOU WIN!" titles — at the 1080px-tall reference; the whole UI scales with the viewport (see `docs/graphical-specs.md`).
+- Font: **"C64 Angled"** monospaced — `assets/fonts/c64_angled.ttf`. Weight normal, line height 1, always uppercase (the exceptions are the non-interactive informative texts, which are mixed case: the Intro screen note, the Credits screen's text and the Main Menu gamepad indicator, the How To Play instructions and the Gameplay tips: see "Text and menus" in `docs/graphical-specs.md`).
+- Font sizes (per `docs/graphical-specs.md`): **24px** for HUD text, the Credits screen's text and the Main Menu gamepad indicator, **32px** for menu buttons, **64px** for the "GAME OVER" and "YOU WIN!" titles — at the 1080px-tall reference; the whole UI scales with the viewport (see `docs/graphical-specs.md`).
 - All text/menus wrapped in a **thin-border transparent rectangle** with 0.5em padding.
 - All text boxes: **single line**, centered justification text, no breaks.
 
 ---
 
+## Terminology
+
+- **Core, not "emitter", in anything a player reads** (How To Play instructions and drawing, level tips): "core" says clearly that it's at the center. The `AtomEmitter` class keeps its name on purpose: "core" is the concept and visual representation, `AtomEmitter` names its functional purpose (it emits atoms). This isn't an inconsistency to fix.
+
+---
+
 ## Level Files
 
-- Located in `src/levels/` (`level1.json` … `level5.json`).
+- Located in `src/levels/` (`level1.json` … `level9.json`).
 - Must strictly conform to `docs/level-file-schema.json`.
 - Level 1 is the easiest level — no special mechanics or tutorial logic.
+- New game mechanics are only added at the first level of a tier (see "Additional game mechanics" in `docs/game-rules.md`).
 - Do not add fields not defined in the schema (`additionalProperties: false` is enforced).
 - `youWinInterstitial` and `gameOverInterstitial` are optional: the file name of a PNG that must exist in `assets/interstitials/` (missing or blank: no picture). `validate:levels` checks that the file exists.
 - **Validate after every change to a level file or to the schema:** run `npm run validate:levels` (all of `src/levels/*.json`) or `npm run validate:levels -- path/to/level.json`. It exits with a non-zero code and lists each error's path when a file is invalid. Run it yourself; do not rely on reading the JSON by eye.

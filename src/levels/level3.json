@@ -18,12 +18,11 @@
   },
   "lives": 4,
   "additionalGameMechanics": [
-    "atom capture",
-    "charged atom hold"
+    "atom capture"
   ],
   "tip": [
-    "You can now hold charged atoms for extra points.",
-    "Keep the capture button pressed to keep holding the atom.",
-    "The atom will be captured when you release it."
+    "Captured atoms are valuable,",
+    "but keeping them until the end of the level",
+    "will give you a much higher score."
   ]
 }

@@ -155,7 +155,7 @@ On a resize the textures are reallocated (and emptied), so the engine redraws th
 
 ### The chain in the game
 
-`GameEngine` builds the chain from two switches: the zoom blur (`ZOOM_BLUR_ENABLED`, always on) and the OLD TV switch in Settings (off by default), which adds the bloom and the CRT. The order is zoom blur, bloom, CRT. The menus' chain has no bloom: it would wash out their light picture. Neither: no pipeline at all, the arena goes back on the stage (`POST_PROCESSING_ENABLED = false` does the same, to compare).
+`GameEngine` builds the chain from two switches: the zoom blur (`ZOOM_BLUR_ENABLED`, always on) and the OLD TV switch in Settings (on by default), which adds the bloom and the CRT. The order is zoom blur, bloom, CRT. The menus' chain has no bloom: it would wash out their light picture. Neither: no pipeline at all, the arena goes back on the stage (`POST_PROCESSING_ENABLED = false` does the same, to compare).
 
 **End-of-level interstitials.** When a level's end picture appears, `GameEngine` rebuilds the chain for the picture's own container in place of the arena: the same effects with the same values, minus the zoom blur (it radiates from the core). With OLD TV off that leaves no effects, so the picture goes straight on the stage. It's cleared to black, which gives the bars around the picture.
 

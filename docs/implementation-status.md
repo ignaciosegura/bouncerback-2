@@ -80,6 +80,17 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
   - [x] **Phase 57** — Interstitial fields in the level files (schema `pattern` for a `.png` file name with no folder; the loader and `validate:levels` check the file exists; the loader gives the engine its URL; no level uses them yet)
   - [x] **Phase 58** — Interstitial display (after the last life zoom or the core collapse the picture cuts in, in the game canvas, contain fit with black bars, through the arena's bloom and CRT with OLD TV on, never the zoom blur; HUD hidden, complete silence; continues on release of a tap, click, bottom face button, RT, Enter or Space after a short input lock, then the result screen cuts in with its screen-in; the result is saved when the picture appears; back and Escape do nothing on it)
 
+## Time Goes Backwards (Anticoherence) — ⏳ Pending
+
+Planned in `docs/time-goes-backwards-implementation-plan.md`, with its own numbering (T1, T2…); completed phases go to `docs/archive/time-goes-backwards.md`.
+
+- [x] **Phase T1** — Level property, lives and timer (optional `timeGoesBackwards` in the level file; lives are computed as usual, but the HUD shows them counting up from 1 and the dark red background follows what it shows; the HUD shows elapsed time; set on level 6) — *TIME reaching the level's full time wasn't seen in the automated run*
+- [x] **Phase T2** — Atom creation, charge loss and disappearing (a press on the core creates an atom that grows and launches on release, or at the cutoff; atoms are born with a random charge limited by the time left, lose one per bounce and disappear at the core at charge 1; the core stops emitting at the cutoff; `CORE_EMITS_ATOMS` setting) — *the reversed sounds waited for T5*
+- [x] **Phase T3** — Reversed effects during play (capture burst, paddle bounce echo, atom pulse and paddle lifetime fade run their normal formula on mirrored progress, through a `reversed` option)
+- [x] **Phase T4** — Reversed level start and end (the core collapse plays in reverse with initial atoms defined by first-contact time; the timer reaching zero goes to an `ENDING` state that plays the level start in reverse; the collapse frame is shared by both directions)
+- [x] **Phase T5** — Audio (every effect plays its `_reversed` copy in this level, added by the engine; voice limits unchanged) — *the reversed files are unedited placeholders*
+- [x] **Phase T6** — Safe initial atoms (an initial atom heading outward starts at most 75% of the way to the paddles, by raising the lower end of the first-contact range; `INITIAL_ATOM_MAX_OUTWARD_PROGRESS` setting)
+
 ## Desktop & Steam Cycle (parallel) — ⏳ Pending
 
 Runs on its own, in parallel with the numbered cycles (see `docs/desktop-build.md`). Phases numbered D1, D2…; completed ones go to `docs/archive/desktop-steam.md`.

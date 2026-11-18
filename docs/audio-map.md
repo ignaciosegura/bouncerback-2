@@ -22,6 +22,8 @@ Music tracks are **not** listed here — they are mapped per-level inside each `
 
 **Formats.** Sound effects can be MP3, WAV or FLAC, found by file name without extension (hence names must be unique across formats). The hold sounds and `launch_super` are FLAC (the hold sounds because they are lossless, so the loop has no gap, which MP3's encoder padding can't guarantee). `hold_loop.flac` is trimmed so that the whole file loops from its first to its last sample; loop points or regions stored inside a file are ignored, which is why the hold is split into a trigger and a loop.
 
+**Time runs backwards.** In levels with `timeGoesBackwards` every effect above plays its reversed copy, found by adding `_reversed` to the name: `bounce_reversed`, `capture_reversed`, `destroy_reversed`, `launch_reversed`, `hold_trigger_reversed`, `hold_loop_reversed` (FLAC, for the same gapless loop) and `vortex_creation_reversed`. The engine adds the suffix (`GameEngine.sfxName`), so `soundManager.js` has no mode. `launch_super` has no reversed copy (that mechanic isn't used there). The reversed names aren't voice-limited. The events change meaning there: `launch_reversed` plays when the core emits an atom and when an atom disappears at the core; `capture_reversed` and `hold_loop_reversed` start together on a press on the core, which creates an atom; `hold_trigger_reversed` plays when that atom is launched. `vortex_creation_reversed` plays only at the level start (the reversed core collapse). The level end is silent, and so is the level start in every other level. The reversed files are currently unedited reversals of the normal ones.
+
 **Hold loop.** Each hold ends in one of these ways, and each stops the loop with the 15 ms fadeout: release (followed by the capture sound), pause, core collapse, or the last life lost. Pausing the game pauses the loop like any other effect, until the hold is cancelled.
 
 ---
@@ -41,10 +43,14 @@ No track loops: each plays once to its end, then leaves silence until the next s
 | `femtocosmos.mp3` | Level 2 |
 | `chronosaedron.mp3` | Level 3 |
 | `mekanomancer.mp3` | Level 4 |
-| `neutronika.mp3` | Level 5 |
+| `protoglyph.mp3` | Level 5 |
+| `anticoherence.mp3` | Level 6 |
+| `quantamorphica.mp3` | Level 7 |
+| `solitoniq.mp3` | Level 8 |
+| `neutronika.mp3` | Level 9 |
 
 > [!NOTE]
-> The track assignment for levels 2–5 above is a suggested default. Adjust the `soundTrack` field in each level file to change the mapping without touching code.
+> The track assignment for levels 2–9 above is a suggested default. Adjust the `soundTrack` field in each level file to change the mapping without touching code.
 
 ---
 

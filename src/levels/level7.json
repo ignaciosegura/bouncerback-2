@@ -1,0 +1,30 @@
+{
+  "name": "QUANTAMORPHICA",
+  "tier": 3,
+  "duration": 56,
+  "timeSignature": {
+    "bpm": 136,
+    "signature": 4
+  },
+  "soundTrack": "quantamorphica.mp3",
+  "vfx": [],
+  "atoms": {
+    "travelTime": 6,
+    "barsInterval": 2
+  },
+  "paddles": {
+    "angle": 35,
+    "duration": 3,
+    "count": 2
+  },
+  "lives": 4,
+  "additionalGameMechanics": [
+    "atom capture",
+    "supercharged atom",
+    "charged atom hold"
+  ],
+  "tip": [
+    "A supercharged atom will appear.",
+    "It's fast and extremely valuable."
+  ]
+}

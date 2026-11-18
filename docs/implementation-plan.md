@@ -10,7 +10,7 @@ Every doc, all seven mockups and the level schema were reviewed against each oth
 
 ## How this file works
 
-This file holds only the phases still pending. Completed phases are in `docs/archive/` (`cycle-1.md`, `cycle-2.md`, `cycle-3.md`), and the design decisions are in `docs/design-decisions.md`. New phases are planned here, numbered after the last one in `docs/implementation-status.md`; once a phase is done, its section and its verification items move to its cycle's archive file. The desktop & Steam cycle has its own numbering (Phase D1, D2…) and its own archive file, `docs/archive/desktop-steam.md` (see "Development Cycles").
+This file holds only the phases still pending and the issues deferred for later. Completed phases are in `docs/archive/` (`cycle-1.md`, `cycle-2.md`, `cycle-3.md`), and the design decisions are in `docs/design-decisions.md`. New phases are planned here, numbered after the last one in `docs/implementation-status.md`; once a phase is done, its section and its verification items move to its cycle's archive file. The desktop & Steam cycle has its own numbering (Phase D1, D2…) and its own archive file, `docs/archive/desktop-steam.md` (see "Development Cycles").
 
 ---
 
@@ -30,6 +30,18 @@ Implementation is split into development cycles. The **first development cycle**
 The **third development cycle** starts with game controller support (Phases 30–32). Pending cycle 2 phases (Pause, mobile packaging, optional VFX, level unlocking, results ambience track) stay in cycle 2.
 
 The **desktop & Steam cycle** runs in parallel with the numbered cycles, on its own: the Electron desktop build and the Steam release planned in `docs/desktop-build.md`. Its phases are numbered separately (Phase D1, D2…) so they never clash with the main cycles' numbers, are listed in their own section of `docs/implementation-status.md`, and move to `docs/archive/desktop-steam.md` when done.
+
+---
+
+## Deferred Issues
+
+Known issues the user chose to deal with later. Don't fix them unprompted.
+
+- **Intro screen layout (noted 2026-09-30):** the note and the button don't match `docs/mockups/INTRO.png`. When measured, the note's box was at 368–400px and the button at about 497–567px, against about 415–447px and 506–573px (button centered) in the mockup. `src/index.css` uses `.intro-screen__note { margin-bottom: 96u }` and `.intro-screen .menu { margin-bottom: 145u }`, while the Phase 28 plan specified 59 and 91. When this is picked up, first check whether 96 and 145 were intentional.
+- **Lives bonus, all levels (noted 2026-11-06):** `win()` in `GameEngine.js` pays the bonus on the level's starting lives (`this.level.lives`), while `docs/game-rules.md` says remaining lives, so the bonus is the same however many lives were lost. The bonus is to be reconsidered for every level.
+- **Anticoherence atom escape (noted 2026-11-06):** the escape keeps its normal animation in the time-backwards level (Phases T1–T5) until a reversed version that still shows the player where the atom left is designed.
+- **Anticoherence tip and How To Play (noted 2026-11-06):** the level has no `tip`, and `docs/game-instructions.md` doesn't describe time running backwards. Both are to be written after the level is playable.
+- **Anticoherence score balance (noted 2026-11-06):** creating atoms scores capture points with no limit, and hold points are paid while one is held, so tapping the core can inflate the high score shared by all levels. Accepted for now; review it if it turns out to be a problem.
 
 ---
 
@@ -63,7 +75,7 @@ Out of scope: Steamworks, the overlay, Proton, Steam depots, Windows and macOS b
   - Registers the `app://` scheme as privileged (standard, secure, fetch, streaming for audio) and serves files from `dist/` through it, refusing any path that leaves `dist/`.
   - Creates one `BrowserWindow`: fullscreen, black background (no white flash at start), no menu bar, the window title "Bouncerback", context isolation and the sandbox on, no Node in the page, no preload.
   - Loads `app://bouncerback/index.html`.
-  - Links that open a new window (the Main Menu credits) go to the system browser (`shell.openExternal`), and the app never opens a second Electron window.
+  - Links that open a new window (the Credits screen's LICENSES button) go to the system browser (`shell.openExternal`), and the app never opens a second Electron window.
   - F11 toggles fullscreen. Ctrl+Shift+I opens DevTools (test build convenience; reconsider before release).
   - On Linux, appends the `ozone-platform=x11` switch.
   - At startup writes a short `launch-info.txt` to the app's user-data folder (`~/.config/bouncerback/` on Linux): Electron and Chromium versions, `app.getGPUFeatureStatus()`, the display size and scale factor. On the Deck in Game Mode there are no DevTools at hand, so this is how to tell whether WebGL is hardware-accelerated.
@@ -83,7 +95,7 @@ Out of scope: Steamworks, the overlay, Proton, Steam depots, Windows and macOS b
 - Starts? Time to the Intro; any white flash; the console output and `launch-info.txt` (WebGL and GPU status).
 - Fullscreen at 1280x800: is the whole UI scaled correctly at 16:10, nothing cut off, menu background cropped as expected; the arena and the CRT glass fit.
 - Text legibility at the Deck's size: HUD, credits, How To Play, the tips (the smallest text).
-- Performance (Game Mode: the Deck's performance overlay, Quick Access → Performance, shows FPS and GPU load): smooth 60 fps in menus and in level 5, with OLD TV off and on; the last life zoom; any stutter when a level starts. Battery draw if visible.
+- Performance (Game Mode: the Deck's performance overlay, Quick Access → Performance, shows FPS and GPU load): smooth 60 fps in menus and in level 9, with OLD TV off and on; the last life zoom; any stutter when a level starts. Battery draw if visible.
 - Audio: music and effects play, no crackle, volume steps work; audio after the Deck sleeps and wakes.
 - Controller: is the built-in controller seen by the game at all in Desktop Mode (where Steam applies its desktop configuration) and in Game Mode; menus (d-pad, A to activate, B to go back), gameplay (both sticks, captures, holds), pause with the menu button; does any button do something in Steam and in the game at once.
 - Main Menu gamepad indicator: shown or hidden on the Deck (it hides on touch-only devices, and the Deck has a touchscreen and trackpads), and does it switch to "Gamepad detected".
@@ -108,3 +120,9 @@ Out of scope: Steamworks, the overlay, Proton, Steam depots, Windows and macOS b
 - On the Mac: `npm run desktop:start` opens the game fullscreen, with no white flash, no menu bar and no console errors; it plays as in the browser (music from the Intro button, menus, a level with the controller and the mouse, OLD TV on and off). The credit links open in the default browser and no second window appears. F11 leaves and re-enters fullscreen. Settings and progress survive a restart. `launch-info.txt` is written. The web build (`npm run build`, `npm run dev`) and the mobile builds (`npm run cap:sync`) are unchanged.
 - `npm run desktop:build:linux` produces a `.tar.gz` in `release/` containing an executable `bouncerback`, with no `node_modules` from the project inside the app archive.
 - On the Deck: the steps in "Running it on the Deck" work in both modes, and every item in "Feedback to collect" has an answer written into `docs/desktop-build.md`.
+
+---
+
+### Phases T1–T5 — Time runs backwards (Anticoherence)
+
+Planned in its own document, `docs/time-goes-backwards-implementation-plan.md`, with its own numbering (T1, T2…). T1 is complete; T2–T5 are pending.

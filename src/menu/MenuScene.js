@@ -26,7 +26,7 @@ export default class MenuScene {
     this.mounted = false
     this.destroyed = false
     this.dirty = false // Lottie drew a frame that isn't uploaded yet
-    this.oldTv = false
+    this.oldTv = true
     this.post = null
 
     // Created now rather than on mount, so play() can start it before PixiJS is ready. PixiJS sizes

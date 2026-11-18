@@ -11,7 +11,7 @@ root/
 ├── electron-builder.json           # Desktop packaging config (`npm run desktop:build:linux`, `npm run desktop:build:win`)
 ├── release/                        # Desktop builds made by electron-builder (not committed)
 ├── package.json                  
-├── scripts/                        # Node scripts run through npm (deploy-ftp.js, validate-levels.js: checks src/levels/*.json against docs/level-file-schema.json, `npm run validate:levels`)
+├── scripts/                        # Node scripts run through npm (deploy-ftp.js, validate-levels.js: checks src/levels/*.json against docs/level-file-schema.json, `npm run validate:levels`; level-difficulty-table.js: prints the level difficulty table, `npm run level:table`, see docs/level-difficulty-table.md; third-party-licenses.js: regenerates THIRD-PARTY-LICENSES.md from the installed dependencies, `npm run licenses`)
 └── assets/                         # Static assets
     ├── audio/                      # Sound effects & music files for Howler.js
     ├── images/                     # SVG vector assets and mobile app icon
@@ -77,6 +77,8 @@ root/
     │   └── menuSettings.js         # Its tunable values (resolution cap)
     ├── game/                       # Pure game logic & PixiJS implementation
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
+    │   ├── timeBackwards.js        # Time goes backwards: the charge limit, the cutoff and the random charge (no PixiJS)
+    │   ├── timeBackwardsSettings.js # Tunable values of the time goes backwards property
     │   ├── levelLoader.js          # Validates level JSON and derives runtime values (timer, speeds, intervals, interstitial URLs)
     │   ├── additionalMechanics.js    # Enum constant with the names of the additional game mechanics
     │   ├── chargedAtomHoldSettings.js # Its tunable values (points per second while an atom is held, size of each score step)
@@ -99,11 +101,16 @@ root/
     │   ├── level2.json             # Level 2 data
     │   ├── level3.json             # Level 3 data
     │   ├── level4.json             # Level 4 data
-    │   └── level5.json             # Level 5 data
+    │   ├── level5.json             # Level 5 data
+    │   ├── level6.json             # Level 6 data
+    │   ├── level7.json             # Level 7 data
+    │   ├── level8.json             # Level 8 data
+    │   └── level9.json             # Level 9 data
     ├── screens/                    # React screens, built from the generic components above
     │   ├── IntroScreen.jsx         # First screen: ENTER BOUNCERBACK button (unlocks audio)
     │   ├── MainMenuScreen.jsx      # Main menu screen with the game logo (menu music and background animation start here)
     │   ├── SettingsMenuScreen.jsx  # Settings menu screen
+    │   ├── CreditsScreen.jsx       # Credits screen: who made the game, LICENSES (opens the licenses file on GitHub), Back
     │   ├── HowToPlayScreen.jsx     # How To Play screen: instructions text, example drawing, Back
     │   ├── LevelSelectionMenuScreen.jsx  # Level selection menu screen
     │   ├── GameScreen.jsx          # Houses the PixiCanvas component & HUD overlay
