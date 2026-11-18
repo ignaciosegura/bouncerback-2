@@ -1,4 +1,4 @@
-import { Application, Container, ImageSource, Sprite, Texture } from 'pixi.js'
+import { Application, Container, ImageSource, Sprite, Text, Texture } from 'pixi.js'
 import * as soundManager from '../audio/soundManager.js'
 import { bouncePoints, capturePoints, containmentPoints, livesBonus, timeBonus } from './scoring.js'
 import { lerpColor } from './color.js'
@@ -148,6 +148,7 @@ export default class GameEngine {
     this.interstitialTextures = new Map()
     this.interstitialScene = null // the picture shown, in place of the arena
     this.interstitialSprite = null
+    this.interstitialText = null // the lines drawn over the picture, if the level has them
     this.continuePresses = new Set() // inputs pressed after the input lock: they continue on release
   }
 
@@ -312,6 +313,16 @@ export default class GameEngine {
     if (sprite) {
       sprite.scale.set(Math.min(width / sprite.texture.width, height / sprite.texture.height))
       sprite.position.set(width / 2, height / 2)
+    }
+
+    // The text takes the gameplay tip's size and place (CSS: 32px, line height 1, top edge 359px at
+    // the 1080px-tall reference), relative to the screen, not to the picture
+    const text = this.interstitialText
+    if (text) {
+      const u = Math.max(0.4, Math.min(width / 1920, height / 1080))
+      text.style.fontSize = 32 * u
+      text.style.lineHeight = 32 * u
+      text.position.set(width / 2, 359 * u)
     }
   }
 
@@ -1090,7 +1101,7 @@ export default class GameEngine {
       this.releaseAtom(atom)
     }
     this.addScore(bonus)
-    this.end('onLevelWin', this.level.youWinInterstitial)
+    this.end('onLevelWin', this.level.youWinInterstitial, this.level.youWinInterstitialText)
   }
 
   // End-of-level interstitials
@@ -1120,7 +1131,7 @@ export default class GameEngine {
   // The end animation is over: the outcome's picture, if it has one, else straight to the result.
   // The result is emitted at once either way, so React saves it now. If the picture isn't loaded
   // yet, the last frame stays until it is; if it failed, there's no picture.
-  end (event, url) {
+  end (event, url, lines = null) {
     this.state = STATE.ENDED
     const texture = url && this.interstitialTextures.get(url)
     if (!texture) {
@@ -1129,13 +1140,13 @@ export default class GameEngine {
     }
     texture.then((loaded) => {
       if (this.destroyed) return
-      if (loaded) this.showInterstitial(loaded)
+      if (loaded) this.showInterstitial(loaded, lines)
       this.emit(event, { score: this.score, interstitial: Boolean(loaded) })
     })
   }
 
   // Cut in: the picture replaces the arena at once, in complete silence
-  showInterstitial (texture) {
+  showInterstitial (texture, lines) {
     this.state = STATE.INTERSTITIAL
     this.stateTime = 0
     soundManager.stopTrack({ cut: true })
@@ -1145,6 +1156,16 @@ export default class GameEngine {
     this.interstitialSprite = new Sprite({ texture, anchor: 0.5 })
     this.interstitialScene = new Container()
     this.interstitialScene.addChild(this.interstitialSprite)
+    if (lines?.length) {
+      // Pixi text, in the scene, so the CRT reaches it with the picture. The font is the page's,
+      // already loaded; layout() sets the size and position
+      this.interstitialText = new Text({
+        text: lines.join('\n'),
+        anchor: { x: 0.5, y: 0 },
+        style: { fontFamily: 'C64 Angled', fill: 0xFFFFFF, align: 'center' }
+      })
+      this.interstitialScene.addChild(this.interstitialText)
+    }
     this.buildPostProcessing()
     this.layout()
   }

@@ -146,6 +146,13 @@
             "pattern": "^(\\s*|[^/\\\\]+\\.png)$",
             "description": "Optional file name (no folder) of the PNG in assets/interstitials/ shown full screen after the level is won, before the You Win! screen. If missing or blank, the You Win! screen comes straight away."
         },
+        "youWinInterstitialText": {
+            "type": "array",
+            "description": "Optional text drawn over the youWinInterstitial picture, one array item per line, in the same style and place as the gameplay tip. Ignored if the level has no youWinInterstitial. If missing, the picture is shown alone.",
+            "items": {
+                "type": "string"
+            }
+        },
         "gameOverInterstitial": {
             "type": "string",
             "pattern": "^(\\s*|[^/\\\\]+\\.png)$",

@@ -40,6 +40,9 @@ for (const file of files) {
       if (picture && !existsSync(join(interstitialsDir, picture))) errors.push(`.${field} assets/interstitials/${picture} doesn't exist`)
     }
   }
+  if (errors.length === 0 && level.youWinInterstitialText?.length && !level.youWinInterstitial?.trim()) {
+    errors.push('.youWinInterstitialText needs a youWinInterstitial to be drawn over')
+  }
   if (errors.length === 0) {
     console.log(`OK   ${name}`)
   } else {

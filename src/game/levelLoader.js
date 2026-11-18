@@ -93,6 +93,9 @@ function checkRanges (level) {
     const name = interstitialName(level[field])
     if (name && !(name in interstitialFiles)) problems.push(`level.${field}: assets/interstitials/${name} doesn't exist`)
   }
+  if (level.youWinInterstitialText?.length && !interstitialName(level.youWinInterstitial)) {
+    problems.push('level.youWinInterstitialText needs a youWinInterstitial to be drawn over')
+  }
   return problems
 }
 
@@ -126,6 +129,8 @@ function loadLevel (data, number) {
     tip: data.tip ?? null,
     // URLs of the end-of-level pictures, or null for none
     youWinInterstitial: interstitialFiles[interstitialName(data.youWinInterstitial)] ?? null,
+    // Lines drawn over the win picture, or null for none
+    youWinInterstitialText: data.youWinInterstitialText?.length ? data.youWinInterstitialText : null,
     gameOverInterstitial: interstitialFiles[interstitialName(data.gameOverInterstitial)] ?? null,
     // Fixed when the level is loaded: mechanics never change while a level is played
     additionalGameMechanics: Object.freeze([...data.additionalGameMechanics]),

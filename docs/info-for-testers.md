@@ -10,7 +10,8 @@ Until the real pictures exist, no level names one. To try the feature, put any P
 
 ```json
 "youWinInterstitial": "test.png",
-"gameOverInterstitial": "test.png"
+"gameOverInterstitial": "test.png",
+"youWinInterstitialText": ["First line", "Second line"]
 ```
 
 Then run `npm run validate:levels` and `npm run dev`. To get there quickly, shorten the level (`duration`) for a win, or set `lives` to 1 for a loss. Don't commit the test picture or the level changes. See "End-of-level interstitials" in `graphical-specs.md`.
