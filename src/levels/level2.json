@@ -20,7 +20,7 @@
   "additionalGameMechanics": ["atom capture"],
   "tip": [
     "You can now capture charged atoms",
-    "while they’re crossing the core.",
+    "while they are crossing the core.",
     "Charged atoms are very valuable."
   ]
 }

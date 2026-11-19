@@ -19,14 +19,16 @@
   "lives": 8,
   "additionalGameMechanics": [],
   "tip": [
+    "This is your first day in this universe",
     "You can not capture atoms yet.",
-    "Make sure they don't escape the containment ring."
+    "Make sure they do not escape the containment ring."
   ],
   "youWinInterstitial": {
-    "screen": "doctor_1.png",
+    "screen": "circles_1.png",
     "text": [
-      "Something's odd",
-      "It works, but it seems awake."
+      "This was your first day in this universe.",
+      "You did good, but it will be",
+      "more difficult in the future."
     ]
   }
 }

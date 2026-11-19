@@ -641,7 +641,7 @@ button {
     calc(359 * var(--u))
     0
     0
-    calc(max(calc(97 * var(--u)), env(safe-area-inset-left)) + 5em);
+    calc(max(calc(97 * var(--u)), env(safe-area-inset-left)) + 4em);
   color: var(--color-black);
   font-size: var(--font-menu);
   line-height: 1;
