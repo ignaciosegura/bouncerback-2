@@ -79,6 +79,7 @@ root/
     │   ├── GameEngine.js           # Main PixiJS application orchestrator
     │   ├── timeBackwards.js        # Time goes backwards: the charge limit, the cutoff and the random charge (no PixiJS)
     │   ├── timeBackwardsSettings.js # Tunable values of the time goes backwards property
+    │   ├── ringCollapseSettings.js # Tunable values of the ring collapse ending (the last level)
     │   ├── levelLoader.js          # Validates level JSON and derives runtime values (timer, speeds, intervals, interstitial URLs)
     │   ├── additionalMechanics.js    # Enum constant with the names of the additional game mechanics
     │   ├── chargedAtomHoldSettings.js # Its tunable values (points per second while an atom is held, size of each score step)

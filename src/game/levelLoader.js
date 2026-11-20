@@ -132,6 +132,7 @@ function loadLevel (data, number) {
     soundTrack: data.soundTrack,
     lives: data.lives,
     timeGoesBackwards: data.timeGoesBackwards ?? false,
+    ringCollapse: data.ringCollapse ?? false,
     tip: data.tip ?? null,
     // The end-of-level interstitials: { screen: URL of the picture, text: lines drawn over it or null }, or null for none
     youWinInterstitial: loadInterstitial(data.youWinInterstitial),

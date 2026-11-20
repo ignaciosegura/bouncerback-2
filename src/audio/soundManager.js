@@ -98,22 +98,30 @@ export function unlock () {
   sfx.silence?.play()
 }
 
-export function playSfx (name) {
+// `playbackRate` is the playback speed of this play only: 1 is normal, 2 is twice as fast (and an
+// octave higher). Other voices and later plays of the same sound keep the normal speed
+export function playSfx (name, { playbackRate = 1 } = {}) {
   const howl = sfx[name]
   if (!howl) {
     console.warn(`soundManager: unknown sound effect "${name}"`)
     return
   }
 
+  const start = () => {
+    const id = howl.play()
+    if (playbackRate !== 1) howl.rate(playbackRate, id)
+    return id
+  }
+
   const limit = SFX_VOICE_LIMITS[name]
   if (!limit) {
-    trackVoice(howl, howl.play())
+    trackVoice(howl, start())
     return
   }
 
   const voices = (activeVoices[name] ?? []).filter((id) => howl.playing(id))
   while (voices.length >= limit) stealVoice(howl, voices.shift())
-  const id = howl.play()
+  const id = start()
   trackVoice(howl, id)
   voices.push(id)
   activeVoices[name] = voices

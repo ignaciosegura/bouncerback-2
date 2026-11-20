@@ -6,6 +6,7 @@ import { livesShown } from './levelLoader.js'
 import { CHARGED_ATOM_HOLD_SETTINGS } from './chargedAtomHoldSettings.js'
 import { INTERSTITIAL_SETTINGS, INTERSTITIAL_CRT_OVERRIDES } from './interstitialSettings.js'
 import { TIME_BACKWARDS_SETTINGS } from './timeBackwardsSettings.js'
+import { RING_COLLAPSE_SETTINGS } from './ringCollapseSettings.js'
 import { cutoffSeconds, initialAtomPlan, maxChargeFor, randomCharge } from './timeBackwards.js'
 import { easeInOutQuad, easeInQuad, easeOutQuad } from './easing.js'
 import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
@@ -73,12 +74,19 @@ const BACKGROUND_COLORS = {
 }
 const BACKGROUND_TRANSITION_TIME = 0.5
 
+// A ring collapsing to the center, `progress` (0 → 1) into its collapse: the level start's ring
+// step in reverse. Shared by the level start, the time goes backwards ending and the ring collapse
+function ringCollapseRadius (startRadius, progress) {
+  return startRadius * easeOutQuad(Math.min(1, Math.max(0, 1 - progress)))
+}
+
 const STATE = {
   WAITING: 'waiting', // the gameplay tip is on screen: nothing is drawn until begin()
   STARTING: 'starting',
   PLAYING: 'playing',
   COLLAPSING: 'collapsing',
   ENDING: 'ending', // time goes backwards: the level start played in reverse
+  RING_COLLAPSING: 'ringCollapsing', // levels with ringCollapse: the ring, then the big rings, collapse after the core
   LOST: 'lost',
   INTERSTITIAL: 'interstitial', // the level's end-of-level picture is shown until the player continues
   ENDED: 'ended'
@@ -555,6 +563,9 @@ export default class GameEngine {
     case STATE.ENDING:
       this.updateEnding(dt)
       break
+    case STATE.RING_COLLAPSING:
+      this.updateRingCollapsing(dt)
+      break
     case STATE.LOST:
       this.updateLost(dt)
       break
@@ -658,9 +669,8 @@ export default class GameEngine {
   }
 
   drawStartAnimation (t) {
-    const ring = easeOutQuad(Math.min(1, t / RING_GROW_TIME))
     const core = easeOutQuad(Math.min(1, Math.max(0, (t - RING_GROW_TIME) / CORE_GROW_TIME)))
-    this.ring.draw(RING_RADIUS * ring)
+    this.ring.draw(ringCollapseRadius(RING_RADIUS, 1 - t / RING_GROW_TIME))
     this.emitter.draw(CORE_RADIUS * core)
   }
 
@@ -778,8 +788,8 @@ export default class GameEngine {
     return this.level.timeGoesBackwards && name !== 'launch_super' ? `${name}_reversed` : name
   }
 
-  playSfx (name) {
-    soundManager.playSfx(this.sfxName(name))
+  playSfx (name, options) {
+    soundManager.playSfx(this.sfxName(name), options)
   }
 
   startLoopSfx (name) {
@@ -1053,7 +1063,69 @@ export default class GameEngine {
     this.stateTime += dt
     this.updateVanishingAtoms(dt)
     this.drawCollapseFrame(this.stateTime)
-    if (this.stateTime >= CORE_COLLAPSE_TIME) this.win()
+    if (this.stateTime < CORE_COLLAPSE_TIME) return
+
+    if (this.level.ringCollapse && !this.level.timeGoesBackwards) this.startRingCollapse()
+    else this.win()
+  }
+
+  // Levels with ringCollapse, after the core collapse: the empty ring holds, then collapses, then
+  // the big rings collapse one after another, back to back, each one faster than the one before
+  startRingCollapse () {
+    this.state = STATE.RING_COLLAPSING
+    const {
+      DELAY_SECONDS, OUTER_RING_COUNT, OUTER_RING_FIRST_SPEED, OUTER_RING_SPEED_STEP, OUTER_RING_SOUND_SPEED_STEP
+    } = RING_COLLAPSE_SETTINGS
+    // Time into the current ring's collapse: negative during the hold
+    this.stateTime = -DELAY_SECONDS
+    // The sound speeds up with its own step, so it can stay within Howler's playback rate range
+    // while the rings keep accelerating
+    this.ringCollapses = [{ radius: RING_RADIUS, speed: 1, playbackRate: 1 }]
+    for (let i = 0; i < OUTER_RING_COUNT; i++) {
+      this.ringCollapses.push({
+        radius: null,
+        speed: OUTER_RING_FIRST_SPEED + i * OUTER_RING_SPEED_STEP,
+        playbackRate: OUTER_RING_FIRST_SPEED + i * OUTER_RING_SOUND_SPEED_STEP
+      })
+    }
+    this.ringCollapseStarted = false
+  }
+
+  updateRingCollapsing (dt) {
+    this.updateVanishingAtoms(dt)
+    this.stateTime += dt
+    if (this.stateTime < 0) return
+
+    // Time left over at the end of one ring goes into the next, so the timing doesn't depend on
+    // the frame rate
+    let ring = this.ringCollapses[0]
+    while (ring) {
+      if (!this.ringCollapseStarted) {
+        this.ringCollapseStarted = true
+        // A big ring starts at half the canvas diagonal, fully outside the screen
+        ring.radius ??= this.outerRingRadius()
+        this.playSfx('ring_collapse', { playbackRate: ring.playbackRate })
+      }
+      const duration = RING_GROW_TIME / ring.speed
+      if (this.stateTime < duration) {
+        this.ring.draw(ringCollapseRadius(ring.radius, this.stateTime / duration))
+        return
+      }
+      this.stateTime -= duration
+      this.ringCollapses.shift()
+      this.ringCollapseStarted = false
+      ring = this.ringCollapses[0]
+    }
+    // All the rings are gone: the empty arena holds, then the win. stateTime is now the time since
+    // the last ring reached the center
+    this.ring.draw(0)
+    if (this.stateTime >= RING_COLLAPSE_SETTINGS.END_DELAY_SECONDS) this.win()
+  }
+
+  // Half the canvas diagonal, in arena units (the zoom is at rest at the end of a level)
+  outerRingRadius () {
+    const { width, height } = this.app.screen
+    return Math.hypot(width, height) / 2 / (Math.min(width, height) / REFERENCE_SIZE)
   }
 
   // Time goes backwards, timer reached 0: no atoms are left apart from those finishing an escape.

@@ -122,6 +122,11 @@
             "description": "Whether time runs backwards in this level: the lives and the timer shown count up (see \"Time runs backwards\" in game-rules.md). Optional; if missing, false.",
             "default": false
         },
+        "ringCollapse": {
+            "type": "boolean",
+            "description": "Whether the level's win ends with the ring collapse: after the core collapse the containment ring collapses too, then a series of accelerating rings from outside the screen (see \"Level end condition\" in game-rules.md). For the last level. No effect together with timeGoesBackwards, which has its own ending. Optional; if missing, false.",
+            "default": false
+        },
         "additionalGameMechanics": {
             "type": "array",
             "description": "Names of the additional game mechanics active in this level, fixed for the whole level. Required; if empty, the level only uses the core mechanic. Valid names: \"atom capture\", \"supercharged atom\" and \"charged atom hold\".",

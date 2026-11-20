@@ -135,6 +135,16 @@ Decisions taken with the user while planning, with their reasons, moved here fro
 ### Anticoherence: time runs backwards (level 6)
 - **How To Play doesn't mention it, on purpose:** that time runs backwards is meant to be a surprise for the player. `docs/game-instructions.md` stays silent about it, and the level's `tip` only hints at it. Don't add it to the instructions as a gap to fill.
 
+### Ring collapse ending (the last level)
+
+- **Phase 59:** the last level ends bigger than the others: after the core collapse the containment ring collapses too, then a series of big rings, faster each time, each with `ring_collapse` sped up to match. Decisions made with the user:
+  - **Only the ring collapses**, not the core: the core collapse already shrinks the core to nothing, so bringing it back to shrink it again would break the motion. The ring plays the level start's ring step in reverse, like the end of the Anticoherence ending; one formula (`ringCollapseRadius` in `GameEngine.js`) serves the level start, that ending and every ring here.
+  - **A level file flag (`ringCollapse`)**, not "the highest level number", like `timeGoesBackwards`: it stays with the level if levels are reordered or added. No effect with `timeGoesBackwards`, which has its own ending.
+  - **Big rings from half the canvas diagonal**, so they start fully off-screen on any screen shape (half the width would show them touching the sides on a landscape screen).
+  - **Same duration as the ring collapse, not the same speed in pixels:** a bigger ring takes as long as the containment ring at factor 1, so the timing doesn't depend on the screen shape and stays tight.
+  - **Back to back**, with no pause between rings, and the sound sped up with each ring (a playback rate, which raises the pitch too). The sounds may overlap; the sound file is tuned by ear, and the code doesn't depend on its length.
+  - Values (the pause, the ring count, the speeds) are tunable in `src/game/ringCollapseSettings.js`. At the time they were decided as a 1 s pause and eight rings at factors 1, 1.2 … 2.4; after testing, the ring count went up to 16 (factors up to 4), and the sound got its own speed step (0.15, so its last rate is 3.25), since Howler's playback rate only goes up to 4. A 5 s pause on the empty arena was also added after the last ring, before the interstitial.
+
 ### Desktop build (Steam)
 Planned in `docs/desktop-build.md`, which holds the details.
 - **Electron as the desktop wrapper**, not Tauri: Electron bundles its own Chromium, so WebGL, the GLSL post-processing and the Gamepad API behave the same on Windows, Linux (and the Steam Deck) and macOS, and the same as in the browser where the game is developed. Tauri uses each OS's own WebView (WebKitGTK on Linux), which differs per OS and is riskier for the shaders and controllers. Electron's larger download is accepted.
