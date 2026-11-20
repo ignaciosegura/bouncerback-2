@@ -4,7 +4,7 @@ import { bouncePoints, capturePoints, containmentPoints, livesBonus, timeBonus }
 import { lerpColor } from './color.js'
 import { livesShown } from './levelLoader.js'
 import { CHARGED_ATOM_HOLD_SETTINGS } from './chargedAtomHoldSettings.js'
-import { INTERSTITIAL_SETTINGS } from './interstitialSettings.js'
+import { INTERSTITIAL_SETTINGS, INTERSTITIAL_CRT_OVERRIDES } from './interstitialSettings.js'
 import { TIME_BACKWARDS_SETTINGS } from './timeBackwardsSettings.js'
 import { cutoffSeconds, initialAtomPlan, maxChargeFor, randomCharge } from './timeBackwards.js'
 import { easeInOutQuad, easeInQuad, easeOutQuad } from './easing.js'
@@ -253,7 +253,7 @@ export default class GameEngine {
       if (this.oldTv) {
         // The bloom goes before the CRT, so the chromatic aberration fringes the glow too
         effects.push(new BloomEffect(renderer))
-        effects.push(new CrtEffect(renderer))
+        effects.push(new CrtEffect(renderer, this.interstitialScene ? INTERSTITIAL_CRT_OVERRIDES : {}))
       }
       // Only the processed image goes on the stage; the arena is drawn into it by renderArena()
       if (effects.length > 0) {

@@ -157,7 +157,7 @@ On a resize the textures are reallocated (and emptied), so the engine redraws th
 
 `GameEngine` builds the chain from two switches: the zoom blur (`ZOOM_BLUR_ENABLED`, always on) and the OLD TV switch in Settings (on by default), which adds the bloom and the CRT. The order is zoom blur, bloom, CRT. The menus' chain has no bloom: it would wash out their light picture. Neither: no pipeline at all, the arena goes back on the stage (`POST_PROCESSING_ENABLED = false` does the same, to compare).
 
-**End-of-level interstitials.** When a level's end picture appears, `GameEngine` rebuilds the chain for the picture's own container in place of the arena: the same effects with the same values, minus the zoom blur (it radiates from the core). With OLD TV off that leaves no effects, so the picture goes straight on the stage. It's cleared to black, which gives the bars around the picture.
+**End-of-level interstitials.** When a level's end picture appears, `GameEngine` rebuilds the chain for the picture's own container in place of the arena: the same effects, with the CRT's values overridden by `INTERSTITIAL_CRT_OVERRIDES`. No zoom blur: it radiates from the core, which the picture doesn't have, and it added nothing to the image. With OLD TV off that leaves no effects, so the picture goes straight on the stage. It's cleared to black, which gives the bars around the picture.
 
 **The order matters.** The bloom comes before the CRT so that the CRT's chromatic aberration reads the glow too and fringes it, like a lens would. The CRT comes last because it plays the screen: its curvature bends the blur's streaks with everything else, and its scanlines and mask sit on top of the whole picture, like a real CRT showing an image.
 
@@ -453,6 +453,8 @@ Each value lives only in its effect's settings file, with its unit and range in 
 **On a black background most CRT layers don't show:** scanlines, the mask, the vignette and the glass's border darken what's there, and black can't get darker. They're visible on the lit shapes (the ring, atoms, paddles, streaks) and on the dark red one-life-left background, where the glass's shape shows clearly. To see every layer while tuning, temporarily set the engine's `BACKGROUND_COLORS.DEFAULT` to a grey such as `0x404040`.
 
 `src/menu/menuSettings.js`, `MENU_CRT_OVERRIDES`: the CRT values that differ on the menus. Every other CRT value is the arena's, so a change in `crtSettings.js` shows on both.
+
+`src/game/interstitialSettings.js`, `INTERSTITIAL_CRT_OVERRIDES`: the same for the end-of-level interstitials, whose pictures have light areas that the arena's brightness gain would push to white. Every other CRT value is the arena's.
 
 | Setting | What you'll see | Notes |
 | :--- | :--- | :--- |
