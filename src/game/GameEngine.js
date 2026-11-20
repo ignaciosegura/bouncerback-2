@@ -1029,7 +1029,7 @@ export default class GameEngine {
     this.zoom.scale = ZOOM_SCALE ** e
     this.zoom.offset = 1 - e
     this.layout()
-    if (this.stateTime >= GAME_OVER_DELAY) this.end('onGameOver', this.level.gameOverInterstitial)
+    if (this.stateTime >= GAME_OVER_DELAY) this.end('onGameOver', this.level.gameOverInterstitial, soundManager.GAME_OVER_TRACK)
   }
 
   // Timer reached 0: no spawns, paddles or input; the core takes every atom inside the ring
@@ -1090,7 +1090,7 @@ export default class GameEngine {
       this.releaseAtom(atom)
     }
     this.addScore(bonus)
-    this.end('onLevelWin', this.level.youWinInterstitial)
+    this.end('onLevelWin', this.level.youWinInterstitial, soundManager.YOU_WIN_TRACK)
   }
 
   // End-of-level interstitials
@@ -1120,7 +1120,7 @@ export default class GameEngine {
   // The end animation is over: the outcome's picture, if it has one, else straight to the result.
   // The result is emitted at once either way, so React saves it now. If the picture isn't loaded
   // yet, the last frame stays until it is; if it failed, there's no picture.
-  end (event, interstitial) {
+  end (event, interstitial, track) {
     this.state = STATE.ENDED
     const texture = interstitial && this.interstitialTextures.get(interstitial.screen)
     if (!texture) {
@@ -1129,18 +1129,20 @@ export default class GameEngine {
     }
     texture.then((loaded) => {
       if (this.destroyed) return
-      if (loaded) this.showInterstitial(loaded)
+      if (loaded) this.showInterstitial(loaded, track)
       // The text is HTML, drawn by React over the canvas
       this.emit(event, { score: this.score, interstitial: Boolean(loaded), interstitialText: loaded ? interstitial.text : null })
     })
   }
 
-  // Cut in: the picture replaces the arena at once, in complete silence
-  showInterstitial (texture) {
+  // Cut in: the picture replaces the arena at once; the level's sounds are cut and the outcome's
+  // ambience (played once, no loop) starts
+  showInterstitial (texture, track) {
     this.state = STATE.INTERSTITIAL
     this.stateTime = 0
     soundManager.stopTrack({ cut: true })
     soundManager.stopAllSfx()
+    soundManager.playTrack(track)
     // A controller button held from gameplay never continues
     this.gamepad.reset()
     this.interstitialSprite = new Sprite({ texture, anchor: 0.5 })
