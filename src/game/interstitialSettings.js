@@ -12,7 +12,7 @@ export const INTERSTITIAL_SETTINGS = Object.freeze({
 // the brightness gain. Placeholder values (the menus' own): to be tuned by eye.
 export const INTERSTITIAL_CRT_OVERRIDES = Object.freeze({
   // Gain that makes up for what scanlines, mask and vignette darken. Range: 1–1.6.
-  BRIGHTNESS: 0.25,
+  BRIGHTNESS: 0.22,
   // Darkening toward the edges: the corners lose this share of their brightness. Range: 0–0.6.
   VIGNETTE: 0.8
 })
