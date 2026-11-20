@@ -15,7 +15,7 @@ export const RING_COLLAPSE_SETTINGS = Object.freeze({
   // Added to the playback rate of ring_collapse for each following big ring, starting from
   // OUTER_RING_FIRST_SPEED. Separate from the rings' step so the sound can stay within Howler's
   // playback rate range (up to 4)
-  OUTER_RING_SOUND_SPEED_STEP: 0.7,
+  OUTER_RING_SOUND_SPEED_STEP: 0.07,
   // Seconds the empty arena holds after the last big ring reaches the center, before the You Win!
   // interstitial (or screen)
   END_DELAY_SECONDS: 5
