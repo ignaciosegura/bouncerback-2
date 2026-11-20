@@ -101,7 +101,7 @@ Mobile browsers block audio until an explicit user interaction. Ensure Howler.js
 - Level 1 is the easiest level — no special mechanics or tutorial logic.
 - New game mechanics are only added at the first level of a tier (see "Additional game mechanics" in `docs/game-rules.md`).
 - Do not add fields not defined in the schema (`additionalProperties: false` is enforced).
-- `youWinInterstitial` and `gameOverInterstitial` are optional: the file name of a PNG that must exist in `assets/interstitials/` (missing or blank: no picture). `validate:levels` checks that the file exists.
+- `youWinInterstitial` and `gameOverInterstitial` are optional objects with a required `screen`, the file name of a PNG that must exist in `assets/interstitials/` (missing or blank: no picture), and an optional `text` array (one item per line, drawn over the picture). `validate:levels` checks that the file exists.
 - **Validate after every change to a level file or to the schema:** run `npm run validate:levels` (all of `src/levels/*.json`) or `npm run validate:levels -- path/to/level.json`. It exits with a non-zero code and lists each error's path when a file is invalid. Run it yourself; do not rely on reading the JSON by eye.
 
 ---

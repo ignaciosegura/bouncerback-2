@@ -43,7 +43,7 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
 - [x] **Phase 28** — Intro headphones note ("GRAB YOUR BEST HEADPHONES FIRST ;)" above the `ENTER BOUNCERBACK` button, 32px, no border; the button stays centered)
 - [x] **Phase 29** — Main Menu credits & mixed-case text ("A game by NIK NAK STUDIO" / "Music and sfx by MAN FROM SPACE" at the bottom of the Main Menu, 24px, mixed case, the names link to niknak.es / manfromspace.com in a new tab with no link styling or feedback; the Intro note becomes "Grab your best headphones first ;)")
 
-## Third Development Cycle — ⏳ Pending
+## Third Development Cycle — ✅ Complete
 
 - Game controller support (see `docs/game-controller.md`):
   - [x] **Phase 30** — Gamepad API fundamentals (`src/input/gamepad.js`: polled reader, one active controller, press detection, stick engage/release thresholds against drift)
@@ -77,10 +77,10 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
 - [x] **Phase 55** — Blinking buttons (the text of `ENTER BOUNCERBACK` and of unlocked levels not yet beaten blinks, 1 s on / 1 s off, all in sync; it keeps blinking under the controller's selection and the pressed look, and turns steady on activation)
 - [x] **Phase 56** — Paddle count per level (optional `paddles.count` in the level file: how many paddles can be set at once before setting one more removes the oldest; 2 if missing, at least 1; replaces the fixed `MAX_ACTIVE_PADDLES`, the replacement warning follows it)
 - Storytelling, end-of-level interstitials (optional `youWinInterstitial` / `gameOverInterstitial` objects in the level file, with a `screen`: a PNG in `assets/interstitials/`, and an optional `text`; missing or blank screen, no picture):
-  - [x] **Phase 57** — Interstitial fields in the level files (schema `pattern` for a `.png` file name with no folder; the loader and `validate:levels` check the file exists; the loader gives the engine its URL; no level uses them yet)
+  - [x] **Phase 57** — Interstitial fields in the level files (schema `pattern` for a `.png` file name with no folder; the loader and `validate:levels` check the file exists; the loader gives the engine its URL)
   - [x] **Phase 58** — Interstitial display (after the last life zoom or the core collapse the picture cuts in, in the game canvas, contain fit with black bars, through the arena's bloom and CRT with OLD TV on, never the zoom blur; HUD hidden, complete silence; continues on release of a tap, click, bottom face button, RT, Enter or Space after a short input lock, then the result screen cuts in with its screen-in; the result is saved when the picture appears; back and Escape do nothing on it)
 
-## Time Goes Backwards (Anticoherence) — ⏳ Pending
+## Time Goes Backwards (Anticoherence) — ✅ Complete
 
 Planned in `docs/time-goes-backwards-implementation-plan.md`, with its own numbering (T1, T2…); completed phases go to `docs/archive/time-goes-backwards.md`.
 
@@ -88,7 +88,7 @@ Planned in `docs/time-goes-backwards-implementation-plan.md`, with its own numbe
 - [x] **Phase T2** — Atom creation, charge loss and disappearing (a press on the core creates an atom that grows and launches on release, or at the cutoff; atoms are born with a random charge limited by the time left, lose one per bounce and disappear at the core at charge 1; the core stops emitting at the cutoff; `CORE_EMITS_ATOMS` setting) — *the reversed sounds waited for T5*
 - [x] **Phase T3** — Reversed effects during play (capture burst, paddle bounce echo, atom pulse and paddle lifetime fade run their normal formula on mirrored progress, through a `reversed` option)
 - [x] **Phase T4** — Reversed level start and end (the core collapse plays in reverse with initial atoms defined by first-contact time; the timer reaching zero goes to an `ENDING` state that plays the level start in reverse; the collapse frame is shared by both directions)
-- [x] **Phase T5** — Audio (every effect plays its `_reversed` copy in this level, added by the engine; voice limits unchanged) — *the reversed files are unedited placeholders*
+- [x] **Phase T5** — Audio (every effect plays its `_reversed` copy in this level, added by the engine; voice limits unchanged)
 - [x] **Phase T6** — Safe initial atoms (an initial atom heading outward starts at most 75% of the way to the paddles, by raising the lower end of the first-contact range; `INITIAL_ATOM_MAX_OUTWARD_PROGRESS` setting)
 
 ## Desktop & Steam Cycle (parallel) — ⏳ Pending

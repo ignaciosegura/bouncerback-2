@@ -132,6 +132,9 @@ Decisions taken with the user while planning, with their reasons, moved here fro
 - **The pictures are the engine's own textures**, loaded with an `Image` when the level mounts and destroyed with the engine, not through PixiJS' `Assets` cache (the plan said `Assets.load()` / `Assets.unload()`). With the shared cache, an engine torn down late (React StrictMode's double mount in development, the delayed WebGL teardown) would unload the texture the next engine is using.
 - **Checked twice:** the schema's `pattern` rejects names with a folder or not ending in `.png` (the in-game checker learned `pattern`), and both the loader and `npm run validate:levels` check that the file exists in `assets/interstitials/`, which a schema can't express.
 
+### Anticoherence: time runs backwards (level 6)
+- **How To Play doesn't mention it, on purpose:** that time runs backwards is meant to be a surprise for the player. `docs/game-instructions.md` stays silent about it, and the level's `tip` only hints at it. Don't add it to the instructions as a gap to fill.
+
 ### Desktop build (Steam)
 Planned in `docs/desktop-build.md`, which holds the details.
 - **Electron as the desktop wrapper**, not Tauri: Electron bundles its own Chromium, so WebGL, the GLSL post-processing and the Gamepad API behave the same on Windows, Linux (and the Steam Deck) and macOS, and the same as in the browser where the game is developed. Tauri uses each OS's own WebView (WebKitGTK on Linux), which differs per OS and is riskier for the shaders and controllers. Electron's larger download is accepted.
