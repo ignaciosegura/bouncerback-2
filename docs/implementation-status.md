@@ -80,6 +80,7 @@ Legend: `[x]` done · `[ ]` pending · `[~]` won't do
   - [x] **Phase 57** — Interstitial fields in the level files (schema `pattern` for a `.png` file name with no folder; the loader and `validate:levels` check the file exists; the loader gives the engine its URL)
   - [x] **Phase 58** — Interstitial display (after the last life zoom or the core collapse the picture cuts in, in the game canvas, contain fit with black bars, through the arena's bloom and CRT with OLD TV on, never the zoom blur; HUD hidden, complete silence; continues on release of a tap, click, bottom face button, RT, Enter or Space after a short input lock, then the result screen cuts in with its screen-in; the result is saved when the picture appears; back and Escape do nothing on it)
 - [x] **Phase 59** — Ring collapse ending (optional `ringCollapse` in the level file, set on level 9: after the core collapse the containment ring holds and collapses, then a series of big rings (`OUTER_RING_COUNT`) from half the canvas diagonal collapse back to back, each faster, with `ring_collapse` sped up to match; tunable in `ringCollapseSettings.js`) — *checked in an automated Chrome run at 1280x720 with OLD TV on; sound, pause, other screen shapes and frame rates not checked yet*
+- [x] **Phase 60** — Final ring collapse sound (the last big ring of the ring collapse plays `ring_collapse_final` instead of `ring_collapse`, at normal speed, ringing out over the pause before the You Win! picture) — *not checked by ear yet*
 
 ## Time Goes Backwards (Anticoherence) — ✅ Complete
 

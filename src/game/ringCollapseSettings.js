@@ -2,7 +2,7 @@
 // ring collapse" in docs/graphical-specs.md. Change them here and reload.
 export const RING_COLLAPSE_SETTINGS = Object.freeze({
   // Seconds the empty ring holds after the core collapse, before it collapses too
-  DELAY_SECONDS: 1,
+  DELAY_SECONDS: 3,
   // Big rings that collapse after the containment ring, back to back, each starting outside the
   // screen (radius: half the canvas diagonal)
   OUTER_RING_COUNT: 40,
@@ -17,6 +17,7 @@ export const RING_COLLAPSE_SETTINGS = Object.freeze({
   // playback rate range (up to 4)
   OUTER_RING_SOUND_SPEED_STEP: 0.07,
   // Seconds the empty arena holds after the last big ring reaches the center, before the You Win!
-  // interstitial (or screen)
+  // interstitial (or screen). The last ring's ring_collapse_final plays through it: the picture's
+  // cut silences whatever is still playing
   END_DELAY_SECONDS: 5
 })

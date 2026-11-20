@@ -582,6 +582,31 @@ No other level changes.
 - `docs/implementation-status.md`: Phase 59.
 - `docs/game-instructions.md`: nothing (it doesn't describe level endings).
 
+### Phase 60 — Final sound for the ring collapse
+
+**Goal**
+
+In the ring collapse ending (levels with `ringCollapse`, see Phase 59 in `docs/archive/cycle-3.md`), the last big ring plays its own sound, `assets/audio/ring_collapse_final.flac` (already in the repo), instead of `ring_collapse`. Every other ring keeps `ring_collapse`, sped up as now. Nothing else changes: the rings, their timing and the pause before the You Win! picture stay the same.
+
+**Choices**
+
+- **Only the last big ring** (the last of `OUTER_RING_COUNT`) gets the final sound. The containment ring and every other big ring keep `ring_collapse`.
+- **At normal speed** (playback rate 1), not at the rate the sped-up step would give it. It is a separate sound made for the ending, and at about 4 s long it fits in the empty-arena pause after the last ring (`END_DELAY_SECONDS`), so it rings out before the picture cuts in. This is a proposal: if the final sound should be sped up like the others, it takes the last ring's playback rate instead (a one-line difference).
+- **No new setting.** The sound's name is fixed in the engine, like every other effect's name. If the final sound turns out longer than the pause, the picture's cut silences it, as it does every other sound. The user adjusts the file or `END_DELAY_SECONDS`.
+
+**Implementation**
+
+- `src/game/GameEngine.js`, `startRingCollapse`: each entry in `this.ringCollapses` also gets its sound's name: `ring_collapse` for all of them, `ring_collapse_final` with playback rate 1 for the last big ring. `updateRingCollapsing` plays `ring.sound` at `ring.playbackRate`, in place of the fixed `ring_collapse`. With `OUTER_RING_COUNT` at 0, nothing gets the final sound: the containment ring keeps `ring_collapse`.
+- `src/audio/soundManager.js`: nothing. The glob already loads `ring_collapse_final.flac` under the name `ring_collapse_final`.
+- `src/game/ringCollapseSettings.js`: nothing, apart from the comment on `END_DELAY_SECONDS`, which says that the final sound plays during that pause.
+
+**Docs** (as part of the implementation)
+
+- `docs/audio-map.md`: a `ring_collapse_final.flac` row (the last big ring of the ring collapse, at normal speed, plays through the pause before the picture). The `ring_collapse.flac` row says that it plays for every ring but the last big one.
+- `docs/graphical-specs.md`, "Level end, ring collapse": the last big ring plays `ring_collapse_final` at normal speed instead.
+- `docs/design-decisions.md`, "Ring collapse ending": a line on the final sound and why it isn't sped up.
+- `docs/implementation-status.md`: Phase 60.
+
 ## Verification
 
 - Game controller, menus (test with the Trust GXT pad; terms as in `docs/game-controller.md`): on the Intro the controller does nothing; clicking the button still starts the music. On the Main Menu nothing is selected until the controller is used; the first push or bottom face button press selects PLAY without activating it. The d-pad and the left stick move the selection (one step per push, holding doesn't repeat, no wrap-around); the bottom face button and RT activate it with the same transition as a click; the new screen arrives with its first item selected. Level Select: all five levels and BACK are reachable. Settings: up / down between MUSIC, SFX and BACK, left / right between `-` and `+`; the bottom face button on `-` / `+` changes the volume one step per press and keeps it selected. The right face button on Level Select / Settings goes back to the Main Menu; it does nothing on the Main Menu, Game Over and You Win!. The credit links are never selected. The selected button shows line, gap, line, all the same thickness, outside its border, and the layout doesn't move; the `-` / `+` steps show it inside. The selection fades, tints and shakes with its button during the screen-out. Presses during a transition do nothing. A mouse click or tap hides the selection, and the next controller press brings it back on the first item. A controller with a slightly drifting stick at rest doesn't move the selection.
@@ -628,3 +653,7 @@ No other level changes.
 - Ring collapse ending (Phase 59): Every other sound effect still plays at normal speed after the ending (e.g. play level 9 again).
 - Ring collapse ending (Phase 59): Levels 1–8: unchanged ending. Level 6 (Anticoherence): unchanged ending.
 - Ring collapse ending (Phase 59): Losing level 9: the last life zoom and Game Over, unchanged.
+- Final ring collapse sound (Phase 60): Level 9, won: every ring plays `ring_collapse`, faster each time, except the last big ring, which plays `ring_collapse_final` at normal pitch. It plays to its end during the pause, then the You Win! picture cuts in.
+- Final ring collapse sound (Phase 60): `ring_collapse_final` plays once, never for the containment ring or another big ring.
+- Final ring collapse sound (Phase 60): Playing level 9 again plays it again, the same way. No console warning about an unknown sound effect, in the dev run and in the production build (hashed file name).
+- Final ring collapse sound (Phase 60): Levels 1–8 and Anticoherence: unchanged, and `ring_collapse_final` never plays.

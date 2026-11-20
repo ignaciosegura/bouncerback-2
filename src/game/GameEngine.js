@@ -1079,13 +1079,16 @@ export default class GameEngine {
     // Time into the current ring's collapse: negative during the hold
     this.stateTime = -DELAY_SECONDS
     // The sound speeds up with its own step, so it can stay within Howler's playback rate range
-    // while the rings keep accelerating
-    this.ringCollapses = [{ radius: RING_RADIUS, speed: 1, playbackRate: 1 }]
+    // while the rings keep accelerating. The last big ring has its own sound, at normal speed: it
+    // rings out over the pause before the win
+    this.ringCollapses = [{ radius: RING_RADIUS, speed: 1, sound: 'ring_collapse', playbackRate: 1 }]
     for (let i = 0; i < OUTER_RING_COUNT; i++) {
+      const last = i === OUTER_RING_COUNT - 1
       this.ringCollapses.push({
         radius: null,
         speed: OUTER_RING_FIRST_SPEED + i * OUTER_RING_SPEED_STEP,
-        playbackRate: OUTER_RING_FIRST_SPEED + i * OUTER_RING_SOUND_SPEED_STEP
+        sound: last ? 'ring_collapse_final' : 'ring_collapse',
+        playbackRate: last ? 1 : OUTER_RING_FIRST_SPEED + i * OUTER_RING_SOUND_SPEED_STEP
       })
     }
     this.ringCollapseStarted = false
@@ -1104,7 +1107,7 @@ export default class GameEngine {
         this.ringCollapseStarted = true
         // A big ring starts at half the canvas diagonal, fully outside the screen
         ring.radius ??= this.outerRingRadius()
-        this.playSfx('ring_collapse', { playbackRate: ring.playbackRate })
+        this.playSfx(ring.sound, { playbackRate: ring.playbackRate })
       }
       const duration = RING_GROW_TIME / ring.speed
       if (this.stateTime < duration) {

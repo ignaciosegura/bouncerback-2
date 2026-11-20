@@ -144,6 +144,7 @@ Decisions taken with the user while planning, with their reasons, moved here fro
   - **Same duration as the ring collapse, not the same speed in pixels:** a bigger ring takes as long as the containment ring at factor 1, so the timing doesn't depend on the screen shape and stays tight.
   - **Back to back**, with no pause between rings, and the sound sped up with each ring (a playback rate, which raises the pitch too). The sounds may overlap; the sound file is tuned by ear, and the code doesn't depend on its length.
   - Values (the pause, the ring count, the speeds) are tunable in `src/game/ringCollapseSettings.js`. At the time they were decided as a 1 s pause and eight rings at factors 1, 1.2 … 2.4; after testing, the ring count went up to 16 (factors up to 4), and the sound got its own speed step (0.15, so its last rate is 3.25), since Howler's playback rate only goes up to 4. A 5 s pause on the empty arena was also added after the last ring, before the interstitial.
+  - **Final sound (Phase 60):** the last big ring plays `ring_collapse_final` instead of `ring_collapse`, at normal speed: it is a separate sound made for the ending, and it rings out over the pause after the last ring rather than being sped up with the rings. Its name is fixed in the engine like every other effect's, with no setting.
 
 ### Desktop build (Steam)
 Planned in `docs/desktop-build.md`, which holds the details.
