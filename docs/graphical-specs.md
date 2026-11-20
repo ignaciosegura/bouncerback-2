@@ -117,6 +117,7 @@ See the LEVEL MENU and LEVEL MENU (LOCKED LEVELS) mockups.
 * A level can have an interstitial for each outcome in its level file (`youWinInterstitial`, `gameOverInterstitial`), an object with a `screen` (a PNG in `assets/interstitials/`) and an optional `text`. It's the first storytelling element. Without one, the level goes to its result screen as before.
 * When the end animation is over (the last life zoom on a loss, the core collapse on a win), the picture replaces the arena at once (a cut, no fade) and the HUD disappears at once. It stays until the player continues; then the Game Over or You Win! screen replaces it at once and plays its usual screen-in (no screen-out). See `docs/navigation.md` for how to continue.
 * An interstitial can also carry text (`text`, one item per line, optional; it needs a `screen`). It's plain HTML over the canvas (React, not PixiJS), so the CRT doesn't touch it and it stays readable. It has the gameplay tip's look (see "Gameplay tips": mixed case as written, 32px, line height 1, top edge 359px from the top of the screen at the 1920x1080 reference, scaling with the viewport), but black (the pictures are mostly white) and left-aligned with the HUD's SCORE (the HUD's left padding, plus 5 characters of extra padding) instead of centered. It's placed from the screen, not from the picture, and taps pass through it.
+* The You Win! interstitials' pictures use a yellow background, #FFDD00 (see "Colors"). It's part of the PNGs, not set in code.
 * It's drawn in the game canvas, full screen, scaled to fit whole and centered: black bars where the screen's shape differs from the picture's (e.g. 16:10 on the Steam Deck, wide phones). Pictures are made at 1920x1080, like the mockups, and are deliberately low fidelity.
 * With OLD TV on it goes through the same bloom and CRT layers as the arena (the CRT with its own overrides, `INTERSTITIAL_CRT_OVERRIDES`). It never gets the zoom blur (it radiates from the core, which the picture doesn't have). With OLD TV off it's drawn flat.
 * Presses are ignored for a short moment after it appears, so a stray tap at the end of the level doesn't skip it. The length is set in `src/game/interstitialSettings.js`.
@@ -243,6 +244,7 @@ Without this mechanic nothing is held. It builds on `atom capture`, so everythin
 * White background: #D8D8D8
 * Dark red background (one life left): #550000
 * Yellow (atom at 3 charges): #FFFF00
+* Yellow background for interstitials: #FFDD00.
 * Red (atom at 10 charges, paddle replacement warning): #FF0000
 * Grey (core fill and outline during the level-end core collapse): #888888
 * Transition dark yellow (screen-out tint, halfway): #666600
