@@ -633,19 +633,18 @@ button {
   text-transform: none;
 }
 
-/* End-of-level interstitial text: the tip's top edge (359px) and size, left-aligned with the HUD's
-   SCORE (same left padding as .hud) plus 5 characters */
+/* End-of-level interstitial text: the tip's size, the block centered on the screen, each line
+   centered */
 
 .interstitial-text {
-  padding:
-    calc(359 * var(--u))
-    0
-    0
-    calc(max(calc(97 * var(--u)), env(safe-area-inset-left)) + 4em);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   color: var(--color-white);
   font-size: var(--font-menu);
   line-height: 1;
-  text-align: left;
+  text-align: center;
   text-transform: none;
   /* Keeps the whitespace-only div of an empty line at full line height */
   white-space: pre;
