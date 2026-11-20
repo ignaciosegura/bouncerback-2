@@ -23,5 +23,13 @@
   "tip": [
     "The more charged an atom is, the higher score it provides",
     "for every bounce, capture and at core collapse."
-  ]
+  ],
+  "youWinInterstitial": {
+    "screen": "circles_2.png",
+    "text": [
+      "Every atom is precious.",
+      "Every atom has the power",
+      "to create or destroy everything."
+    ]
+  }
 }

@@ -21,5 +21,10 @@
   "additionalGameMechanics": [
     "atom capture",
     "charged atom hold"
+  ],
+  "tip": [
+    "Time goes backwards here. Your task remain the same.",
+    "Trying to capture an atom will have",
+    "UNFORESEEN CONSEQUENCES."
   ]
 }
