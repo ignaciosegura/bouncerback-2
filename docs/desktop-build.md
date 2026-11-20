@@ -124,6 +124,16 @@ The build starts fullscreen. F11 toggles windowed mode; Ctrl+Shift+I opens DevTo
 
 The build starts fullscreen; F11 toggles windowed mode (not under CrossOver on the Mac: macOS keeps F11, and fn+F11, for Show Desktop); Ctrl+Shift+I opens DevTools. Saved data and `launch-info.txt` are in the bottle, under `drive_c/users/crossover/AppData/Roaming/bouncerback/` (the bottle's folder is in `~/Library/Application Support/CrossOver/Bottles/`). On a real Windows PC they are in `%APPDATA%\bouncerback\`, and SmartScreen warns on the first launch, since the build is unsigned ("Windows protected your PC" → More info → Run anyway).
 
+**Windows x64 on the Steam Deck (Proton).** The Phase D5 build, run on the Deck through Proton, Valve's Windows compatibility layer. The native Linux build stays the Deck's target; this is a closer check of the Windows build than CrossOver (Vulkan on real AMD hardware, no translation to Metal or Rosetta 2), and a fallback if the Linux build has trouble on the Deck. Its performance is not what ships on the Deck.
+
+1. Copy `release/bouncerback-<version>-win-x64.zip` to the Deck in Desktop Mode: USB stick (exFAT), a network share (`smb://<mac-name>.local` in Dolphin, with File Sharing on in the Mac's System Settings), or `scp` (on the Deck, `passwd` once, then `sudo systemctl start sshd`; from the Mac, `scp release/bouncerback-<version>-win-x64.zip deck@steamdeck.local:~/Games/`).
+2. Extract it into a folder of its own, e.g. `~/Games/Bouncerback-win/`, so that `Bouncerback.exe` sits directly in it.
+3. Steam → Add a Game → Add a Non-Steam Game → Browse (set the file type filter to "All files") → `Bouncerback.exe`. Rename the entry (e.g. "Bouncerback (Win)") to tell it apart from the Linux build.
+4. In its Properties → Compatibility, turn **on** "Force the use of a specific Steam Play compatibility tool" and pick Proton Experimental or the latest stable Proton (the opposite of the Linux build, which keeps it off).
+5. Start it from the library, in Desktop Mode or in Game Mode. The first launch is slow while Proton creates its prefix.
+
+If the window stays blank while the music plays, add `--in-process-gpu` to its Launch Options (the CrossOver fix above; that problem came from Wine's Mac driver, so Proton is not expected to need it). For a log, set the Launch Options to `PROTON_LOG=1 %command%` (writes `~/steam-<id>.log`), or run `steam` from Konsole in Desktop Mode and launch the game to see its output there. Saved data and `launch-info.txt` are in the Proton prefix, under `~/.local/share/Steam/steamapps/compatdata/<id>/pfx/drive_c/users/steamuser/AppData/Roaming/bouncerback/`; non-Steam games get a generated `<id>`, so look for the most recently modified folder in `compatdata/`.
+
 ### Steam Deck test results
 
 To be filled after testing the Phase D1 build, in both modes unless noted. Date and SteamOS version:
