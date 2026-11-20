@@ -19,6 +19,8 @@
     "desktop:start": "vite build && electron .",
     "desktop:build:linux": "vite build && electron-builder --linux tar.gz --x64",
     "desktop:build:win": "vite build && electron-builder --win zip --x64",
+    "desktop:deck:win": "npm run desktop:build:win && node scripts/deploy-deck.js win",
+    "desktop:deck:linux": "npm run desktop:build:linux && node scripts/deploy-deck.js linux",
     "validate:levels": "node scripts/validate-levels.js",
     "level:table": "node scripts/level-difficulty-table.js",
     "licenses": "node scripts/third-party-licenses.js",

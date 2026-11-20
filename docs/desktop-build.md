@@ -134,6 +134,28 @@ The build starts fullscreen; F11 toggles windowed mode (not under CrossOver on t
 
 If the window stays blank while the music plays, add `--in-process-gpu` to its Launch Options (the CrossOver fix above; that problem came from Wine's Mac driver, so Proton is not expected to need it). For a log, set the Launch Options to `PROTON_LOG=1 %command%` (writes `~/steam-<id>.log`), or run `steam` from Konsole in Desktop Mode and launch the game to see its output there. Saved data and `launch-info.txt` are in the Proton prefix, under `~/.local/share/Steam/steamapps/compatdata/<id>/pfx/drive_c/users/steamuser/AppData/Roaming/bouncerback/`; non-Steam games get a generated `<id>`, so look for the most recently modified folder in `compatdata/`.
 
+**Copying builds to the Steam Deck over SSH.** Instead of a USB stick or a share, the Mac copies the unpacked build straight into a folder on the Deck with `rsync` over SSH, and every new build overwrites the previous one in place, so the Steam library entry made for it keeps working. It works over the network only: the Deck's USB-C port is host-only, so a cable to the Mac doesn't connect them. The Mac on Ethernet and the Deck on Wi-Fi is fine, as long as both are on the same router's network.
+
+One-time setup on the Deck (Desktop Mode, Konsole):
+
+1. `passwd`: set a password for the `deck` user (it has none by default, and SSH needs one).
+2. `sudo systemctl enable --now sshd`: start the SSH server, now and after every boot.
+3. Check that the Mac reaches it: `ssh deck@steamdeck.local` (answer `yes` to the host key question the first time, then type the password). `steamdeck` is the Deck's default host name; if it was renamed (Settings → System → hostname), use that name.
+
+Optional, on the Mac: `ssh-copy-id deck@steamdeck.local` installs the Mac's SSH key on the Deck, so the copy no longer asks for the password (twice per copy otherwise). It needs a key on the Mac; create one first with `ssh-keygen -t ed25519` if `~/.ssh/id_ed25519.pub` doesn't exist.
+
+Copying:
+
+- `npm run desktop:deck:win` builds the Windows version and copies `release/win-unpacked/` to `~/Games/Bouncerback-win/` on the Deck.
+- `npm run desktop:deck:linux` does the same with the Linux version, to `~/Games/Bouncerback-linux/`.
+- `node scripts/deploy-deck.js win` (or `linux`) copies the last build without rebuilding.
+
+The Deck's folder is made identical to the build (files the build no longer has are deleted from it; nothing outside it is touched). The first time, add the executable to Steam as a non-Steam game, as in the Linux and Proton steps above (`Bouncerback.exe` in `~/Games/Bouncerback-win/`, `bouncerback` in `~/Games/Bouncerback-linux/`); later copies need nothing on the Deck. Quit the game on the Deck before copying.
+
+Two environment variables change the destination: `DECK_HOST` (the SSH destination, default `deck@steamdeck.local`) and `DECK_DIR` (the parent folder in the Deck's home, default `Games`). E.g. `DECK_HOST=deck@192.168.1.50 npm run desktop:deck:win`.
+
+**If the Deck can't be reached** (the script stops after a few seconds with `ssh failed`): the Deck must be awake (it doesn't answer while asleep) and SSH running (`systemctl status sshd` on it). If `steamdeck.local` isn't found, the router is probably not passing the multicast (mDNS) name lookups between its wired and Wi-Fi sides, which some routers and mesh systems block: use the Deck's IP address instead, from Settings → Internet → the connected network on the Deck, or `ip -4 addr show wlan0` in Konsole, with `DECK_HOST=deck@<ip>`. Giving the Deck a fixed IP (a DHCP reservation in the router) keeps that address from changing. Also check that the router has no "AP isolation" or "client isolation" on the Wi-Fi network, which stops Wi-Fi devices from talking to the rest of the network.
+
 ### Steam Deck test results
 
 To be filled after testing the Phase D1 build, in both modes unless noted. Date and SteamOS version:
