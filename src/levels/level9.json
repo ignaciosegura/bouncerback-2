@@ -18,6 +18,7 @@
     "count": 4
   },
   "lives": 4,
+  "ringCollapse": true,
   "additionalGameMechanics": [
     "atom capture",
     "supercharged atom",
