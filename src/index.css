@@ -647,6 +647,8 @@ button {
   line-height: 1;
   text-align: left;
   text-transform: none;
+  /* Keeps the whitespace-only div of an empty line at full line height */
+  white-space: pre;
 }
 
 /* Game */

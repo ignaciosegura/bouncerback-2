@@ -25,5 +25,12 @@
   "tip": [
     "You will have three lives instead of four.",
     "Be mindful managing your risks."
-  ]
+  ],
+  "youWinInterstitial": {
+    "screen": "circles_4.png",
+    "text": [
+      "Cause and consequence is now in place",
+      "This universe is close to being able to sustain itself."
+    ]
+  }
 }

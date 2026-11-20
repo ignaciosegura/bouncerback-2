@@ -26,5 +26,12 @@
     "Time goes backwards here. Your task remain the same.",
     "Trying to capture an atom will have",
     "UNFORESEEN CONSEQUENCES."
-  ]
+  ],
+  "youWinInterstitial": {
+    "screen": "circles_3.png",
+    "text": [
+      "Cause and consequence is now in place",
+      "This universe is close to being able to sustain itself."
+    ]
+  }
 }

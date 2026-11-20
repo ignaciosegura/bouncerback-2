@@ -5,7 +5,7 @@ import Overlay from '../components/Overlay.jsx'
 export default function InterstitialText ({ lines }) {
   return (
     <Overlay className="interstitial-text">
-      {lines.map((line, i) => <div key={i}>{line}</div>)}
+      {lines.map((line, i) => <div key={i}>{line || ' '}</div>)}
     </Overlay>
   )
 }

@@ -27,5 +27,22 @@
     "This level is much faster and longer.",
     "You can deploy four deflectors instead of two.",
     "The deflectors stay deployed longer."
-  ]
+  ],
+  "youWinInterstitial": {
+    "screen": "circles_6.png",
+    "text": [
+      "It is done. It is real. It now exists on its own.",
+      "The fate of this universe is no longer in our hands.",
+      "It is now time for this universe to discover itself.",
+      "",
+      "In time, it will create self-conscious creatures",
+      "with the purpose of understanding itself through discovery.",
+      "The creatures will need to understand the universe themselves",
+      "before explaining it to the universe itself.",
+      "",
+      "Whether they actually make it, it is up to them.",
+      "",
+      "Our work here is done. Now we rest."
+    ]
+  }
 }
