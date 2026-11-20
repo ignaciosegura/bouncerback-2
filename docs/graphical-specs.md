@@ -47,6 +47,7 @@ The screen will be used in forced landscape mode. The visual style is based on e
     * "BOUNCERBACK is a game designed and developed by Nik Nak Studio in 2026."
     * "Gameplay design and development:" and, on its own line, "Ignacio Segura"
     * "Music and SFX:" and, on its own line, "Man from Space"
+    * "Bouncerback collects no data or telemetry. Progress is stored only on your device." (the privacy statement, in three lines)
 * Four buttons at the bottom, 64px apart and 393px wide (wider than the usual 283px for the longest label, MAN FROM SPACE): NIK NAK STUDIO and MAN FROM SPACE, which open https://www.niknak.es and https://www.manfromspace.com in a new tab; LICENSES, which opens the third-party licenses file on GitHub in a new tab (`THIRD-PARTY-LICENSES.md`), and `<<< BACK`, which returns to the Main Menu.
 * At the 1920x1080 reference size, the text's first line starts 178px from the top, and the bottom of BACK is 109px above the bottom of the screen.
 * All of it takes part in the screen transitions (see "Screen transitions").

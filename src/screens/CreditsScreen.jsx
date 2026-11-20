@@ -18,6 +18,7 @@ export default function CreditsScreen ({ onBack }) {
         <p>BOUNCERBACK is a game designed and developed by Nik Nak Studio in 2026.</p>
         <p>Gameplay design and development:<br />Ignacio Segura</p>
         <p>Music and SFX:<br />Man from Space</p>
+        <p>Bouncerback collects no data<br />or telemetry. Progress is stored<br />only on your device.</p>
       </div>
       <Menu className="credits__menu">
         <Button onClick={openLink(NIK_NAK_URL)}>NIK NAK STUDIO</Button>
