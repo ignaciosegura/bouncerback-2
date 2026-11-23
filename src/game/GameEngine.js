@@ -509,6 +509,7 @@ export default class GameEngine {
     const paddle = this.paddlePool.pop() ?? this.createPaddle()
     paddle.start(angle)
     this.draggedPaddles.set(input, paddle)
+    this.updatePaddleWarnings()
   }
 
   dragPaddle (input, angle) {
@@ -527,10 +528,12 @@ export default class GameEngine {
     while (this.activePaddles.length > this.level.paddleCount) {
       this.releasePaddle(this.activePaddles.shift())
     }
+    this.updatePaddleWarnings()
   }
 
   // Set paddles that the paddles being dragged will push out when released turn red: the oldest
-  // ones beyond the level's paddle count (activePaddles is ordered oldest first)
+  // ones beyond the level's paddle count (activePaddles is ordered oldest first). Called whenever
+  // a paddle is dragged, set or expires: the only changes to the two lists during play
   updatePaddleWarnings () {
     const pushedOut = this.activePaddles.length + this.draggedPaddles.size - this.level.paddleCount
     this.activePaddles.forEach((paddle, i) => paddle.setWarning(i < pushedOut))
@@ -689,14 +692,16 @@ export default class GameEngine {
       this.spawnAtom(true)
     }
 
+    let expired = false
     for (let i = this.activePaddles.length - 1; i >= 0; i--) {
       const paddle = this.activePaddles[i]
       if (!paddle.update(dt)) {
         this.activePaddles.splice(i, 1)
         this.releasePaddle(paddle)
+        expired = true
       }
     }
-    this.updatePaddleWarnings()
+    if (expired) this.updatePaddleWarnings()
 
     this.payHeld(dt)
 
@@ -753,8 +758,11 @@ export default class GameEngine {
   // contact distance, so it stays on the beat even when the paddle is set late), escapes once its
   // center crosses the ring, otherwise keeps moving
   checkContact (atom) {
-    const angle = atom.positionAngle
-    const paddle = this.activePaddles.find((p) => p.covers(angle, ATOM_ANGULAR_RADIUS))
+    // The atom's direction from the core: along its axis, or the opposite way past the core
+    const side = atom.distance >= 0 ? 1 : -1
+    const x = atom.axisX * side
+    const y = atom.axisY * side
+    const paddle = this.activePaddles.find((p) => p.covers(x, y, ATOM_ANGULAR_RADIUS))
     if (paddle) {
       paddle.bounce()
       this.addScore(bouncePoints(this.level.number, atom.charge))

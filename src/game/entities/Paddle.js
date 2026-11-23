@@ -14,11 +14,6 @@ const FADE_MIN_ALPHA = 0.2
 const WARNING_COLOR = 0xff0000
 const NO_TINT = 0xffffff
 
-// Signed smallest difference between two angles, in (-π, π]
-function angleDifference (a, b) {
-  return Math.atan2(Math.sin(a - b), Math.cos(a - b))
-}
-
 // An arc on the ring centred on `angle`. Drawn as an outline while the player drags it (inactive),
 // filled once set (active). Expires `duration` seconds after being set, fading out over the end
 // of its lifetime. Owns the flash shown when it bounces an atom. Turns red while it's about to be pushed out.
@@ -31,6 +26,10 @@ export default class Paddle {
     this.view.visible = false
     this.flash = new PaddleFlash(reversed)
     this.warning = false
+    // covers() limit: the cosine of the largest angle from the paddle's center it blocks, for
+    // `coverTolerance` (computed on the first check: the tolerance is the same for every check)
+    this.coverTolerance = null
+    this.coverCos = 0
   }
 
   start (angle) {
@@ -48,8 +47,11 @@ export default class Paddle {
     this.view.rotation = angle
   }
 
+  // Set: it no longer moves, so its direction is computed once here for covers()
   activate () {
     this.active = true
+    this.dirX = Math.cos(this.angle)
+    this.dirY = Math.sin(this.angle)
     this.view.alpha = this.reversed ? FADE_MIN_ALPHA : 1
     this.draw()
   }
@@ -84,9 +86,17 @@ export default class Paddle {
     return this.age < this.duration
   }
 
-  // Whether the paddle blocks something at `angle` whose angular half-size is `tolerance`
-  covers (angle, tolerance) {
-    return Math.abs(angleDifference(angle, this.angle)) <= this.arc / 2 + tolerance
+  // Whether the set paddle blocks something in the direction (`x`, `y`) from the core (a unit
+  // vector) whose angular half-size is `tolerance`. The angle between the two directions is within
+  // the limit when the cosine of the angle (their dot product) is at least the limit's cosine.
+  covers (x, y, tolerance) {
+    if (tolerance !== this.coverTolerance) {
+      this.coverTolerance = tolerance
+      const limit = this.arc / 2 + tolerance
+      // Past half a turn it blocks every direction (the dot product can round below -1)
+      this.coverCos = limit >= Math.PI ? -Infinity : Math.cos(limit)
+    }
+    return x * this.dirX + y * this.dirY >= this.coverCos
   }
 
   draw () {

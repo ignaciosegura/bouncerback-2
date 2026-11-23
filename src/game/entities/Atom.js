@@ -66,6 +66,10 @@ export default class Atom {
   spawn (angle, supercharged = false, charge = 1) {
     this.supercharged = supercharged
     this.angle = angle
+    // Unit vector along the axis: the angle never changes after the spawn, so render() and the
+    // paddle check use these instead of calling cos and sin every frame
+    this.axisX = Math.cos(angle)
+    this.axisY = Math.sin(angle)
     this.distance = 0
     this.direction = 1
     this.charge = supercharged ? SUPERCHARGED_CHARGE : charge
@@ -242,8 +246,8 @@ export default class Atom {
       this.color = lerpColor(this.colorFrom, this.colorTo, this.colorTime / COLOR_TRANSITION_TIME)
       this.view.tint = this.color
     }
-    const x = Math.cos(this.angle) * this.distance
-    const y = Math.sin(this.angle) * this.distance + this.shakeY(dt)
+    const x = this.axisX * this.distance
+    const y = this.axisY * this.distance + this.shakeY(dt)
     if (this.state === ATOM_STATE.ESCAPING && this.escapeTime > 0) this.view.tint = this.escapeTint()
     this.view.position.set(x, y)
     this.pulse.update(dt, x, y, this.color)
