@@ -127,6 +127,7 @@ Leave it inline when it is a single expression used once and the variable it's a
 
 The code mostly follows the patterns above. These are the places where it doesn't follow one pattern yet; each needs a decision on which way becomes the rule:
 
-1. **Top-level arrow helpers.** `baseName` (`soundManager.js`) and `openLink` (`CreditsScreen.jsx`) are private top-level `const` arrows, as are most helpers in `scripts/`; elsewhere private helpers are declarations. Decide whether one-line private arrows are allowed at the top level, or whether `scripts/` may follow its own style.
+1. **Top-level arrow helpers.** `baseName` (`soundManager.js`) and `openLink` (`CreditsScreen.jsx`) are private top-level `const` arrows; elsewhere in `src/` private helpers are declarations.
 2. **`forEach`.** Used in four places against about fifty `for … of` loops.
-3. **JSDoc blocks.** `soundManager.js` uses `/** … */` for short one-line descriptions, where the rest of the code uses `//`.
+
+`scripts/` is exempt from this document: it holds private development utilities, and may keep its own style (its top-level arrow helpers included).
