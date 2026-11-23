@@ -788,8 +788,8 @@ export default class GameEngine {
     return this.level.timeGoesBackwards && name !== 'launch_super' ? `${name}_reversed` : name
   }
 
-  playSfx (name, options) {
-    soundManager.playSfx(this.sfxName(name), options)
+  playSfx (name, playbackRate) {
+    soundManager.playSfx(this.sfxName(name), playbackRate)
   }
 
   startLoopSfx (name) {
@@ -1107,7 +1107,7 @@ export default class GameEngine {
         this.ringCollapseStarted = true
         // A big ring starts at half the canvas diagonal, fully outside the screen
         ring.radius ??= this.outerRingRadius()
-        this.playSfx(ring.sound, { playbackRate: ring.playbackRate })
+        this.playSfx(ring.sound, ring.playbackRate)
       }
       const duration = RING_GROW_TIME / ring.speed
       if (this.stateTime < duration) {
