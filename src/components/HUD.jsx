@@ -1,14 +1,17 @@
+import { memo } from 'react'
 import Overlay from './Overlay.jsx'
 import TextBox from './TextBox.jsx'
 
-function Stat ({ label, value }) {
+// Memoized: the score can change every frame (held atoms), and only the stat whose value changed
+// needs to re-render
+const Stat = memo(function Stat ({ label, value }) {
   return (
     <div className="hud__stat">
       <TextBox size="hud">{label}</TextBox>
       <TextBox size="hud">{value}</TextBox>
     </div>
   )
-}
+})
 
 // Heads-up display over the game canvas: taps pass through to the game
 export default function HUD ({ score, timeTenths, hiScore, lives }) {
