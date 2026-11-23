@@ -9,6 +9,7 @@ import { TIME_BACKWARDS_SETTINGS } from './timeBackwardsSettings.js'
 import { RING_COLLAPSE_SETTINGS } from './ringCollapseSettings.js'
 import { cutoffSeconds, initialAtomPlan, maxChargeFor, randomCharge } from './timeBackwards.js'
 import { easeInOutQuad, easeInQuad, easeOutQuad } from './easing.js'
+import { clamp } from '../utils/math.js'
 import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
 import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
 import Atom, { ATOM_RADIUS, ATOM_STATE, CAPTURE_MIN_CHARGE, CREATE_TIME } from './entities/Atom.js'
@@ -68,19 +69,19 @@ const POST_PROCESSING_ENABLED = true
 const ZOOM_BLUR_ENABLED = true
 
 // The background turns dark red while the player has only one life left
-const BACKGROUND_COLORS = {
+const BACKGROUND_COLORS = Object.freeze({
   DEFAULT: 0x000000,
   ONE_LIFE_LEFT: 0x550000 // dark enough for the red paddle replacement warning to stand out
-}
+})
 const BACKGROUND_TRANSITION_TIME = 0.5
 
 // A ring collapsing to the center, `progress` (0 → 1) into its collapse: the level start's ring
 // step in reverse. Shared by the level start, the time goes backwards ending and the ring collapse
 function ringCollapseRadius (startRadius, progress) {
-  return startRadius * easeOutQuad(Math.min(1, Math.max(0, 1 - progress)))
+  return startRadius * easeOutQuad(clamp(1 - progress))
 }
 
-const STATE = {
+const STATE = Object.freeze({
   WAITING: 'waiting', // the gameplay tip is on screen: nothing is drawn until begin()
   STARTING: 'starting',
   PLAYING: 'playing',
@@ -90,7 +91,7 @@ const STATE = {
   LOST: 'lost',
   INTERSTITIAL: 'interstitial', // the level's end-of-level picture is shown until the player continues
   ENDED: 'ended'
-}
+})
 
 /**
  * Owns the PixiJS application and the game loop. Only low-frequency events reach React,
@@ -604,7 +605,7 @@ export default class GameEngine {
     }
     this.stateTime += dt
     const animationStart = START_DELAY - CORE_COLLAPSE_TIME
-    const t = Math.min(CORE_COLLAPSE_TIME, Math.max(0, this.stateTime - animationStart))
+    const t = clamp(this.stateTime - animationStart, 0, CORE_COLLAPSE_TIME)
     if (t > 0 && !this.vortexPlayed) {
       this.vortexPlayed = true
       this.playSfx('vortex_creation')
@@ -653,8 +654,7 @@ export default class GameEngine {
     const settleProgress = Math.min(1, t / CORE_COLLAPSE_SETTLE_TIME)
     const grow = easeInOutQuad(settleProgress)
     const settle = easeOutQuad(settleProgress)
-    const collapse = easeInQuad(Math.min(1, Math.max(0,
-      (t - CORE_COLLAPSE_SETTLE_TIME) / (CORE_COLLAPSE_TIME - CORE_COLLAPSE_SETTLE_TIME))))
+    const collapse = easeInQuad(clamp((t - CORE_COLLAPSE_SETTLE_TIME) / (CORE_COLLAPSE_TIME - CORE_COLLAPSE_SETTLE_TIME)))
 
     const radius = t < CORE_COLLAPSE_SETTLE_TIME
       ? CORE_RADIUS + (RING_RADIUS - CORE_RADIUS) * grow
@@ -669,7 +669,7 @@ export default class GameEngine {
   }
 
   drawStartAnimation (t) {
-    const core = easeOutQuad(Math.min(1, Math.max(0, (t - RING_GROW_TIME) / CORE_GROW_TIME)))
+    const core = easeOutQuad(clamp((t - RING_GROW_TIME) / CORE_GROW_TIME))
     this.ring.draw(ringCollapseRadius(RING_RADIUS, 1 - t / RING_GROW_TIME))
     this.emitter.draw(CORE_RADIUS * core)
   }

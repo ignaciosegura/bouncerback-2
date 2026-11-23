@@ -1,6 +1,7 @@
 import { Graphics } from 'pixi.js'
 import { RING_RADIUS } from './ContainmentRing.js'
 import PaddleFlash from './PaddleFlash.js'
+import { clamp } from '../../utils/math.js'
 
 export const PADDLE_THICKNESS = 20
 const OUTLINE_WIDTH = 2
@@ -78,7 +79,7 @@ export default class Paddle {
       return this.age < this.duration
     }
     const fadeStart = this.duration * FADE_START
-    const progress = Math.min(Math.max((this.age - fadeStart) / (this.duration - fadeStart), 0), 1)
+    const progress = clamp((this.age - fadeStart) / (this.duration - fadeStart))
     this.view.alpha = 1 - (1 - FADE_MIN_ALPHA) * progress
     return this.age < this.duration
   }

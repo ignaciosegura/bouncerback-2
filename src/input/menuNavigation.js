@@ -1,5 +1,5 @@
 import { BUTTONS, GamepadReader, hasGamepad, watchGamepads } from './gamepad.js'
-import { KonamiCode } from './konamiCode.js'
+import KonamiCode from './konamiCode.js'
 
 // Game controller navigation of the menu screens. DOM only: it marks the selected button with a
 // class and activates it with click(), so the screens' own onClick handlers run unchanged. Like a
@@ -23,12 +23,12 @@ const TRANSITION_CLASSES = ['screen-transition--out', 'screen-transition--in']
 // Moving prefers the items in line with the selected one: the offset across the direction counts double
 const CROSS_AXIS_WEIGHT = 2
 
-const DIRECTIONS = {
+const DIRECTIONS = Object.freeze({
   UP: { x: 0, y: -1 },
   DOWN: { x: 0, y: 1 },
   LEFT: { x: -1, y: 0 },
   RIGHT: { x: 1, y: 0 }
-}
+})
 
 const DPAD = [
   [BUTTONS.UP, DIRECTIONS.UP],

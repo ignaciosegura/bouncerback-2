@@ -1,4 +1,6 @@
 import { Howl } from 'howler'
+import { clamp } from '../utils/math.js'
+import { readSaved, writeSaved } from '../utils/savedData.js'
 
 export const MIN_VOLUME = 0
 export const MAX_VOLUME = 9
@@ -14,12 +16,12 @@ const MAX_GAIN = 10 ** (-6 / 20)
 
 const FADE_MS = 500
 // Max simultaneous voices per sound effect; when full, the oldest voice is faded out (voice stealing)
-const SFX_VOICE_LIMITS = { bounce: 1, destroy: 1 }
+const SFX_VOICE_LIMITS = Object.freeze({ bounce: 1, destroy: 1 })
 const STEAL_FADE_MS = 15
-const STORAGE_KEYS = {
+const STORAGE_KEYS = Object.freeze({
   music: 'bouncerback.musicVolume',
   sfx: 'bouncerback.sfxVolume'
-}
+})
 
 const baseName = (path) => path.split('/').pop()
 
@@ -60,25 +62,12 @@ const trackStartListeners = {}
 applySfxVolume()
 
 function readVolume (key) {
-  try {
-    const stored = Number.parseInt(localStorage.getItem(key), 10)
-    if (Number.isInteger(stored)) return clampVolume(stored)
-  } catch {
-    // Storage unavailable: fall back to the default
-  }
-  return MAX_VOLUME
+  const stored = Number.parseInt(readSaved(key), 10)
+  return Number.isInteger(stored) ? clampVolume(stored) : MAX_VOLUME
 }
 
-function writeVolume (key, value) {
-  try {
-    localStorage.setItem(key, String(value))
-  } catch {
-    // Storage unavailable: the setting just won't persist
-  }
-}
-
-function clampVolume (value) {
-  return Math.min(MAX_VOLUME, Math.max(MIN_VOLUME, value))
+export function clampVolume (value) {
+  return clamp(value, MIN_VOLUME, MAX_VOLUME)
 }
 
 // 0–9 setting → 0–MAX_GAIN gain
@@ -344,12 +333,12 @@ export function getSfxVolume () {
 
 export function setMusicVolume (value) {
   musicVolume = clampVolume(value)
-  writeVolume(STORAGE_KEYS.music, musicVolume)
+  writeSaved(STORAGE_KEYS.music, musicVolume)
   tracks[currentTrack]?.howl?.volume(gain(musicVolume))
 }
 
 export function setSfxVolume (value) {
   sfxVolume = clampVolume(value)
-  writeVolume(STORAGE_KEYS.sfx, sfxVolume)
+  writeSaved(STORAGE_KEYS.sfx, sfxVolume)
   applySfxVolume()
 }

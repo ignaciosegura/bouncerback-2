@@ -1,22 +1,11 @@
 // High score persistence (docs/game-rules.md): common to all levels, saved the moment it's beaten.
+import { readSaved, writeSaved } from '../utils/savedData.js'
+
 const STORAGE_KEY = 'bouncerback.hiScore'
 
 export function getHiScore () {
-  try {
-    const stored = Number.parseInt(localStorage.getItem(STORAGE_KEY), 10)
-    if (Number.isInteger(stored) && stored >= 0) return stored
-  } catch {
-    // Storage unavailable: fall back to the default
-  }
-  return 0
-}
-
-function setHiScore (value) {
-  try {
-    localStorage.setItem(STORAGE_KEY, String(value))
-  } catch {
-    // Storage unavailable: the high score just won't persist
-  }
+  const stored = Number.parseInt(readSaved(STORAGE_KEY), 10)
+  return Number.isInteger(stored) && stored >= 0 ? stored : 0
 }
 
 /**
@@ -26,6 +15,6 @@ function setHiScore (value) {
 export function beatHiScore (score) {
   const current = getHiScore()
   if (score <= current) return current
-  setHiScore(score)
+  writeSaved(STORAGE_KEY, score)
   return score
 }

@@ -2,6 +2,7 @@ import { Graphics } from 'pixi.js'
 import { lerpColor } from '../color.js'
 import { easeInQuad, shakeOffset } from '../easing.js'
 import { circlePoints } from '../geometry.js'
+import { clamp } from '../../utils/math.js'
 import AtomPulse from './AtomPulse.js'
 
 export const ATOM_RADIUS = 20
@@ -11,14 +12,14 @@ export const CAPTURE_MIN_CHARGE = 3
 export const SUPERCHARGED_SPEED_FACTOR = 2
 export const SUPERCHARGED_CHARGE = 20
 
-export const ATOM_STATE = {
+export const ATOM_STATE = Object.freeze({
   MOVING: 'moving',
   ESCAPING: 'escaping',
   COLLAPSING: 'collapsing',
   CAPTURING: 'capturing',
   HELD: 'held', // by the player (charged atom hold): stopped, shaking
   CREATING: 'creating' // time goes backwards: grows from nothing at the core, on a press
-}
+})
 
 const ESCAPE_FADE_TIME = 0.5
 // Escape shake: the atom vibrates vertically, up then down like the menus' screen-shake, a few
@@ -35,12 +36,12 @@ const CAPTURE_TIME = 0.5
 export const CREATE_TIME = CAPTURE_TIME // the capture's pull-in played backwards
 const COLOR_TRANSITION_TIME = 0.5
 
-const ATOM_COLORS = {
+const ATOM_COLORS = Object.freeze({
   WHITE: 0xffffff,
   YELLOW: 0xffff00, // charge CAPTURE_MIN_CHARGE
   RED: 0xff0000, // charge MAX_CHARGE
   SUPERCHARGED: 0xbb00ff // the supercharged atom, whatever its charge
-}
+})
 
 // White until capturable; then yellow at CAPTURE_MIN_CHARGE, stepping toward red with each
 // further charge until MAX_CHARGE
@@ -128,7 +129,7 @@ export default class Atom {
 
   // Sets the charge (1 to MAX_CHARGE) and starts the color change toward its color
   setCharge (charge) {
-    this.charge = Math.min(MAX_CHARGE, Math.max(1, charge))
+    this.charge = clamp(charge, 1, MAX_CHARGE)
     const target = chargeColor(this.charge)
     if (target !== this.colorTo) {
       this.colorFrom = this.color

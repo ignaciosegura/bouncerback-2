@@ -22,7 +22,7 @@ export function initNative () {
   })
 }
 
-export const exitApp = () => {
+export function exitApp () {
   if (isNative) App.exitApp()
 }
 

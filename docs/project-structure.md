@@ -68,8 +68,12 @@ root/
     │       ├── crtSettings.js      # Its tunable values
     │       ├── crt.glsl            # Its chunk of the final pass
     │       └── curvature.js        # The curved glass's formula in JavaScript, for pointer input (twin of crtWarp() in crt.glsl)
+    ├── utils/                      # Helpers shared by every layer; no React, no PixiJS
+    │   ├── math.js                 # Number helpers (clamp)
+    │   └── savedData.js            # What the game remembers between sessions (localStorage), safe when storage is unavailable
     ├── input/                      # Game controller (Gamepad API); no React, no PixiJS
     │   ├── gamepad.js              # Polled controller reader: button presses, sticks with drift thresholds
+    │   ├── konamiCode.js           # Detects the Konami Code in the d-pad presses
     │   └── menuNavigation.js       # Controller navigation of the menu screens (selection class + click())
     ├── menu/                       # The menu screens' PixiJS scene, behind their HTML layer; no React
     │   ├── MenuScene.js            # PixiJS application: the Lottie background animation (canvas renderer) as a texture, and the logo

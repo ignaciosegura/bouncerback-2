@@ -1,6 +1,7 @@
 import { UniformGroup } from 'pixi.js'
 import { CRT_SETTINGS } from './crtSettings.js'
 import { warp } from './curvature.js'
+import { clamp } from '../../utils/math.js'
 import glsl from './crt.glsl?raw'
 
 /**
@@ -46,7 +47,7 @@ export default class CrtEffect {
   // device pixels per line they fade out
   scanlineFade (height) {
     const pixelsPerLine = (height * this.renderer.resolution) / this.settings.SCANLINE_COUNT
-    const t = Math.min(1, Math.max(0, pixelsPerLine - 1.5))
+    const t = clamp(pixelsPerLine - 1.5)
     return t * t * (3 - 2 * t) // smoothstep, as in GLSL
   }
 

@@ -12,7 +12,7 @@ const STICK_RELEASE = 0.35
 const TRIGGER_THRESHOLD = 0.5
 
 // Button indices in the standard mapping
-export const BUTTONS = {
+export const BUTTONS = Object.freeze({
   A: 0,
   B: 1,
   LT: 6,
@@ -24,15 +24,15 @@ export const BUTTONS = {
   DOWN: 13,
   LEFT: 14,
   RIGHT: 15
-}
+})
 
 const TRIGGERS = [BUTTONS.LT, BUTTONS.RT]
 
 // Axes of each stick; y points down, as on screen
-const STICK_AXES = {
+const STICK_AXES = Object.freeze({
   left: [0, 1],
   right: [2, 3]
-}
+})
 
 // Connected controllers with the standard mapping. Empty where the API is missing or blocked
 // (insecure contexts: it needs https:// or localhost)

@@ -1,10 +1,12 @@
 // Level unlocking (docs/game-rules.md): tier 0 is unlocked from the start; beating every level of the
 // highest unlocked tier unlocks the next one. Persisted like the high score, and never goes down.
 import { levels, highestTier } from './levelLoader.js'
+import { clamp } from '../utils/math.js'
+import { readSavedJson, writeSavedJson } from '../utils/savedData.js'
 
 const STORAGE_KEY = 'bouncerback.levelProgress'
 
-const DEFAULT_PROGRESS = { unlockedTier: 0, beatenLevels: [] }
+const DEFAULT_PROGRESS = Object.freeze({ unlockedTier: 0, beatenLevels: Object.freeze([]) })
 
 // Raises the unlocked tier while every level of it is beaten and a higher tier exists
 function unlockTiers (allLevels, { unlockedTier, beatenLevels }) {
@@ -18,30 +20,17 @@ function unlockTiers (allLevels, { unlockedTier, beatenLevels }) {
   return { unlockedTier: tier, beatenLevels }
 }
 
+// What was saved, checked against the current levels; the default when nothing usable was saved
 export function getLevelProgress () {
-  try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
-    if (stored && typeof stored === 'object') {
-      const unlockedTier = Number.isInteger(stored.unlockedTier)
-        ? Math.min(Math.max(stored.unlockedTier, 0), highestTier)
-        : 0
-      const beatenLevels = Array.isArray(stored.beatenLevels)
-        ? levels.map((level) => level.number).filter((number) => stored.beatenLevels.includes(number))
-        : []
-      return { unlockedTier, beatenLevels }
-    }
-  } catch {
-    // Storage unavailable or malformed: fall back to the default
-  }
-  return DEFAULT_PROGRESS
-}
-
-function setLevelProgress (progress) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
-  } catch {
-    // Storage unavailable: the progress just won't persist
-  }
+  const stored = readSavedJson(STORAGE_KEY)
+  if (!stored || typeof stored !== 'object') return DEFAULT_PROGRESS
+  const unlockedTier = Number.isInteger(stored.unlockedTier)
+    ? clamp(stored.unlockedTier, 0, highestTier)
+    : 0
+  const beatenLevels = Array.isArray(stored.beatenLevels)
+    ? levels.map((level) => level.number).filter((number) => stored.beatenLevels.includes(number))
+    : []
+  return { unlockedTier, beatenLevels }
 }
 
 /**
@@ -54,7 +43,7 @@ export function registerLevelWin (levelNumber) {
     ? current.beatenLevels
     : [...current.beatenLevels, levelNumber]
   const progress = unlockTiers(levels, { unlockedTier: current.unlockedTier, beatenLevels })
-  setLevelProgress(progress)
+  writeSavedJson(STORAGE_KEY, progress)
   return progress
 }
 
@@ -68,7 +57,7 @@ export function toggleAllLevelsUnlocked () {
   const progress = current.unlockedTier >= highestTier
     ? DEFAULT_PROGRESS
     : { unlockedTier: highestTier, beatenLevels: current.beatenLevels }
-  setLevelProgress(progress)
+  writeSavedJson(STORAGE_KEY, progress)
   return progress
 }
 

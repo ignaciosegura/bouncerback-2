@@ -11,7 +11,7 @@ const SEQUENCE = [
  * Keeps the last d-pad presses and reports when they spell the code. Comparing the latest presses,
  * instead of counting steps, lets the code start over in the middle (up up up down down…).
  */
-export class KonamiCode {
+export default class KonamiCode {
   constructor () {
     this.presses = []
   }

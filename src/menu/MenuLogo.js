@@ -1,6 +1,7 @@
 import { Container, Graphics, GraphicsPath } from 'pixi.js'
 import { lerpColor } from '../game/color.js'
 import { shakeOffset } from '../game/easing.js'
+import { clamp } from '../utils/math.js'
 import { LOGO_PIECES, LOGO_VIEWBOX } from './logoPieces.js'
 
 // Blink: a random piece turns white, then fades back to the logo's color. The wait must stay
@@ -135,8 +136,4 @@ function pieceGraphics (d) {
 
 function contains (outer, inner) {
   return inner.minX >= outer.minX && inner.maxX <= outer.maxX && inner.minY >= outer.minY && inner.maxY <= outer.maxY
-}
-
-function clamp (t) {
-  return Math.min(1, Math.max(0, t))
 }

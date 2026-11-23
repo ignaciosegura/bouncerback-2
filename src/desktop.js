@@ -5,6 +5,6 @@ const bridge = window.bouncerbackDesktop
 export const isDesktop = Boolean(bridge)
 
 // Closes the game (the Main Menu's EXIT GAME button). The main process quits the app
-export const quitDesktop = () => {
+export function quitDesktop () {
   bridge?.quit()
 }

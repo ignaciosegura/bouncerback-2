@@ -18,7 +18,7 @@ import { startMenuNavigation } from './input/menuNavigation.js'
 import { onBackButton, exitApp } from './native.js'
 import { isDesktop, quitDesktop } from './desktop.js'
 
-const SCREENS = {
+const SCREENS = Object.freeze({
   INTRO: 'intro',
   MAIN_MENU: 'mainMenu',
   LEVEL_SELECT: 'levelSelect',
@@ -28,7 +28,7 @@ const SCREENS = {
   GAME: 'game',
   GAME_OVER: 'gameOver',
   YOU_WIN: 'youWin'
-}
+})
 
 // Not a screen: the screen-out started by EXIT GAME (desktop builds) ends by quitting the game
 const EXIT_GAME = 'exitGame'

@@ -1,17 +1,15 @@
 import Button from './Button.jsx'
-import { MIN_VOLUME, MAX_VOLUME } from '../audio/soundManager.js'
+import { clampVolume } from '../audio/soundManager.js'
 
 // "Dual button": [-] LABEL VALUE [+]
 function VolumeControl ({ label, value, onChange }) {
-  const clamp = (v) => Math.min(MAX_VOLUME, Math.max(MIN_VOLUME, v))
-
   return (
     <div className="volume-control">
       <button
         type="button"
         className="volume-control__step"
         aria-label={`${label} down`}
-        onClick={() => onChange(clamp(value - 1))}
+        onClick={() => onChange(clampVolume(value - 1))}
       >
         -
       </button>
@@ -20,7 +18,7 @@ function VolumeControl ({ label, value, onChange }) {
         type="button"
         className="volume-control__step"
         aria-label={`${label} up`}
-        onClick={() => onChange(clamp(value + 1))}
+        onClick={() => onChange(clampVolume(value + 1))}
       >
         +
       </button>
