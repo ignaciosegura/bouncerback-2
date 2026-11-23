@@ -8,7 +8,9 @@ const LICENSES_URL = 'https://github.com/ignaciosegura/bouncerback-2/blob/master
 
 // Buttons rather than links, so the game controller can select them. They open in a new tab; the
 // desktop build hands them to the system browser
-const openLink = (url) => () => window.open(url, '_blank', 'noopener,noreferrer')
+function openLink (url) {
+  return () => window.open(url, '_blank', 'noopener,noreferrer')
+}
 
 // Mixed case on purpose (CREDITS mockup); the line breaks are the mockup's
 export default function CreditsScreen ({ onBack }) {

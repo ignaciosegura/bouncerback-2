@@ -23,7 +23,9 @@ const STORAGE_KEYS = Object.freeze({
   sfx: 'bouncerback.sfxVolume'
 })
 
-const baseName = (path) => path.split('/').pop()
+function baseName (path) {
+  return path.split('/').pop()
+}
 
 const sfxUrls = import.meta.glob('../../assets/audio/*.{mp3,wav,flac}', { eager: true, query: '?url', import: 'default' })
 const trackUrls = import.meta.glob('../../assets/audio/tracks/*.mp3', { eager: true, query: '?url', import: 'default' })

@@ -2,6 +2,8 @@
 
 How the code is structured: when to write a class, a plain-function module, a helper function or an inline arrow function, and how to name and comment things. It describes how the code is already written. Formatting (no semicolons, two-space indentation, a space before function parentheses) is enforced by `eslint.config.js` and isn't repeated here.
 
+It applies to `src/` and `electron/`. `scripts/` is exempt: it holds private development utilities and may keep its own style.
+
 The architectural rules in `AGENTS.md` (React and PixiJS in separate domains, no fast game state in React state) come first; this document only covers style within them.
 
 ---
@@ -47,7 +49,7 @@ Don't create a class just to group functions that share no state: use a module o
 
 ### Declarations, arrows and inline callbacks
 
-- **Top-level functions are declarations:** `export function name ()` for the module's API, plain `function name ()` for private helpers. Never export an arrow function (`export const name = () => …`). Private helpers stay unexported and are defined above the code that uses them when that reads naturally.
+- **Top-level functions are declarations:** `export function name ()` for the module's API, plain `function name ()` for private helpers, one-liners included. No top-level arrow functions, exported or not (`const name = () => …`). Private helpers stay unexported and are defined above the code that uses them when that reads naturally.
 - **Inside a function or a component, use `const name = (…) => { … }`** for functions that close over local state: event handlers, the `select` / `cancelPress` helpers inside `startMenuNavigation`, a component's `navigate` or `exitToMenu`.
 - **Write a callback inline** when it is short and used once: `array.map((level) => level.number)`, `onClick={() => navigate(SCREENS.SETTINGS)}`. When an inline callback grows beyond a line or two, or needs a comment, give it a name.
 - **A function that returns a function** is fine when it removes repetition at the call sites: `endLevel(SCREENS.GAME_OVER)` in `App.jsx`, `openLink(url)` in `CreditsScreen.jsx`.
@@ -74,7 +76,7 @@ Leave it inline when it is a single expression used once and the variable it's a
 ### Control flow
 
 - **Return early** for guards (`if (!this.mounted) return`), and keep the main path unindented.
-- **`for … of`** for loops over collections; `map` / `filter` / `some` / `every` when building or testing values. Avoid `forEach`.
+- **Loops are chosen case by case**, for what reads best: `forEach`, `map`, `filter`, `reduce`, `some` / `every` or a `for … of` loop. The array methods read well as one-liners (`this.pieces.forEach((piece, i) => …)`); `for … of` is needed when the loop must `break`, `continue`, `return` from the enclosing function or `await`, which a callback can't do.
 - **`?.` and `??`** for optional objects and defaults (`this.post?.destroy()`, `navigator.getGamepads?.() ?? []`).
 - **`switch`** for dispatching on a state or screen constant.
 - **Errors:** throw only for programming mistakes (`PostProcessing: resource "x" is used twice`). Expected failures (storage blocked, unknown sound name) fall back to a default, with a comment in the empty `catch` or a `console.warn` prefixed with the module name. Saved data goes through `utils/savedData.js`, which already does this: a read returns null and the caller picks its default.
@@ -120,14 +122,3 @@ Leave it inline when it is a single expression used once and the variable it's a
 - **Trailing comments** after a constant or a field explain it in a few words (`this.lastAtom = null // the atom that took the last life`).
 - **Empty `catch` blocks always have a comment** saying what the fallback is.
 - Comments are in plain English, mixed case, full sentences or fragments without a final period on one-liners.
-
----
-
-## Inconsistencies to settle
-
-The code mostly follows the patterns above. These are the places where it doesn't follow one pattern yet; each needs a decision on which way becomes the rule:
-
-1. **Top-level arrow helpers.** `baseName` (`soundManager.js`) and `openLink` (`CreditsScreen.jsx`) are private top-level `const` arrows; elsewhere in `src/` private helpers are declarations.
-2. **`forEach`.** Used in four places against about fifty `for … of` loops.
-
-`scripts/` is exempt from this document: it holds private development utilities, and may keep its own style (its top-level arrow helpers included).
