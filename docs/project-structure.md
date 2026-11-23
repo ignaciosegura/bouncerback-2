@@ -32,6 +32,7 @@ root/
     ├── mobile-build.md             # Where the iOS / Android test builds are and how to launch them
     ├── desktop-build.md            # Overview of what is needed to publish the desktop versions on Steam (Windows, Linux; macOS to be considered)
     ├── implementation-guidelines.md  # Implementation guidelines
+    ├── coding-style.md             # Code structure and style: modules vs classes, helpers, constants, naming, comments
     ├── level-file-schema.json      # Level file schema
     ├── react-pixi-example.jsx      # Example of a React Pixi component
     ├── post-processing.md          # How the post-processing (zoom blur, CRT) works (learning resource) and how to tune it

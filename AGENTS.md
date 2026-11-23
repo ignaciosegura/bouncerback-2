@@ -13,6 +13,7 @@ Read the relevant docs before implementing anything. Do not guess at conventions
 | File | What it answers | Read it when |
 | :--- | :--- | :--- |
 | `docs/tech-stack.md` | Technology choices, architectural boundaries, critical rules, development environment setup | Adding or changing a dependency or a build tool, setting up the development environment, or deciding which layer (React or PixiJS) new code belongs to |
+| `docs/coding-style.md` | How code is structured: modules vs classes, helper and arrow functions, constants, naming, comments | Writing or restructuring code (not needed for level files, docs or settings values alone) |
 | `docs/implementation-guidelines.md` | Summary of architectural and implementation rules | Writing new code that crosses the React / PixiJS boundary, or touching PixiJS setup, audio unlocking or the canvas container |
 | `docs/project-structure.md` | Full folder and file layout | Looking for where something lives, or adding, moving or renaming a file or folder (update it afterwards) |
 | `docs/navigation.md` | Screen flow and navigation hierarchy | Adding or changing a screen, a menu button or a path between screens (back buttons included) |
