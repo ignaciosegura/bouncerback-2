@@ -17,6 +17,7 @@
     "build:deploy": "npm run build && npm run deploy:ftp",
     "build:desktop:linux": "vite build && electron-builder --linux tar.gz --x64",
     "build:desktop:win": "vite build && electron-builder --win zip --x64",
+    "build:all": "npm run build:deploy && npm run build:android-install && npm run build:desktop:linux && npm run build:desktop:win",
     "cap:assets": "capacitor-assets generate --ios --android --assetPath assets/native --iconBackgroundColor \"#000000\" --iconBackgroundColorDark \"#000000\" --splashBackgroundColor \"#000000\" --splashBackgroundColorDark \"#000000\"",
     "desktop:start": "vite build && electron .",
     "validate:levels": "node scripts/validate-levels.js",
