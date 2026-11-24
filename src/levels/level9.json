@@ -9,7 +9,7 @@
   "soundTrack": "neutronika.mp3",
   "vfx": [],
   "atoms": {
-    "travelTime": 4,
+    "travelTime": 3,
     "barsInterval": 2
   },
   "paddles": {
