@@ -130,6 +130,7 @@ The level file will specify the length of the level in musical notation format: 
 This section applies only to levels with `timeGoesBackwards: true` in their level file (Anticoherence, level 6). It is a level property, not an additional game mechanic.
 
 * **The lives shown count up.** The game counts lives as usual: the player has the level's `lives` value, each escape takes one, the level is lost at zero, and the score uses them as in any other level. Only what the player sees changes: the HUD shows one life at the start and one more with each escape (`lives` − lives left + 1). For example, with 4 lives it shows 1, 2, 3, 4, and 5 on the fourth escape, which loses the level. Nothing tells the player the limit. The dark red background follows the lives shown, so the level starts dark red and turns black when the HUD shows two.
+* **Containment points come from the start.** The level ends with an empty arena, so no atom is contained at the end. Instead, the win pays the containment points (see "Score") of the atoms the level started with, each at the charge it started with: with time reversed, those are the atoms the player contained.
 * **The timer shown counts up.** The HUD shows the time elapsed, from 0 up to the level's full time, instead of the time remaining. The level ends at the same moment as it would otherwise.
 
 # Score
@@ -142,7 +143,7 @@ The player will get:
 * 500 points * level * atom charge value for every atom contained at the end of the level, when the core collapse takes all remaining atoms.
 
 Without `atom capture`, the charge value of every atom is always 1, so those two formulas become 10 points * level per bounce and 500 points * level per contained atom.
-* 500 points * level * remaining lives.
+* 1000 points * level * (remaining lives + max(0, 4 − the level's starting lives)). Levels with fewer than 4 lives get the difference as extra lives, so keeping every life is never worth less than 4 lives; for example, a level with 3 lives pays 4 × 500 × level with all 3 left, and 3 × 500 × level with 2 left. The 4 is `LIVES_BONUS_MIN_FULL` in `src/game/scoring.js`.
 * Additional time bonus after the core collapse has taken all remaining atoms (the player needs to pass the level): 1 point * level for every 0.1 seconds of the level's total duration. In other words, the level's initial timer value (in tenths of a second) * level. For example, a 2-minute level 3 gives 1200 * 3 = 3600 points.
  
 # Level unlocking

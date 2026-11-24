@@ -4,8 +4,8 @@
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { MAX_CHARGE, SUPERCHARGED_CHARGE, SUPERCHARGED_SPEED_FACTOR } from '../src/game/entities/Atom.js'
-import { bouncePoints, containmentPoints, timeBonus, livesBonus } from '../src/game/scoring.js'
+import { SUPERCHARGED_SPEED_FACTOR } from '../src/game/entities/Atom.js'
+import { maxScore } from '../src/game/maxScore.js'
 
 const root = resolve(fileURLToPath(import.meta.url), '../..')
 const levelsDir = join(root, 'src/levels')
@@ -29,7 +29,6 @@ function analyse (file) {
   const data = JSON.parse(readFileSync(join(levelsDir, file), 'utf8'))
   const { bpm, signature } = data.timeSignature
   const mechanics = data.additionalGameMechanics
-  const capture = mechanics.includes('atom capture')
   const supercharged = mechanics.includes('supercharged atom')
 
   const secondsPerBeat = 60 / bpm
@@ -39,31 +38,8 @@ function analyse (file) {
   const atomCount = Math.floor(data.duration / data.atoms.barsInterval)
   const paddleCount = data.paddles.count ?? DEFAULT_PADDLE_COUNT
 
-  // Score ceiling: each atom spawns mid-interval and is bounced every time it comes back to the
-  // ring, then stays contained to the end; no captures, no hold, no lives lost.
-  const bounceScore = (travelTime, spawn, fixedCharge) => {
-    const remaining = durationSeconds - spawn
-    const bounces = remaining >= travelTime ? Math.floor((remaining - travelTime) / (2 * travelTime)) + 1 : 0
-    let charge = fixedCharge ?? 1
-    let points = 0
-    for (let i = 0; i < bounces; i++) {
-      points += bouncePoints(level, charge)
-      if (fixedCharge === undefined && capture && charge < MAX_CHARGE) charge++
-    }
-    return { points, contained: containmentPoints(level, charge) }
-  }
-
-  let score = 0
-  for (let i = 0; i < atomCount; i++) {
-    const { points, contained } = bounceScore(travel, i * interval + interval / 2)
-    score += points + contained
-  }
-  if (supercharged) {
-    // Appears at half the timer, at double speed, with a fixed charge
-    const { points, contained } = bounceScore(travel / SUPERCHARGED_SPEED_FACTOR, durationSeconds / 2, SUPERCHARGED_CHARGE)
-    score += points + contained
-  }
-  score += timeBonus(level, Math.round(durationSeconds * 10)) + livesBonus(level, data.lives)
+  // Score ceiling, the same the game shows as MAX on the result screens
+  const score = maxScore(data, level)
 
   // Bounces per second needed at the end of the level if no atom is ever captured: every live
   // atom comes back to the ring once per round trip (2 * travel). The supercharged atom's round

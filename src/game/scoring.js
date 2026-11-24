@@ -20,7 +20,11 @@ export function timeBonus (level, timerTenths) {
   return timerTenths * level
 }
 
-// Level end: reward for the lives left
-export function livesBonus (level, lives) {
-  return 500 * level * lives
+// A level with fewer starting lives than this gets the difference as extra lives in the lives
+// bonus, so keeping every life is worth at least this many lives in any level
+const LIVES_BONUS_MIN_FULL = 4
+
+// Level end: reward for the `livesLeft` lives left, out of the level's `startingLives`
+export function livesBonus (level, livesLeft, startingLives) {
+  return 1000 * level * (livesLeft + Math.max(0, LIVES_BONUS_MIN_FULL - startingLives))
 }

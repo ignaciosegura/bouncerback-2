@@ -10,7 +10,7 @@ npm run level:table
 
 The script is `scripts/level-difficulty-table.js`. It reads every `src/levels/levelN.json`, in the order of `N`, and writes a Markdown table plus one footnote to `docs/level-table.md` (overwriting it), so it can be opened and read formatted. When asked for a table summarizing the levels' difficulty, run it and present the content of `docs/level-table.md` as it is (then add the observations: see "Reading the table"). Don't change the layout or recompute anything by hand: to change a column, edit the script and this doc together.
 
-The script takes the point formulas from `src/game/scoring.js` and the charge limits and the supercharged atom's speed factor from `src/game/entities/Atom.js` (`MAX_CHARGE`, `SUPERCHARGED_CHARGE`, `SUPERCHARGED_SPEED_FACTOR`), so a change to any of them shows up in the table. Nothing else is restated here: the level files and those two files are the only source of truth for the values.
+The script takes the maximum score from `src/game/maxScore.js` (the same function the game uses for MAX on the Game Over and You Win! screens), which takes the point formulas from `src/game/scoring.js` and the charge limits and the supercharged atom's speed factor from `src/game/entities/Atom.js` (`MAX_CHARGE`, `SUPERCHARGED_CHARGE`, `SUPERCHARGED_SPEED_FACTOR`), so a change to any of them shows up in the table. Nothing else is restated here: the level files and those two files are the only source of truth for the values.
 
 ## Columns
 
@@ -34,7 +34,7 @@ Every value is derived from the level file. Let `spb` (seconds per beat) be `60 
 
 ### Max score
 
-The score ceiling is an estimate under a fixed set of assumptions, so that levels can be compared with each other. It is not a promise that the number can be reached.
+The score ceiling is an estimate under a fixed set of assumptions, so that levels can be compared with each other. It is calculated by `maxScore()` in `src/game/maxScore.js`, which the game also shows, unrounded, as MAX on the Game Over and You Win! screens: a change to it changes both. It is not a promise that the number can be reached.
 
 Assumptions:
 
@@ -43,13 +43,18 @@ Assumptions:
 * With `atom capture`, each bounce adds a charge, up to `MAX_CHARGE`. Without it the charge stays at 1.
 * No atom is captured: containing an atom at the end scores more than capturing it. No lives are lost. `charged atom hold` points are left out (see below).
 * With `supercharged atom`, one more atom appears at half the level's time, with a fixed charge of `SUPERCHARGED_CHARGE`, and travels `SUPERCHARGED_SPEED_FACTOR` times faster.
+* In a level where time runs backwards (`timeGoesBackwards`, see "Time runs backwards" in `docs/game-rules.md`), the atoms work the other way, as the game plays them (`src/game/timeBackwards.js`):
+  * The core emits nothing once the time left is under the cutoff (`cutoffSeconds`), and nothing at all when `CORE_EMITS_ATOMS` is off (`src/game/timeBackwardsSettings.js`).
+  * Each emitted atom starts at the highest charge the game can give it for the time left (`startChargeLimit`), loses one per bounce and is gone when it crosses the center at charge 1. So it pays no containment points: the arena is empty at the end.
+  * The atoms the level starts with (`INITIAL_ATOM_COUNT`), first reaching the paddles when the game makes them (`initialAtomContacts`), also start at the highest charge they can have and lose one per bounce. Each pays its containment points at that start charge: reversed, those are the atoms the player contained.
+  * The supercharged atom (if a level had both) is never contained. Atoms the player creates with a press are left out, like hold points.
 
 The ceiling is the sum, using the formulas of "Score" in `docs/game-rules.md` (and `src/game/scoring.js`):
 
 1. **Bounce points** of every bounce of every atom, at the charge the atom has when it hits the paddle.
-2. **Containment points** of every atom at the end, at the charge it has reached.
+2. **Containment points** of every atom at the end, at the charge it has reached (where time runs backwards: of the atoms the level starts with, at their start charge).
 3. **Time bonus**, from the level's initial timer value in tenths of a second.
-4. **Lives bonus**, with all the lives left.
+4. **Lives bonus**, with all the lives left (including the extra lives of a level with few lives, see "Score" in `docs/game-rules.md`).
 
 Hold points are left out because they depend on how long the player keeps an atom held, which has no natural ceiling. They are worth, per second, `POINTS_PER_SECOND * level * atom charge` (`src/game/chargedAtomHoldSettings.js`), so levels with `charged atom hold` can score clearly more than the table says.
 

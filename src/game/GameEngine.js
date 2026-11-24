@@ -12,7 +12,7 @@ import { easeInOutQuad, easeInQuad, easeOutQuad } from './easing.js'
 import { clamp } from '../utils/math.js'
 import ContainmentRing, { RING_RADIUS } from './entities/ContainmentRing.js'
 import AtomEmitter, { CORE_RADIUS } from './entities/AtomEmitter.js'
-import Atom, { ATOM_RADIUS, ATOM_STATE, CAPTURE_MIN_CHARGE, CREATE_TIME } from './entities/Atom.js'
+import Atom, { ATOM_RADIUS, ATOM_STATE, CAPTURE_MIN_CHARGE, CORE_COLLAPSE_SETTLE_TIME, CREATE_TIME } from './entities/Atom.js'
 import CaptureCircle from './entities/CaptureCircle.js'
 import Paddle, { PADDLE_THICKNESS } from './entities/Paddle.js'
 import { BUTTONS, GamepadReader } from '../input/gamepad.js'
@@ -52,8 +52,8 @@ const CAPTURE_BUTTONS = [BUTTONS.A, BUTTONS.LT, BUTTONS.RT, BUTTONS.L3, BUTTONS.
 // Continue from an interstitial: the menus' activate buttons and keys
 const CONTINUE_BUTTONS = [BUTTONS.A, BUTTONS.RT]
 const CONTINUE_KEYS = ['Enter', 'NumpadEnter', 'Space']
-// Core collapse: the core grows to the ring while the atoms settle, then it collapses with them
-const CORE_COLLAPSE_SETTLE_TIME = 1.85
+// Core collapse: the core grows to the ring while the atoms settle (CORE_COLLAPSE_SETTLE_TIME, in
+// Atom.js), then it collapses with them
 const CORE_COLLAPSE_TIME = 2
 // Last life zoom: the other atoms freeze at once; the last atom keeps escaping (without fading),
 // then freezes too, and the view zooms on the point midway between it and where it crossed the ring
@@ -126,6 +126,7 @@ export default class GameEngine {
     this.atomSpeed = CONTACT_DISTANCE * level.atomSpeed
     this.travelTime = 1 / level.atomSpeed // seconds from the core to the paddles
     this.superchargedSpawned = false // the supercharged atom is generated once, halfway
+    this.initialCharges = [] // time goes backwards: the charges of the atoms the level starts with
     // Camera for the last life zoom. `offset` is the share of the focus point's normal offset from
     // the screen center still left (1: centered layout, 0: the focus is at the center)
     this.zoom = { scale: 1, focusX: 0, focusY: 0, offset: 1 }
@@ -654,6 +655,8 @@ export default class GameEngine {
       contactDistance: CONTACT_DISTANCE,
       timer
     })
+    // Reversed, these are the atoms the player contained: the win pays their containment points
+    this.initialCharges = plan.map(({ charge }) => charge)
     for (const { distance, direction, charge } of plan) {
       const atom = this.addAtom(false, charge)
       atom.distance = distance
@@ -1179,8 +1182,10 @@ export default class GameEngine {
   }
 
   win () {
-    let { number, timerTenths, lives } = this.level
-    let bonus = timeBonus(number, timerTenths) + livesBonus(number, lives)
+    const { number, timerTenths, lives } = this.level
+    let bonus = timeBonus(number, timerTenths) + livesBonus(number, this.lives, lives)
+    // Time goes backwards: the atoms the level started with, at the charge each started with
+    for (const charge of this.initialCharges) bonus += containmentPoints(number, charge)
     for (const atom of this.atoms.filter((a) => a.state === ATOM_STATE.COLLAPSING)) {
       bonus += containmentPoints(number, atom.charge)
       this.releaseAtom(atom)

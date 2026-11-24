@@ -1,5 +1,6 @@
 import schema from '../../docs/level-file-schema.json'
 import { ADDITIONAL_MECHANICS } from './additionalMechanics.js'
+import { maxScore } from './maxScore.js'
 
 // Level Select buttons are sized for names this long (the longest planned: QUANTAMORPHICA)
 export const LEVEL_NAME_MAX_LENGTH = 14
@@ -131,6 +132,8 @@ function loadLevel (data, number) {
     tier: data.tier,
     soundTrack: data.soundTrack,
     lives: data.lives,
+    // Score ceiling shown as MAX on the result screens (an estimate: see maxScore.js)
+    maxScore: maxScore(data, number),
     timeGoesBackwards: data.timeGoesBackwards ?? false,
     ringCollapse: data.ringCollapse ?? false,
     tip: data.tip ?? null,

@@ -208,7 +208,7 @@ In these levels the effects of play are the normal ones played in reverse (each 
 * Atom pulse: the disc shrinks onto the atom while fading in, peaking on the next beat.
 * Paddle lifetime: a set paddle starts at 20% opacity, rises steadily to full opacity at half its lifetime, stays there, and disappears when it expires. A paddle being dragged stays at full opacity, and the red replacement warning is unchanged.
 * Level start: the full ring waits empty, then the core collapse plays in reverse, ending exactly with the start delay. The atoms come out of the center with the expanding core, slow to a stop at their resting points while the core shrinks to normal, then accelerate to full speed as play starts (`vortex_creation_reversed` plays with it). The initial atoms are defined by when they first reach the paddles (`INITIAL_ATOM_COUNT`, `INITIAL_FIRST_CONTACT_MIN_BEATS`).
-* Level end: the arena is empty when the timer runs out. After `END_DELAY_SECONDS` the level start plays in reverse (the core shrinks away, then the ring), silently, and the You Win! screen follows. No atoms are taken, so no containment points are paid.
+* Level end: the arena is empty when the timer runs out. After `END_DELAY_SECONDS` the level start plays in reverse (the core shrinks away, then the ring), silently, and the You Win! screen follows. No atoms are taken; the containment points are those of the atoms the level started with (see "Time runs backwards" in `game-rules.md`).
 
 ## Visual feedback for additional game mechanics
 

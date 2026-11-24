@@ -4,7 +4,7 @@ import Button from '../components/Button.jsx'
 import TextBox from '../components/TextBox.jsx'
 
 // Shared layout of the Game Over and You Win! screens
-export default function ResultScreen ({ title, score, hiScore, onTryAgain, onMainMenu }) {
+export default function ResultScreen ({ title, score, hiScore, maxScore, onTryAgain, onMainMenu }) {
   return (
     <Screen variant="dark" className="result-screen">
       <TextBox size="title">{title}</TextBox>
@@ -13,6 +13,8 @@ export default function ResultScreen ({ title, score, hiScore, onTryAgain, onMai
         <dd>{score}</dd>
         <dt>HI-SCORE</dt>
         <dd>{hiScore}</dd>
+        <dt>MAX</dt>
+        <dd>{maxScore}</dd>
       </dl>
       <Menu>
         <Button onClick={onTryAgain}>TRY AGAIN</Button>

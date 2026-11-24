@@ -48,11 +48,13 @@ Every change from one screen to another plays the screen transition (see "Screen
 - **Game Over Screen** *(replaces the Game Screen when the player runs out of lives)*
   - Score
   - Hi-Score
+  - Max (the level's score ceiling, see "Max score" in `docs/level-difficulty-table.md`)
   - Try Again Button (restarts the same level from scratch: score reset to 0, lives reset to the level file's value)
   - Main Menu Button
 - **You Win! Screen** *(replaces the Game Screen after the core collapse takes the remaining atoms)*
   - Score
   - Hi-Score
+  - Max (the level's score ceiling, see "Max score" in `docs/level-difficulty-table.md`)
   - Try Again Button (restarts the same level from scratch: score reset to 0, lives reset to the level file's value)
   - Main Menu Button
 

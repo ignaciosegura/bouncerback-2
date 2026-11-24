@@ -281,6 +281,7 @@ export default function App () {
         <ResultScreen
           score={score}
           hiScore={hiScore}
+          maxScore={level.maxScore}
           onTryAgain={() => startLevel(level)}
           onMainMenu={goToMainMenu}
         />

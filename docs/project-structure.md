@@ -101,6 +101,7 @@ root/
     │   ├── chargedAtomHoldSettings.js # Its tunable values (points per second while an atom is held, size of each score step)
     │   ├── interstitialSettings.js # Tunable values of the end-of-level interstitials (input lock time)
     │   ├── scoring.js              # Pure score formulas and high-score persistence
+    │   ├── maxScore.js             # A level's score ceiling (MAX on the result screens and the level difficulty table)
     │   ├── oldTv.js                # The Settings "OLD TV" switch (the CRT effect), persisted
     │   ├── levelProgress.js        # Level unlocking: the unlocked tier and beaten levels, persisted
     │   ├── color.js                # Color helpers (interpolation for the gameplay color transitions)

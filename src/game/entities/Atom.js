@@ -11,6 +11,9 @@ export const CAPTURE_MIN_CHARGE = 3
 // The supercharged atom (supercharged atom mechanic): double the speed, double the maximum charge
 export const SUPERCHARGED_SPEED_FACTOR = 2
 export const SUPERCHARGED_CHARGE = 20
+// Seconds the atoms take to settle at the start of the core collapse, before the core collapses
+// with them (the whole collapse is CORE_COLLAPSE_TIME, in GameEngine.js)
+export const CORE_COLLAPSE_SETTLE_TIME = 1.85
 
 export const ATOM_STATE = Object.freeze({
   MOVING: 'moving',
