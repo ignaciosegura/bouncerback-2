@@ -9,8 +9,8 @@
   "soundTrack": "solitoniq.mp3",
   "vfx": [],
   "atoms": {
-    "travelTime": 6,
-    "barsInterval": 2.5
+    "travelTime": 4,
+    "barsInterval": 2
   },
   "paddles": {
     "angle": 35,

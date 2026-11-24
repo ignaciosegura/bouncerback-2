@@ -9,7 +9,7 @@
   "soundTrack": "quantamorphica.mp3",
   "vfx": [],
   "atoms": {
-    "travelTime": 6,
+    "travelTime": 5,
     "barsInterval": 2
   },
   "paddles": {
