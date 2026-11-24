@@ -11,8 +11,10 @@ export const INTERSTITIAL_SETTINGS = Object.freeze({
 // are tuned for a black picture with thin lines; a picture with light areas clips to white under
 // the brightness gain. Placeholder values (the menus' own): to be tuned by eye.
 export const INTERSTITIAL_CRT_OVERRIDES = Object.freeze({
-  // Gain that makes up for what scanlines, mask and vignette darken. Range: 1–1.6.
+  // Gain on the whole picture, after scanlines, mask and vignette. Unlike the arena's, it can go
+  // below 1 (the picture is darkened), so its light areas don't clip to white. Range: 0–1.6.
   BRIGHTNESS: 0.22,
-  // Darkening toward the edges: the corners lose this share of their brightness. Range: 0–0.6.
+  // Darkening toward the edges: the corners lose this share of their brightness. Unlike the
+  // arena's, it can go up to 1 (black corners), to frame the picture. Range: 0–1.
   VIGNETTE: 0.8
 })
