@@ -1,6 +1,6 @@
 # Bouncerback — Mobile test builds
 
-Where the debug builds of the iOS and Android apps end up, and how to build and launch them from the command line. These are builds for testing on simulators, emulators and your own devices, not store releases (those need signing: see "Not covered").
+Where the debug builds of the iOS and Android apps end up, and how to build and launch them from the command line. Mostly builds for testing on simulators, emulators and your own devices; the signed Android store build is in "Android store release", and the iOS store release is not set up yet (see "Not covered").
 
 Setup (Xcode, Android Studio, JDK 21, `ANDROID_HOME`, `JAVA_HOME`) is in `docs/tech-stack.md`, section 4. The Capacitor decisions are in `docs/archive/cycle-2.md`, Phase 10.
 
@@ -156,12 +156,39 @@ Notes:
 
 These edits are inside the generated projects. Keep them if the platform folders are ever regenerated:
 
-- Android: `screenOrientation="sensorLandscape"` in `AndroidManifest.xml`; the black window background, the display cutout mode and the black system splash in `res/values/styles.xml` (with `res/drawable/splash_icon_empty.xml`); the default vector icon files removed so the generated adaptive icon is used.
+- Android: the release signing config in `app/build.gradle` (see "Android store release"); `screenOrientation="sensorLandscape"` in `AndroidManifest.xml`; the black window background, the display cutout mode and the black system splash in `res/values/styles.xml` (with `res/drawable/splash_icon_empty.xml`); the default vector icon files removed so the generated adaptive icon is used.
 - iOS: portrait removed from `UISupportedInterfaceOrientations` (iPhone and iPad) in `Info.plist`.
+
+---
+
+## Android store release
+
+`npm run build:android` builds the signed App Bundle for Google Play: it runs `cap:sync`, then `./gradlew bundleRelease`. The file ends up at `android/app/build/outputs/bundle/release/app-release.aab`.
+
+It is signed with the *upload key*. With Play App Signing (the default for new apps), Google keeps the real app signing key; if the upload key is lost, Google can reset it.
+
+**Signing setup (once per computer).** The keystore and its passwords are never committed (`android/.gitignore` ignores `keystore.properties`, `*.jks` and `*.keystore`). On a second computer, copy both files into `android/` by hand, and keep a backup of both somewhere safe (a password manager, for example).
+
+1. Create the keystore, the first time only (it asks for the passwords and the certificate details):
+   ```
+   cd android
+   keytool -genkeypair -v -keystore upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000
+   ```
+2. Create `android/keystore.properties`. `storeFile` is relative to `android/`:
+   ```
+   storeFile=upload.jks
+   storePassword=…
+   keyAlias=upload
+   keyPassword=…
+   ```
+
+Without `keystore.properties`, any release build stops with an error rather than producing an unsigned file. Debug builds don't need it.
+
+Each upload to Google Play needs a higher `versionCode` (and usually a new `versionName`) in `android/app/build.gradle`.
 
 ---
 
 ## Not covered
 
 - **Real iPhone:** a signed build from Xcode, with an Apple developer team selected under Signing & Capabilities.
-- **Store releases:** a signed Android App Bundle (`./gradlew bundleRelease` with a keystore) and an iOS archive. Neither has been set up yet.
+- **iOS store release:** an iOS archive. Not set up yet.
