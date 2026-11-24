@@ -20,6 +20,7 @@ import PostProcessing from '../effects/PostProcessing.js'
 import { POST_PROCESSING_SETTINGS } from '../effects/postProcessingSettings.js'
 import ZoomBlurEffect from '../effects/zoomBlur/ZoomBlurEffect.js'
 import BloomEffect from '../effects/bloom/BloomEffect.js'
+import PhosphorEffect from '../effects/phosphor/PhosphorEffect.js'
 import CrtEffect from '../effects/crt/CrtEffect.js'
 
 // The playfield is laid out in mockup pixels for a 1080px-tall screen, then scaled to fit
@@ -67,6 +68,8 @@ const TEARDOWN_DELAY = 100 // ms: margin for the GPU to display the next screen 
 // to the canvas.
 const POST_PROCESSING_ENABLED = true
 const ZOOM_BLUR_ENABLED = true
+// The phosphor persistence's trails, with OLD TV on (false: to compare, or to save its pass)
+const PHOSPHOR_ENABLED = true
 
 // The background turns dark red while the player has only one life left
 const BACKGROUND_COLORS = Object.freeze({
@@ -249,6 +252,7 @@ export default class GameEngine {
     this.post?.destroy()
     this.post = null
     this.zoomBlur = null
+    this.phosphor = null
     stage.removeChild(this.arena)
     if (this.interstitialScene) stage.removeChild(this.interstitialScene)
 
@@ -260,6 +264,12 @@ export default class GameEngine {
         effects.push(this.zoomBlur)
       }
       if (this.oldTv) {
+        // The trails go before the bloom and the CRT, so they're fringed and curved like the rest.
+        // The still picture has nothing to trail, and the arena's history would linger over it.
+        if (PHOSPHOR_ENABLED && !this.interstitialScene) {
+          this.phosphor = new PhosphorEffect(renderer)
+          effects.push(this.phosphor)
+        }
         // The bloom goes before the CRT, so the chromatic aberration fringes the glow too
         effects.push(new BloomEffect(renderer))
         effects.push(new CrtEffect(renderer, this.interstitialScene ? INTERSTITIAL_CRT_OVERRIDES : {}))
@@ -296,10 +306,13 @@ export default class GameEngine {
   }
 
   // Draws the arena through the post-processing, which the stage then shows. The blur's streaks
-  // come from the core: the playfield's position on screen, also during the last life zoom.
-  renderArena () {
+  // come from the core: the playfield's position on screen, also during the last life zoom. `dt` is
+  // the frame's time, for the phosphor trails to fade; redraws outside the game loop (paused,
+  // resized) leave it at 0, so the trails don't fade.
+  renderArena (dt = 0) {
     if (!this.post) return
     if (this.zoomBlur) this.zoomBlur.center = this.playfield.position
+    if (this.phosphor) this.phosphor.dt = dt
     this.post.render(this.interstitialScene ?? this.arena, { background: this.sceneBackground() })
   }
 
@@ -580,7 +593,7 @@ export default class GameEngine {
       break
     }
 
-    this.renderArena()
+    this.renderArena(dt)
   }
 
   // Start delay: the ring and core grow in, but the timer, spawns, music and input wait

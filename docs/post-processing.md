@@ -1,10 +1,10 @@
 # Post-processing — How It Works
 
-This document explains the post-processing in `src/effects/`, step by step: the pipeline, and the three effects it chains today, the **zoom blur**, the **bloom** and the **CRT**. It's written as a learning resource: it assumes you know JavaScript and the basics of PixiJS, but not shaders. What the effects must look like is in `docs/graphical-specs.md` ("CRT effect"); this document is about how they're built.
+This document explains the post-processing in `src/effects/`, step by step: the pipeline, and the four effects it chains today, the **zoom blur**, the **phosphor persistence**, the **bloom** and the **CRT**. It's written as a learning resource: it assumes you know JavaScript and the basics of PixiJS, but not shaders. What the effects must look like is in `docs/graphical-specs.md` ("CRT effect"); this document is about how they're built.
 
-It covers Phases 37–38 (the zoom blur, the CRT layers and input mapping), 39 (the OLD TV switch), 40 (one folder per effect, composed into one final pass) and 44 (the CRT on the menu screens, and the glass-edge color).
+It covers Phases 37–38 (the zoom blur, the CRT layers and input mapping), 39 (the OLD TV switch), 40 (one folder per effect, composed into one final pass) 44 (the CRT on the menu screens, and the glass-edge color) and 61 (the phosphor persistence).
 
-**About the numbers in this document:** the values of the settings live only in the settings files (`postProcessingSettings.js`, `zoomBlurSettings.js`, `crtSettings.js`), each commented with its unit and range. Numbers used here to explain how something works are **examples**, not the current values.
+**About the numbers in this document:** the values of the settings live only in the settings files (`postProcessingSettings.js`, `zoomBlurSettings.js`, `phosphorSettings.js`, `bloomSettings.js`, `crtSettings.js`), each commented with its unit and range. Numbers used here to explain how something works are **examples**, not the current values.
 
 ---
 
@@ -16,8 +16,8 @@ Normally PixiJS draws the scene (the ring, the atoms, the paddles…) straight o
  without post-processing:  scene ─────────────────────────────────────────────────────► canvas
 
  with it (OLD TV on):      scene ──► scene texture ──┬─────────────────────► final pass ──► canvas
-                                                     │                  (zoom blur mix → CRT)
-                                                     └──► zoom blur's own pass ──► blur texture ──┘
+                                                     │        (zoom blur → phosphor → bloom → CRT)
+                                                     └──► effects' own passes ──► textures ───────┘
 ```
 
 ## 2. The files
@@ -29,11 +29,17 @@ src/effects/
 ├── postProcessingSettings.js  Values shared by the whole pipeline (resolution cap)
 ├── FullscreenPass.js          One full-screen pass: a screen-covering rectangle + a fragment shader
 ├── fullscreen.vert.glsl       The vertex shader every pass shares
+├── color.js                   Color helpers shared by the effects
 ├── zoomBlur/
 │   ├── ZoomBlurEffect.js      The zoom blur effect
 │   ├── zoomBlurSettings.js    Its values
 │   ├── zoomBlur.frag.glsl     Its own pass: the blurred copy, at low resolution
 │   └── zoomBlurMix.glsl       Its chunk of the final pass: the blur mixed over the image
+├── phosphor/
+│   ├── PhosphorEffect.js      The phosphor persistence effect
+│   ├── phosphorSettings.js    Its values
+│   ├── phosphor.frag.glsl     Its own pass: the next history (the trails), at low resolution
+│   └── phosphor.glsl          Its chunk of the final pass: the trails over the image
 ├── bloom/
 │   ├── BloomEffect.js         The bloom effect
 │   ├── bloomSettings.js       Its values
@@ -101,6 +107,7 @@ The shared vertex shader (`fullscreen.vert.glsl`) uses the projection matrices t
 | `resize(width, height)` | Resizes its own textures, updates size-dependent uniforms |
 | `setScene(texture)` | Optional: receives the scene texture, for its own passes |
 | `prepare()` | Optional: its own passes, run before the final pass (the zoom blur's low-resolution blur) |
+| `setFinalPass(resources)` | Optional: receives the final pass's resources once, for an effect that changes one of its own between frames (the phosphor's history textures take turns) |
 | `toScene(point)` | For input: the input-image point shown at an output point |
 | `destroy()` | Frees its textures and shaders |
 
@@ -155,11 +162,11 @@ On a resize the textures are reallocated (and emptied), so the engine redraws th
 
 ### The chain in the game
 
-`GameEngine` builds the chain from two switches: the zoom blur (`ZOOM_BLUR_ENABLED`, always on) and the OLD TV switch in Settings (on by default), which adds the bloom and the CRT. The order is zoom blur, bloom, CRT. The menus' chain has no bloom: it would wash out their light picture. Neither: no pipeline at all, the arena goes back on the stage (`POST_PROCESSING_ENABLED = false` does the same, to compare).
+`GameEngine` builds the chain from two switches: the zoom blur (`ZOOM_BLUR_ENABLED`, always on) and the OLD TV switch in Settings (on by default), which adds the phosphor persistence, the bloom and the CRT. The order is zoom blur, phosphor persistence, bloom, CRT. The phosphor persistence has its own switch too, `PHOSPHOR_ENABLED`, to compare or to save its pass. The menus' chain has no bloom: it would wash out their light picture. Neither: no pipeline at all, the arena goes back on the stage (`POST_PROCESSING_ENABLED = false` does the same, to compare).
 
-**End-of-level interstitials.** When a level's end picture appears, `GameEngine` rebuilds the chain for the picture's own container in place of the arena: the same effects, with the CRT's values overridden by `INTERSTITIAL_CRT_OVERRIDES`. No zoom blur: it radiates from the core, which the picture doesn't have, and it added nothing to the image. With OLD TV off that leaves no effects, so the picture goes straight on the stage. It's cleared to black, which gives the bars around the picture.
+**End-of-level interstitials.** When a level's end picture appears, `GameEngine` rebuilds the chain for the picture's own container in place of the arena: the same effects, with the CRT's values overridden by `INTERSTITIAL_CRT_OVERRIDES`. No zoom blur: it radiates from the core, which the picture doesn't have, and it added nothing to the image. No phosphor persistence: the picture is still, so it has nothing to trail, and the arena's last trails would otherwise fade over it. With OLD TV off that leaves no effects, so the picture goes straight on the stage. It's cleared to black, which gives the bars around the picture.
 
-**The order matters.** The bloom comes before the CRT so that the CRT's chromatic aberration reads the glow too and fringes it, like a lens would. The CRT comes last because it plays the screen: its curvature bends the blur's streaks with everything else, and its scanlines and mask sit on top of the whole picture, like a real CRT showing an image.
+**The order matters.** The phosphor persistence's trails come before the bloom's chunk and the CRT, so they get the chromatic aberration's fringes and bend with the glass like everything else. The bloom comes before the CRT so that the CRT's chromatic aberration reads the glow too and fringes it, like a lens would. The CRT comes last because it plays the screen: its curvature bends the blur's streaks with everything else, and its scanlines and mask sit on top of the whole picture, like a real CRT showing an image.
 
 ### The chain on the menus
 
@@ -248,7 +255,73 @@ Each tap averages two points half a pixel apart across the blur's direction. The
 
 The CRT reads its input three times, one per color channel, each at a slightly different point. Because the bloom is in its input, each of the three reads includes the glow, so the halo gets the red and blue fringes too. The bloom's passes blur the **scene**, not the zoom blur's output (as the zoom blur's own pass, they run before the final pass and can't see the effects inside it): the zoom blur's streaks get no halo of their own.
 
-## 7. CRT
+## 7. Phosphor persistence
+
+`src/effects/phosphor/`. The look: bright things that move leave a short trail that fades out, like the afterglow of a CRT's phosphor (most visible on the vector arcade monitors). Atoms streak behind their path, and paddle flashes and capture bursts linger for a moment. Anything still looks exactly as without it. Only on the arena, with OLD TV on. Like the bloom it has two parts: in `prepare()`, its own pass writes the next **history** (`phosphor.frag.glsl`); then its chunk of the final pass shows the trails over the image (`phosphor.glsl`).
+
+### The history
+
+The history is an image of everything that has been on screen lately, each thing as bright as it still glows. Each frame:
+
+```glsl
+vec3 faded = max(history * uDecay - uCutoff, 0.0);  // what was there, a bit fainter
+history = max(scene, faded);                         // plus what's there now
+```
+
+**The brighter of the two, not the sum.** Adding the scene to the faded history would make a still shape a little brighter every frame, until it clipped to white. With `max`, a still shape stays at its own brightness; when it moves away, what it leaves behind only fades.
+
+**The decay is set in seconds.** A per-frame factor (keep, say, 80% each frame) would make the trails twice as long at 120 Hz as at 60 Hz. `HALF_LIFE` is the time for a trail to lose half its brightness, and `prepare()` turns it into this frame's factor from the frame's real duration: `uDecay = 0.5 ^ (dt / HALF_LIFE)`. Two frames of 1/120 s fade exactly as much as one of 1/60 s. The owner sets `dt` before each render; `GameEngine` passes the game loop's `dt` to `renderArena()`. Redraws outside the game loop (while paused, after a resize, after switching OLD TV) leave it at 0: the decay is 1 and nothing fades, so the trails freeze with the game.
+
+**The cut-off.** The textures store each channel in 8 bits, 0 to 255. Take a faint trail at 1/255 with a decay of, for example, 0.95: 0.95/255 rounds back to 1/255, and it never reaches black. Everything that ever moved would leave a permanent ghost. Each frame also takes `CUTOFF` 8-bit steps off (`uCutoff`), so faint values do reach 0. It also cuts the faint end of every trail a little shorter. Like the decay, it's 0 when `dt` is 0. A half-float texture would avoid the rounding, but it isn't guaranteed on every mobile GPU.
+
+**What it records.** Like the bloom's and the zoom blur's passes, it reads the **scene**, not the other effects: the zoom blur's streaks and the bloom's glow leave no trails of their own, so the picture doesn't smear into a haze.
+
+**Freshness, for the color drift.** The color says how bright a trail still is, not how old it is: a dim atom's fresh trail and a white line's old one can be equally bright. So the history's alpha channel, otherwise unused, holds each pixel's **freshness**. It's 1 where the scene is drawn now, unless an older trail there is still brighter. Elsewhere it fades with the same decay and cut-off as the color. The pass draws over a texture cleared to transparent, so the alpha it writes is stored as is, with nothing blended in.
+
+### Two textures, taking turns
+
+A pass can't read the texture it's writing. The effect keeps two history textures: each frame its pass reads one (the previous history) and writes the other (the next), then the two swap. This is often called **ping-pong**.
+
+### The trails in the final pass
+
+```glsl
+vec3 phosphor(vec2 uv) {
+  vec3 trail = max(texture(uPhosphorHistory, uv).rgb * uPhosphorDecay - uPhosphorCutoff, 0.0);
+  return max(INPUT(uv), trail * uPhosphorMix);
+}
+```
+
+The final pass shows the **previous** frame's history, faded by this frame's decay: what was on screen before, not what is now. The current frame comes only from `INPUT`, so it stays as sharp as ever and keeps the zoom blur's mix. `MIX` sets how bright the trails are, and `max` again means a trail never darkens what's on screen.
+
+The texture to read changes every frame (the two take turns), but `PostProcessing` gathers the effects' resources once, when it builds the final pass. So it hands the final pass's resources to the effect once (`setFinalPass()`), and `prepare()` sets `uPhosphorHistory` to the texture it read this frame. A third texture with a copy every frame would also work, but it costs one more full write and read per frame.
+
+### Resolution
+
+The two textures are `TEXTURE_HEIGHT` pixels tall, whatever the screen. At the screen's own resolution, capped at 2×, a 1080p screen would need two textures of 3840 × 2160 (about 33 MB each). Lower is cheaper, but:
+- the trails are softer;
+- thin lines leave dimmer trails, because a 2 px line is spread over fewer, larger pixels;
+- still shapes get a faint, soft halo, because the trail under them (their low-resolution copy, faded once) shows through around their edges.
+
+Below about 360 px, a 2 px line can slip between the texture's pixels and flicker as it moves.
+
+### Color drift
+
+As a trail fades, its color drifts toward `DRIFT_COLOR` (cyan: in gameplay, white lines drift to cyan, as the menus' black text drifts to red; see "Colors" in `docs/graphical-specs.md`). In the final pass:
+
+```glsl
+float brightness = max(trail.r, max(trail.g, trail.b));
+vec3 drifted = mix(trail.rgb, driftColor * brightness, (1.0 - freshness) * drift);
+```
+
+`driftColor` is `DRIFT_COLOR` at full brightness (its brightest channel scaled to 1, by `fullBrightness()` in `src/effects/color.js`), times the trail's own brightness. So the drift changes only the hue, and the trail still fades exactly as before. A fresh trail keeps its own color. By the time it's gone, it has drifted `DRIFT` of the way to cyan: with 1, its last faint end is pure cyan.
+
+### Things to know
+
+- A resize empties both textures, so the trails start over. So does switching OLD TV, which builds a new effect.
+- During the last life zoom the camera moves the whole arena, so the ring and the core leave trails too.
+- In level 6 (time goes backwards), the trails follow the motion on screen, like a real screen would.
+
+## 8. CRT
 
 `src/effects/crt/`. Its chunk, `crt.glsl`, defines `vec3 crt(vec2 uv)`, run once for every screen pixel in the final pass. It does six steps, in this order; the order matters, as explained after them. Its uniforms and helpers are prefixed (`uCrtCurvature`, `crtWarp()`…); the snippets below drop the prefixes to stay readable.
 
@@ -348,7 +421,7 @@ The shader already answers, for every pixel, "which image point do I show?": `cr
 
 `curvature.js` and the chunk's `crtWarp()` must stay identical: each one names the other in a comment.
 
-## 8. Using it elsewhere
+## 9. Using it elsewhere
 
 `src/effects/` doesn't know about the game. Anything drawn with a PixiJS v8 **WebGL** renderer can use it:
 
@@ -396,16 +469,16 @@ Things to know:
 - **The scene isn't on the stage**, so `app.destroy()` doesn't reach it: destroy it yourself. Pointer events still work on the stage (the game listens on the stage with a `hitArea`); converting a pointer position with `toLocal()` works on containers off the stage too.
 - **WebGL only:** the shaders are GLSL. Ask for `preference: 'webgl'`.
 
-## 9. Adding an effect
+## 10. Adding an effect
 
 1. A folder `src/effects/<name>/` with:
    - `<name>Settings.js`: one frozen object; each value with its unit, what it does on screen and a range.
    - `<name>.glsl`: its chunk. It defines `vec3 <name>(vec2 uv)` and reads the previous image only through `INPUT(uv)`. Every uniform and helper function starts with the effect's name (`u<Name>…`, `<name>…()`).
-   - `<Name>Effect.js`: `name`, `glsl`, `resources` (its uniform groups and textures, named after the effect too), `resize()`, `toScene()` (return the point unchanged unless the effect moves the image), `destroy()`, and `setScene()` / `prepare()` if it needs a pass of its own (build it with `FullscreenPass`).
+   - `<Name>Effect.js`: `name`, `glsl`, `resources` (its uniform groups and textures, named after the effect too), `resize()`, `toScene()` (return the point unchanged unless the effect moves the image), `destroy()`, and `setScene()` / `prepare()` if it needs a pass of its own (build it with `FullscreenPass`). If one of its final-pass textures changes between frames, `setFinalPass()` too (see "Phosphor persistence").
 2. Add it to the chain in `GameEngine.buildScene()`, in the right place (before the CRT, unless it's meant to sit on top of the screen).
 3. Document it here, with its own section and tuning table.
 
-## 10. Tuning
+## 11. Tuning
 
 Each value lives only in its effect's settings file, with its unit and range in a comment; the tables below say what each one does, not its value. Change it and reload (the dev server reloads on save); it applies from the next level started. To tune the CRT, switch **OLD TV** on in Settings.
 
@@ -432,6 +505,17 @@ Each value lives only in its effect's settings file, with its unit and range in 
 | `INTENSITY` | How bright the glow is | A thin line spreads its light over a wide area, so the glow is faint unless this is well above 1 |
 | `RADIUS` | How far the glow spreads | Distance between blur taps, in blur-texture pixels. Above ~2 the taps show as separate copies |
 | `TEXTURE_HEIGHT` | Softness of the glow | Lower is blurrier and cheaper |
+
+`src/effects/phosphor/phosphorSettings.js` (to compare with the trails off, set `PHOSPHOR_ENABLED` in `GameEngine.js` to `false`):
+
+| Setting | What you'll see | Notes |
+| :--- | :--- | :--- |
+| `HALF_LIFE` | Length of the trails | In seconds, the same at any frame rate. Watch fast atoms and the last life zoom, where the whole arena moves |
+| `MIX` | Brightness of the trails | 0 hides them, but the pass still runs |
+| `CUTOFF` | How cleanly the faint ends of the trails fade out | In 8-bit steps per frame. At least 1, or faint ghosts stay for good. Higher shortens the trails' faint ends |
+| `TEXTURE_HEIGHT` | Softness of the trails | Lower is cheaper and softer, makes thin lines' trails dimmer, and adds a faint halo around still shapes. Below ~360 thin lines flicker |
+| `DRIFT_COLOR` | The color the trails drift to as they fade | 0xRRGGBB, only its hue counts (scaled to the trail's brightness) |
+| `DRIFT` | How far they drift | 0 keeps the trail's own color, 1 ends at `DRIFT_COLOR`. The drift grows as the trail fades, so it shows most in the faint tail |
 
 `src/effects/crt/crtSettings.js`:
 
@@ -461,7 +545,7 @@ Each value lives only in its effect's settings file, with its unit and range in 
 | `BRIGHTNESS` | Overall brightness of the menus' picture | The menus' picture is light grey with lighter lines: too high clips the brightest parts of the background (the middle of a scanline, on its phosphor stripe) and the lines to white, and the lines disappear into the background. Too low darkens it away from `#D8D8D8` |
 | `VIGNETTE` | Darkening toward the corners of the menus | Much more visible on a light picture than on the arena's black |
 
-## 11. Performance
+## 12. Performance
 
 GPU cost depends on **pixels × texture reads per pixel**; the CPU only sets a few uniforms and issues a handful of draws per frame.
 
@@ -472,14 +556,17 @@ Example figures, for a 1080p screen at resolution 2, a 360 px tall blur texture 
 | Scene | Full resolution, MSAA | (the scene's own drawing) | ~0.3–1 ms, mostly the MSAA resolve |
 | Zoom blur's own pass | 640 × 360 ≈ 230,000 | `SAMPLES` (8) | ~0.1–0.3 ms (it grows with `SAMPLES` and `TEXTURE_HEIGHT`) |
 | Final pass, OLD TV off (blur mix) | Full resolution | 2 | ~0.3–0.8 ms |
+| Phosphor's own pass (OLD TV on) | 960 × 540 ≈ 520,000 | 2 (the scene and the history) | ~0.1–0.3 ms (estimate; it grows with `TEXTURE_HEIGHT`) |
 | Bloom's own passes (OLD TV on) | 480 × 270 ≈ 130,000, twice | 18 each (9 taps, two points per tap) | ~0.1–0.3 ms |
-| Final pass, OLD TV on (blur mix + bloom + CRT) | Full resolution (minus the black outside the glass) | 9 (the CRT's three reads, each with the blur's two and the bloom's one) | ~1–2.5 ms |
+| Final pass, OLD TV on (blur mix + phosphor + bloom + CRT) | Full resolution (minus the black outside the glass) | 12 (the CRT's three reads, each with the blur's two, the phosphor's one and the bloom's one) | ~1–2.5 ms |
+
+The phosphor's two history textures take memory too: 4 bytes per pixel each (for example, about 2 MB each at 960 × 540).
 
 That's why the blur runs at a fixed low resolution, the resolution is capped at 2×, and the effects share one final pass instead of each adding its own.
 
 On the menus with OLD TV on there's no zoom blur: the scene render (the background animation's texture and the logo) and a final pass with the CRT's 3 reads per pixel. On top of that, with OLD TV on or off, the animation's off-screen canvas is drawn by the CPU and uploaded to the GPU each time it changes (every frame while it plays); `MAX_RESOLUTION` in `src/menu/menuSettings.js` caps its size.
 
-## 12. Pitfalls met along the way
+## 13. Pitfalls met along the way
 
 - **Lost antialiasing:** drawing into a plain render texture loses the canvas' MSAA, and the 2 px ring turns jagged. The scene texture is created with `antialias: true`.
 - **Upside-down passes:** WebGL's render textures and the canvas use opposite vertical directions. Using PixiJS's projection in the vertex shader keeps every pass the right way up.
@@ -488,4 +575,5 @@ On the menus with OLD TV on there's no zoom blur: the scene render (the backgrou
 - **Built-in names:** GLSL has built-in functions such as `distance()`, `length()`, `mix()`; naming a variable `distance` fails to compile on some drivers.
 - **`pow()` and negative numbers:** `pow(x, 2.0)` is undefined for negative `x` in GLSL (it may return garbage or 0). Square by hand: `x * x`.
 - **Stretched distances:** centered coordinates are stretched by the screen's shape; without the aspect correction, the curvature would turn the ring into an oval.
+- **Fading that never ends:** in an 8-bit texture, multiplying a faint value by a decay close to 1 rounds it back to the same value, so the phosphor's trails would never quite reach black. Each step also subtracts a small cut-off (see "Phosphor persistence").
 - **Teardown order:** destroying a texture while the final pass's shader still binds it makes PixiJS warn ("a 'textureSource' was destroyed while still bound to a shader"). `PostProcessing.destroy()` destroys the final pass first, then the effects and the scene texture.

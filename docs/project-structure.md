@@ -58,11 +58,22 @@ root/
     │   ├── postProcessingSettings.js  # Values shared by the whole pipeline (resolution cap)
     │   ├── FullscreenPass.js       # One full-screen pass: a screen-covering rectangle + a fragment shader
     │   ├── fullscreen.vert.glsl    # Vertex shader shared by every pass
+    │   ├── color.js                # Color helpers shared by the effects (0xRRGGBB to vec3, full-brightness hue)
     │   ├── zoomBlur/               # Zoom blur effect: streaks pointing away from a center
     │   │   ├── ZoomBlurEffect.js   # The effect
     │   │   ├── zoomBlurSettings.js # Its tunable values
     │   │   ├── zoomBlur.frag.glsl  # Its own pass: the blurred copy (low resolution)
     │   │   └── zoomBlurMix.glsl    # Its chunk of the final pass: the blur mixed over the image
+    │   ├── phosphor/               # Phosphor persistence effect: fading trails behind what moves
+    │   │   ├── PhosphorEffect.js   # The effect
+    │   │   ├── phosphorSettings.js # Its tunable values
+    │   │   ├── phosphor.frag.glsl  # Its own pass: the next history (low resolution)
+    │   │   └── phosphor.glsl       # Its chunk of the final pass: the trails over the image
+    │   ├── bloom/                  # Bloom effect: a soft glow around bright shapes
+    │   │   ├── BloomEffect.js      # The effect
+    │   │   ├── bloomSettings.js    # Its tunable values
+    │   │   ├── bloom.frag.glsl     # Its own passes: one direction of a blur (low resolution), run twice
+    │   │   └── bloom.glsl          # Its chunk of the final pass: the glow added over the image
     │   └── crt/                    # CRT effect: curved glass, chromatic aberration, scanlines, mask, vignette
     │       ├── CrtEffect.js        # The effect
     │       ├── crtSettings.js      # Its tunable values

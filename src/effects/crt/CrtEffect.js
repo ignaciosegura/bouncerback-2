@@ -2,6 +2,7 @@ import { UniformGroup } from 'pixi.js'
 import { CRT_SETTINGS } from './crtSettings.js'
 import { warp } from './curvature.js'
 import { clamp } from '../../utils/math.js'
+import { rgb } from '../color.js'
 import glsl from './crt.glsl?raw'
 
 /**
@@ -59,9 +60,4 @@ export default class CrtEffect {
   }
 
   destroy () {}
-}
-
-// 0xRRGGBB as red, green and blue from 0 to 1, for a vec3 uniform
-function rgb (color) {
-  return new Float32Array([(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff].map((channel) => channel / 255))
 }

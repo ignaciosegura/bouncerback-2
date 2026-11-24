@@ -23,6 +23,8 @@ import template from './postProcessing.frag.glsl?raw'
  *   resize(w, h)
  *   setScene(texture)  optional: the scene texture, for its own passes
  *   prepare()          optional: its own passes, run before the final pass (e.g. the zoom blur's)
+ *   setFinalPass(resources)  optional: the final pass's resources, for an effect that changes one
+ *                      of its own between frames (the phosphor's history textures take turns)
  *   toScene(point)     the input point shown at an output point (input mapping)
  *   destroy()
  */
@@ -48,6 +50,7 @@ export default class PostProcessing {
     // The final pass draws the canvas: it's the only thing PostProcessing puts on the stage
     this.pass = new FullscreenPass({ name: 'post-processing', fragment: composeFragment(effects), resources })
     this.view = this.pass.view
+    for (const effect of effects) effect.setFinalPass?.(this.pass.resources)
 
     this.resize(width, height)
   }

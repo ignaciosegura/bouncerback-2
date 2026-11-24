@@ -160,11 +160,12 @@ See the LEVEL MENU and LEVEL MENU (LOCKED LEVELS) mockups.
 
 * The game arena (the game canvas: ring, core, atoms, paddles, echoes and the black or dark red background) is shown as if on an old CRT screen. It's a post-process applied to the finished image, so the shapes themselves are still the same 2D vector drawings.
 * The HUD is not part of it: it stays flat and sharp on top, with no curvature, scanlines or blur.
-* The end-of-level interstitials are drawn in the game canvas in place of the arena, so they get the same bloom and CRT layers with OLD TV on, but no zoom blur (see "End-of-level interstitials").
+* The end-of-level interstitials are drawn in the game canvas in place of the arena, so they get the same bloom and CRT layers with OLD TV on, but no zoom blur and no phosphor persistence (see "End-of-level interstitials").
 * The menu screens that show the menu background animation (Main Menu, Level Select, Settings, How To Play, Credits) get the CRT layers too: the animation, its `#D8D8D8` background and the Main Menu logo are on the same TV as the arena. Their buttons, texts, credits and the How To Play instructions and drawing stay flat and sharp on top, like the HUD, and inside the glass. They get no zoom blur (it radiates from the core, and the menus have none). The Intro, Game Over and You Win! screens don't change.
-* The player chooses: the Settings screen's **OLD TV** switch (`OLD TV ON` / `OLD TV OFF`, below SFX, as wide as the volume controls; see the SETTINGS MENU mockup) turns the CRT layers and the bloom (curved glass, chromatic aberration, scanlines, phosphor mask, vignette) on and off, on the arena and on those menu screens. Switching it on the Settings screen changes the screen behind it at once. The Pause overlay has the same switch, which changes the arena mid-level. It's **on by default** and saved like the volumes. The zoom blur isn't part of the switch: it's always on.
+* The player chooses: the Settings screen's **OLD TV** switch (`OLD TV ON` / `OLD TV OFF`, below SFX, as wide as the volume controls; see the SETTINGS MENU mockup) turns the CRT layers, the phosphor persistence and the bloom (curved glass, chromatic aberration, scanlines, phosphor mask, vignette) on and off, on the arena and on those menu screens. Switching it on the Settings screen changes the screen behind it at once. The Pause overlay has the same switch, which changes the arena mid-level. It's **on by default** and saved like the volumes. The zoom blur isn't part of the switch: it's always on.
 * The effect is made of these layers, from the scene outward:
     * Zoom blur: a copy of the arena blurred into streaks that point away from the core, mixed over the arena at a low opacity, so it stays subtle (aesthetic reference: Resolume Avenue's Radial Blur). Streak length grows with an object's distance from the core, so the paddles and atoms streak, while the core and the thin ring only get a faint halo. The streaks always come from the core, also while it moves during the last life zoom.
+    * Phosphor persistence (the arena only, with OLD TV on): bright things that move leave a short trail that fades out, like a CRT phosphor's afterglow (most visible on vector arcade monitors). Anything still looks unchanged. As a trail fades, its color drifts toward phosphor cyan (see "Colors": the color drift rule). The trails curve and fringe with the rest of the picture. Not on the end-of-level interstitials (still pictures) or the menus.
     * Bloom (the arena only, with OLD TV on): a soft glow around bright shapes, added over the image, so they look a bit bigger, shinier and less sharp. It comes before the chromatic aberration, so the glow is fringed too. The menus get none: it would wash out their light picture.
     * Curved glass: the image bulges like a CRT's curved glass, more toward the corners. Outside the glass (the screen's rounded corners and edges) is the edge color, like the TV's frame: black, on the arena and on the menus (it's a setting of the effect, so it can be changed in code).
     * Chromatic aberration: the red and blue channels separate slightly toward the edges.
@@ -172,7 +173,7 @@ See the LEVEL MENU and LEVEL MENU (LOCKED LEVELS) mockups.
     * Phosphor mask: very faint vertical red / green / blue stripes.
     * Vignette: the image darkens slightly toward the edges.
 * Scanlines, the mask and the vignette darken the image; a brightness gain compensates, so the arena's white and colors stay close to their values above. The menus use their own, lower gain and vignette: their picture is light, and the arena's gain would push the background and the animation's light lines all to white. The background ends up a little darker than `#D8D8D8`, with its lines still distinct.
-* Every amount (scanline count, curvature, blur strength, the opacities, the resolutions) is tuned by eye. The values are defined only in the code, one settings file per effect (`src/effects/zoomBlur/zoomBlurSettings.js`, `src/effects/bloom/bloomSettings.js`, `src/effects/crt/crtSettings.js`) plus the menus' own CRT values (`src/menu/menuSettings.js`), never in this document.
+* Every amount (scanline count, curvature, blur strength, the opacities, the resolutions) is tuned by eye. The values are defined only in the code, one settings file per effect (`src/effects/zoomBlur/zoomBlurSettings.js`, `src/effects/phosphor/phosphorSettings.js`, `src/effects/bloom/bloomSettings.js`, `src/effects/crt/crtSettings.js`) plus the menus' own CRT values (`src/menu/menuSettings.js`), never in this document.
 * Touch and mouse input follow what's on screen: pressing where a paddle or the core is shown hits it, even near the edges where the glass moves things. On the menus nothing under the glass is interactive: the buttons are flat, on top.
 
 ## Visual feedback (changes in the visuals during gameplay to communicate the player relevant information)
@@ -256,6 +257,13 @@ Without this mechanic nothing is held. It builds on `atom capture`, so everythin
 * Transition dark yellow (screen-out tint, halfway): #666600
 * Transition dark red (screen-out tint, end): #660000. It's slightly lighter than the dark red background (#550000) on purpose: they're separate colors, so changing one doesn't change the other.
 * Supercharged purple (supercharged atom): #BB00FF
+* Phosphor cyan (the hue gameplay trails drift to as they fade): #00FFFF. It's set in `phosphorSettings.js` (`DRIFT_COLOR`), and only its hue counts.
+
+**Color drift rule:** what fades drifts toward a color of its own world. In the menus, black text drifts to red (the screen transitions' tint, through transition dark yellow). In gameplay, white lines drift to cyan (the phosphor persistence's trails).
+
+These are two separate domains, so they don't conflict:
+- **Game objects** change color as part of what happens to them, with or without OLD TV. An escaping atom degrades to yellow, then red, as it's lost (see "Visual feedback").
+- **The screen** is the post-processing, with OLD TV on. Its cyan drift applies to the whole picture's trails, whatever left them.
 
 # Mockups
 

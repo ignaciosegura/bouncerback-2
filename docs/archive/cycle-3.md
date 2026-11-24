@@ -607,6 +607,77 @@ In the ring collapse ending (levels with `ringCollapse`, see Phase 59 in `docs/a
 - `docs/design-decisions.md`, "Ring collapse ending": a line on the final sound and why it isn't sped up.
 - `docs/implementation-status.md`: Phase 60.
 
+### Phase 61 — Phosphor persistence
+
+**Goal**
+
+Bright moving things in the arena leave short trails that fade out, like the afterglow of a CRT's phosphor (most visible on vector arcade monitors). Atoms streak behind their path, paddle flashes and capture bursts linger for a moment, and anything still looks exactly as it does today. It's part of the OLD TV look, so it's part of the arena's post-processing chain.
+
+Out of scope: the menus, the end-of-level interstitials, per-color decay times (real phosphors fade at different speeds per color), and any change to the shapes themselves.
+
+**Choices** (approved with the plan; the values are starting points, to tune by eye)
+
+- **With OLD TV only.** It's a trait of the tube, like the bloom and the CRT layers, so the OLD TV switch turns it on and off with them. With OLD TV off the arena is as today.
+- **Arena only, not the interstitials or the menus.** The interstitial is a still picture, so there's nothing to trail. Leaving it out also avoids a ghost of the arena fading over the picture when it cuts in: the chain is rebuilt without the effect, so the history is gone. The menus already move slowly, and trails would blur the animation.
+- **Max, not additive.** Each frame the history becomes `max(scene, history × decay)`. Adding the scene instead would make anything still grow brighter every frame until it clips to white. With `max`, a still shape stays at its own brightness and only what has moved away leaves a fading copy.
+- **The decay is set in seconds, not per frame.** The decay factor is `0.5 ^ (dt / HALF_LIFE)`, from the frame's real `dt`, so trails have the same length at 60 Hz, at 120 Hz and on the Steam Deck. A frame with `dt = 0` (redraws while paused, after a resize or an OLD TV switch) doesn't decay, so the trails freeze with the game.
+- **A cut-off for faint values.** With 8-bit textures, a value like 1/255 times a decay close to 1 rounds back to 1/255 and never reaches black, leaving permanent faint ghosts. Each step also subtracts a small floor (`CUTOFF`, about one 8-bit step) before the `max`. A half-float texture was the alternative; it isn't guaranteed on every mobile GPU, and the cut-off is enough.
+- **Its own resolution setting.** The history is two textures the size of the screen. At full resolution, capped at 2×, a 1080p screen needs two 4K RGBA textures (about 33 MB each) plus a full-resolution pass, which is too much for phones. `TEXTURE_HEIGHT` sets their height in pixels, like the bloom and the zoom blur. A lower height makes softer trails, a little dimmer on the 2 px lines, and a faint soft halo around shapes that don't move. The starting value is chosen by eye during implementation, in the half-screen range. Below about 360 px the thin lines flicker as they move, the problem the bloom solves with its two-point taps; the same trick can be used here if needed.
+
+**Implementation**
+
+- `src/effects/phosphor/` (new effect, following "Adding an effect" in `docs/post-processing.md`):
+  - `phosphorSettings.js`, `PHOSPHOR_SETTINGS`:
+    - `HALF_LIFE`: seconds for a trail to lose half its brightness.
+    - `MIX`: how strong the trails are over the image, 0–1.
+    - `CUTOFF`: the floor subtracted each step.
+    - `TEXTURE_HEIGHT`: the history's height.
+    
+    Each value gets its unit, its effect on screen and a range, with any numbers labelled as examples.
+  - `phosphor.frag.glsl`, its own pass: `history = max(scene, history × uDecay − uCutoff)`, clamped at 0.
+  - `phosphor.glsl`, its chunk of the final pass: `max(INPUT(uv), trail(uv) × uPhosphorMix)`. The trail it reads is the history from the **previous** frame times the decay. That way the current frame comes only from `INPUT`, at full sharpness and with the zoom blur's mix intact, and the history only adds what has moved away.
+  - `PhosphorEffect.js`:
+    - Two history textures used in turn (ping-pong): the pass reads one and writes the other.
+    - `setScene()` as in the bloom.
+    - A `dt` property the owner sets before each render, 0 by default, from which `prepare()` computes `uDecay`.
+    - `prepare()` runs the pass, then swaps the two textures.
+    - `toScene()` returns the point unchanged, since nothing moves.
+    - `resize()` reallocates both textures, which empties them, so a resize clears the trails.
+    - `destroy()`.
+- `src/effects/PostProcessing.js`: the final pass must read the texture written last frame, which changes every frame. Its resources are only collected once, at construction, so the effect contract gets one optional hook, `setFinalPass(resources)`. `PostProcessing` calls it once with the final pass's resources, and the effect reassigns its texture there after each swap (the same kind of reassignment as `setScene()`). The alternative was a third texture and a copy pass every frame, a full-resolution write that the hook avoids. The contract comment at the top of the file lists the hook.
+- `src/game/GameEngine.js`:
+  - `buildPostProcessing()`: with OLD TV on and no interstitial, add `this.phosphor = new PhosphorEffect(renderer)` after the zoom blur and before the bloom (order below). Reset it to null with the others.
+  - `renderArena(dt = 0)`: set `this.phosphor.dt = dt` before `post.render()`. The ticker's `update` passes its `dt`. The calls from `setOldTv()` while paused and from `onResize` keep 0, so they don't decay the trails.
+- **Order: zoom blur, phosphor, bloom, CRT.**
+  - The CRT comes last as always: the trails curve with the glass and get the scanlines, like the rest of the picture.
+  - The trails sit before the bloom's chunk and the CRT's three reads, so their colors get the chromatic aberration fringes too.
+  - Like the bloom's and the zoom blur's own passes, the history records the **scene**, not the other effects. The zoom blur's streaks and the bloom's glow leave no trails of their own, so the image doesn't smear into a haze.
+
+**Things to check on screen**
+
+- Atoms at the fastest level speed and the supercharged atom: trail length, and whether a fast atom shows separate copies instead of a streak at 60 Hz. If it does, shorten `HALF_LIFE` rather than adding samples.
+- **The last life zoom.** The camera moves the whole arena, so the ring, the core and the paddles will smear while it moves. This is the most likely place for the effect to look wrong. If it does, the engine can lower `MIX` or skip the effect while the zoom moves, which would be a follow-up decision.
+- The core collapse and the ring collapse ending (level 9): the rings collapse quickly, so check that their trails read as a CRT and not as a blur.
+- The dark red background: trails of white and colored shapes over `#550000`, and the background's fade between black and red (`max` slows a fade from red to black slightly, by the decay).
+- Level 6 (time goes backwards): trails follow the motion on screen, so they point the "wrong" way for a reversed world. Accept it as a trait of the screen, or note it.
+- Pause and resume: the frozen frame keeps its trails, and they continue fading on resume. Switching OLD TV in the Pause overlay starts with no trails.
+- Performance on a mid-range phone and on the Steam Deck, at the chosen `TEXTURE_HEIGHT`: one extra pass per frame, one extra texture read per CRT read in the final pass (each of the CRT's three reads runs the chain), and the two textures' memory.
+
+**Docs** (as part of the implementation)
+
+- `docs/post-processing.md`:
+  - A new section, "Phosphor persistence" (the idea, max vs additive, the decay in seconds, the cut-off, ping-pong and the `setFinalPass` hook).
+  - The chain order in "The chain in the game".
+  - The effect contract in "What an effect is" and in "Adding an effect".
+  - A tuning table.
+  - The performance rows.
+  - A pitfall: 8-bit decay never reaching zero.
+  - The intro's list of effects and phases.
+- `docs/graphical-specs.md`, "CRT effect": a phosphor persistence layer, after the zoom blur, arena only, with OLD TV on, and listed in the OLD TV bullet. The settings file is added to the list of settings files.
+- `docs/design-decisions.md`, "CRT effect": persistence, the choices above and the reasons. The earlier flicker trial on the interstitials was tried and rejected (it added nothing, even at small amounts).
+- `docs/project-structure.md`: `src/effects/phosphor/`.
+- `docs/implementation-status.md`: Phase 61.
+
 ## Verification
 
 - Game controller, menus (test with the Trust GXT pad; terms as in `docs/game-controller.md`): on the Intro the controller does nothing; clicking the button still starts the music. On the Main Menu nothing is selected until the controller is used; the first push or bottom face button press selects PLAY without activating it. The d-pad and the left stick move the selection (one step per push, holding doesn't repeat, no wrap-around); the bottom face button and RT activate it with the same transition as a click; the new screen arrives with its first item selected. Level Select: all five levels and BACK are reachable. Settings: up / down between MUSIC, SFX and BACK, left / right between `-` and `+`; the bottom face button on `-` / `+` changes the volume one step per press and keeps it selected. The right face button on Level Select / Settings goes back to the Main Menu; it does nothing on the Main Menu, Game Over and You Win!. The credit links are never selected. The selected button shows line, gap, line, all the same thickness, outside its border, and the layout doesn't move; the `-` / `+` steps show it inside. The selection fades, tints and shakes with its button during the screen-out. Presses during a transition do nothing. A mouse click or tap hides the selection, and the next controller press brings it back on the first item. A controller with a slightly drifting stick at rest doesn't move the selection.
@@ -657,3 +728,9 @@ In the ring collapse ending (levels with `ringCollapse`, see Phase 59 in `docs/a
 - Final ring collapse sound (Phase 60): `ring_collapse_final` plays once, never for the containment ring or another big ring.
 - Final ring collapse sound (Phase 60): Playing level 9 again plays it again, the same way. No console warning about an unknown sound effect, in the dev run and in the production build (hashed file name).
 - Final ring collapse sound (Phase 60): Levels 1–8 and Anticoherence: unchanged, and `ring_collapse_final` never plays.
+- Phosphor persistence (Phase 61): OLD TV on: moving atoms leave fading trails, still shapes look exactly as with the effect left out, and nothing leaves a permanent ghost (after a long level, the background is pure black or `#550000` where nothing has been for a while).
+- Phosphor persistence (Phase 61): Trails are the same length at 60 Hz and 120 Hz (or with the browser's frame rate throttled).
+- Phosphor persistence (Phase 61): OLD TV off, the interstitials, the menus and the HUD are unchanged. Switching OLD TV mid-level works both ways. A resize mid-level doesn't break the image.
+- Phosphor persistence (Phase 61): Touch input still lands where the shapes are shown (`toScene` unchanged).
+- Phosphor persistence (Phase 61): No console warnings on leaving a level (teardown order: the final pass is destroyed before the history textures).
+- Phosphor persistence (Phase 61): `npm run lint` passes.
